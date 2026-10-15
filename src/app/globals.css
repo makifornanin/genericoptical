@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+/*
+ * Specta design tokens (see docs/DESIGN.md).
+ * Primary reference: STOCKPOS — near-monochrome ink, one restrained accent, hairline structure.
+ * --accent and --brand are overridden per business (Settings → Branding) via inline style.
+ */
+:root {
+  color-scheme: light;
+  --ink: #18191b;
+  --ink-2: #26282b;
+  --ink-3: #3a3d41;
+  --canvas: #f6f6f3;
+  --surface: #ffffff;
+  --surface-2: #fafaf8;
+  --line: #e7e7e2;
+  --line-strong: #d5d5cf;
+  --text: #18191b;
+  --text-2: #5c5e63;
+  --text-3: #86888d;
+  --accent: #b5e14a;
+  --accent-ink: #18191b;
+  --accent-soft: #eef7d6;
+  --brand: #1f2b22;
+  --brand-ink: #ffffff;
+
+  --pos: #2e6b35;
+  --pos-soft: #e8f3e3;
+  --warn: #8a5a00;
+  --warn-soft: #fbf1dc;
+  --neg: #b42318;
+  --neg-soft: #fdecea;
+  --info: #4d3fb0;
+  --info-soft: #efedfb;
+  --muted-soft: #efefea;
+
+  /* Chart palette — validated with the dataviz validator (light surface #ffffff). */
+  --series-1: #4d7a2e;
+  --series-2: #3f74c4;
+  --series-3: #c5701f;
+  --series-4: #b04f86;
+  --series-muted: #c9cbc4;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-pos: var(--pos);
+  --color-pos-soft: var(--pos-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-neg: var(--neg);
+  --color-neg-soft: var(--neg-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-muted-soft: var(--muted-soft);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+  --color-series-4: var(--series-4);
+  --color-series-muted: var(--series-muted);
+
+  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-instrument), var(--font-inter-tight), ui-sans-serif, sans-serif;
+
+  --radius-card: 14px;
+  --radius-control: 10px;
+  --radius-canvas: 20px;
+
+  --shadow-pop: 0 12px 32px -12px rgb(24 25 27 / 0.22), 0 2px 6px -2px rgb(24 25 27 / 0.08);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Tabular figures wherever numbers are compared. */
+.tabular,
+table td,
+table th {
+  font-variant-numeric: tabular-nums;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Small uppercase label used for table headers and section eyebrows. */
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+/* Thin scrollbars inside panels. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

@@ -1,0 +1,1 @@
+ALTER TABLE "refunds" ADD COLUMN "affects_revenue" boolean DEFAULT true NOT NULL;

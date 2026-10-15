@@ -1,0 +1,228 @@
+import { Pencil, Plus } from "lucide-react";
+import { Suspense } from "react";
+import { Forbidden, PageBody, PageHeader, TableSkeleton } from "@/components/app/page";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader } from "@/components/ui/card";
+import { Segmented } from "@/components/ui/misc";
+import { Pill } from "@/components/ui/pill";
+import { Table, TableWrap, TD, TH, THead, TR, type SearchParams } from "@/components/ui/table";
+import { formatter } from "@/lib/format";
+import { requireSession } from "@/server/auth/session";
+import { getDb } from "@/server/db";
+import { env } from "@/server/env";
+import { getGhlStatus } from "@/server/integrations/ghl";
+import { appointmentTypes } from "@/server/db/schema";
+import { asc, eq } from "drizzle-orm";
+import { can } from "@/server/services/core";
+import { listBranches } from "@/server/services/settings";
+import { AppointmentTypeDialog, BranchDialog, DemoPanel, GhlPanel, HoursForm, ProfileForm, TaxForm, WebsiteForm } from "./forms";
+
+const PATH = "/app/settings";
+
+async function Content({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const session = await requireSession();
+  const ctx = session.ctx;
+  if (!can(ctx, "settings.manage")) return <Forbidden what="settings" />;
+  const sp = await searchParams;
+  const tab = typeof sp.tab === "string" ? sp.tab : "business";
+  const b = session.business;
+  const f = formatter(b);
+  const demo = process.env.DEMO_MODE === "true" && b.isDemo && can(ctx, "demo.reset");
+
+  let body: React.ReactNode = null;
+  if (tab === "business") {
+    body = (
+      <ProfileForm
+        initial={{
+          name: b.name,
+          legalName: b.legalName ?? "",
+          tagline: b.tagline ?? "",
+          description: b.description ?? "",
+          logoUrl: b.logoUrl ?? "",
+          brandColor: b.brandColor,
+          accentColor: b.accentColor,
+          email: b.email ?? "",
+          phone: b.phone ?? "",
+          website: b.website ?? "",
+          addressLine1: b.addressLine1 ?? "",
+          addressLine2: b.addressLine2 ?? "",
+          city: b.city ?? "",
+          region: b.region ?? "",
+          postalCode: b.postalCode ?? "",
+          country: b.country,
+        }}
+      />
+    );
+  } else if (tab === "tax") {
+    body = (
+      <TaxForm
+        initial={{
+          currency: b.currency,
+          locale: b.locale,
+          timezone: b.timezone,
+          taxName: b.taxName,
+          taxRatePct: String(b.taxRateBps / 100),
+          pricesIncludeTax: b.pricesIncludeTax,
+          taxRegistration: b.taxRegistration ?? "",
+          receiptFooter: b.receiptFooter ?? "",
+          maxDiscountPct: String((b.settings.maxStaffDiscountBps ?? 2000) / 100),
+        }}
+      />
+    );
+  } else if (tab === "hours") {
+    body = <HoursForm initial={b.businessHours} />;
+  } else if (tab === "branches") {
+    const rows = await listBranches(b.id);
+    const blank = { name: "", code: "", addressLine1: "", addressLine2: "", city: "", region: "", phone: "", email: "", mapUrl: "", imageUrl: "", businessHours: null, isActive: true };
+    body = (
+      <Card>
+        <CardHeader title="Branches" subtitle="Each branch has its own stockroom, calendar and sales." actions={<BranchDialog initial={blank} defaultHours={b.businessHours} trigger={<Button variant="primary" size="sm"><Plus /> Add branch</Button>} />} />
+        <TableWrap>
+          <Table>
+            <THead>
+              <TH>Branch</TH>
+              <TH>Address</TH>
+              <TH>Phone</TH>
+              <TH>Hours</TH>
+              <TH>Status</TH>
+              <TH align="right">{""}</TH>
+            </THead>
+            <tbody>
+              {rows.map((r) => (
+                <TR key={r.id}>
+                  <TD className="font-medium">
+                    {r.name} <span className="text-text-3">· {r.code}</span>
+                  </TD>
+                  <TD className="text-text-2">{[r.addressLine1, r.city].filter(Boolean).join(", ") || "—"}</TD>
+                  <TD className="text-text-2">{r.phone ?? "—"}</TD>
+                  <TD className="text-text-2">{r.businessHours ? "Custom" : "Business default"}</TD>
+                  <TD>{r.isActive ? <Pill tone="positive" dot>Active</Pill> : <Pill>Inactive</Pill>}</TD>
+                  <TD align="right">
+                    <BranchDialog
+                      id={r.id}
+                      defaultHours={b.businessHours}
+                      initial={{ name: r.name, code: r.code, addressLine1: r.addressLine1 ?? "", addressLine2: r.addressLine2 ?? "", city: r.city ?? "", region: r.region ?? "", phone: r.phone ?? "", email: r.email ?? "", mapUrl: r.mapUrl ?? "", imageUrl: r.imageUrl ?? "", businessHours: r.businessHours, isActive: r.isActive }}
+                      trigger={<Button variant="ghost" size="icon-sm" aria-label={`Edit ${r.name}`}><Pencil /></Button>}
+                    />
+                  </TD>
+                </TR>
+              ))}
+            </tbody>
+          </Table>
+        </TableWrap>
+      </Card>
+    );
+  } else if (tab === "appointments") {
+    const all = await getDb().select().from(appointmentTypes).where(eq(appointmentTypes.businessId, b.id)).orderBy(asc(appointmentTypes.sortOrder), asc(appointmentTypes.name));
+    const blank = { name: "", code: "", description: "", durationMinutes: "30", requiresPractitioner: true, isPublic: true, priceCents: null, isActive: true };
+    body = (
+      <Card>
+        <CardHeader title="Appointment types" subtitle="Durations drive the calendar and online booking slots." actions={<AppointmentTypeDialog initial={blank} trigger={<Button variant="primary" size="sm"><Plus /> Add type</Button>} />} />
+        <TableWrap>
+          <Table>
+            <THead>
+              <TH>Type</TH>
+              <TH align="right">Duration</TH>
+              <TH>Practitioner</TH>
+              <TH>Online</TH>
+              <TH align="right">Price</TH>
+              <TH>Status</TH>
+              <TH align="right">{""}</TH>
+            </THead>
+            <tbody>
+              {all.map((t) => (
+                <TR key={t.id}>
+                  <TD className="font-medium">
+                    {t.name}
+                    <div className="font-mono text-[11px] font-normal text-text-3">{t.code}</div>
+                  </TD>
+                  <TD align="right">{t.durationMinutes} min</TD>
+                  <TD className="text-text-2">{t.requiresPractitioner ? "Required" : "Not needed"}</TD>
+                  <TD className="text-text-2">{t.isPublic ? "Bookable" : "Staff only"}</TD>
+                  <TD align="right">{t.priceCents !== null ? f.money(t.priceCents) : "—"}</TD>
+                  <TD>{t.isActive ? <Pill tone="positive" dot>Active</Pill> : <Pill>Inactive</Pill>}</TD>
+                  <TD align="right">
+                    <AppointmentTypeDialog
+                      id={t.id}
+                      initial={{ name: t.name, code: t.code, description: t.description ?? "", durationMinutes: String(t.durationMinutes), requiresPractitioner: t.requiresPractitioner, isPublic: t.isPublic, priceCents: t.priceCents, isActive: t.isActive }}
+                      trigger={<Button variant="ghost" size="icon-sm" aria-label={`Edit ${t.name}`}><Pencil /></Button>}
+                    />
+                  </TD>
+                </TR>
+              ))}
+            </tbody>
+          </Table>
+        </TableWrap>
+      </Card>
+    );
+  } else if (tab === "website") {
+    const w = b.websiteContent;
+    body = (
+      <WebsiteForm
+        initial={{
+          heroEyebrow: w.heroEyebrow ?? "",
+          heroTitle: w.heroTitle ?? "",
+          heroBody: w.heroBody ?? "",
+          aboutTitle: w.aboutTitle ?? "",
+          aboutBody: w.aboutBody ?? "",
+          privacyContactEmail: w.privacyContactEmail ?? "",
+          values: w.values ?? [],
+          faqs: w.faqs ?? [],
+        }}
+      />
+    );
+  } else if (tab === "integrations") {
+    if (!can(ctx, "integrations.manage")) body = <p className="text-[13.5px] text-text-2">You don&apos;t have permission to manage integrations.</p>;
+    else {
+      const g = await getGhlStatus(ctx);
+      body = (
+        <GhlPanel
+          status={g.status}
+          locationId={g.locationId}
+          hasToken={g.hasToken}
+          webhookUrl={`${env().APP_URL}/api/integrations/ghl/webhook/${b.slug}`}
+          webhookSecret={g.webhookSecret}
+          settings={g.settings}
+          lastTestedAt={g.lastTestedAt ? g.lastTestedAt.toISOString() : null}
+          lastError={g.lastError}
+          counts={g.counts}
+          recent={g.recent.map((r) => ({ id: r.id, direction: r.direction, eventType: r.eventType, status: r.status, lastError: r.lastError, createdAt: r.createdAt.toISOString() }))}
+        />
+      );
+    }
+  } else if (tab === "demo" && demo) {
+    body = <DemoPanel />;
+  }
+
+  return (
+    <PageBody>
+      <Segmented
+        pathname={PATH}
+        params={sp}
+        param="tab"
+        options={[
+          { value: "business", label: "Business & branding" },
+          { value: "tax", label: "Currency & tax" },
+          { value: "hours", label: "Hours" },
+          { value: "branches", label: "Branches" },
+          { value: "appointments", label: "Appointment types" },
+          { value: "website", label: "Website" },
+          { value: "integrations", label: "Integrations" },
+          ...(demo ? [{ value: "demo", label: "Demo data" }] : []),
+        ]}
+      />
+      {body}
+    </PageBody>
+  );
+}
+
+export default function SettingsPage(props: PageProps<"/app/settings">) {
+  return (
+    <>
+      <PageHeader title="Settings" subtitle="Customise the business without changing code: branding, tax, hours, branches, website and integrations." />
+      <Suspense fallback={<TableSkeleton rows={6} />}>
+        <Content searchParams={props.searchParams} />
+      </Suspense>
+    </>
+  );
+}

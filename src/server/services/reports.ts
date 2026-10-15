@@ -160,29 +160,46 @@ export async function revenueSeries(ctx: Ctx, range: ResolvedRange, branchId?: s
   });
 }
 
+/**
+ * Revenue lines for breakdowns: lines of sales completed in the period, minus item returns dated in the
+ * period (a returned line's share of its net value, excluding tax). Refunds of a typed amount without
+ * returned items can't be attributed to a line; they reduce the headline totals only.
+ */
+function revenueLines(ctx: Ctx, range: ResolvedRange, branchId?: string | null) {
+  return sql`
+    select si.category_id, si.variant_id, si.product_name, si.product_type, s.sold_by_membership_id, si.net_cents::bigint as net, si.quantity as qty
+    from sales s join sale_items si on si.sale_id = s.id
+    where s.business_id = ${ctx.businessId} and s.status = 'completed' and s.completed_at >= ${range.from} and s.completed_at < ${range.to} ${branchCond("s", branchId)}
+    union all
+    select si.category_id, si.variant_id, si.product_name, si.product_type, s.sold_by_membership_id,
+           -round(ri.amount_cents::numeric * si.net_cents / nullif(si.line_total_cents, 0))::bigint as net, -ri.quantity as qty
+    from refunds r
+    join refund_items ri on ri.refund_id = r.id
+    join sale_items si on si.id = ri.sale_item_id
+    join sales s on s.id = r.sale_id
+    where r.business_id = ${ctx.businessId} and r.affects_revenue and r.created_at >= ${range.from} and r.created_at < ${range.to} ${branchCond("s", branchId)}`;
+}
+
 export async function salesByCategory(ctx: Ctx, range: ResolvedRange, branchId?: string | null) {
   const res = await db().execute<{ name: string; net: number; qty: number }>(sql`
-    select coalesce(c.name, 'Uncategorised') as name, sum(si.net_cents)::bigint as net, sum(si.quantity)::int as qty
-    from sales s
-    join sale_items si on si.sale_id = s.id
-    left join product_categories c on c.id = si.category_id
-    where s.business_id = ${ctx.businessId} and s.status = 'completed' and s.completed_at >= ${range.from} and s.completed_at < ${range.to} ${branchCond("s", branchId)}
-    group by 1 order by 2 desc`);
+    with lines as (${revenueLines(ctx, range, branchId)})
+    select coalesce(c.name, 'Uncategorised') as name, sum(lines.net)::bigint as net, sum(lines.qty)::int as qty
+    from lines left join product_categories c on c.id = lines.category_id
+    group by 1 having sum(lines.net) <> 0 or sum(lines.qty) <> 0
+    order by 2 desc`);
   return res.rows.map((r) => ({ name: r.name, netCents: n(r.net), quantity: n(r.qty) }));
 }
 
 export async function topProducts(ctx: Ctx, range: ResolvedRange, branchId?: string | null, limit = 8) {
   const res = await db().execute<{ product_name: string; product_id: string; qty: number; net: number }>(sql`
-    select si.product_name, p.id as product_id,
-           sum(si.quantity - si.refunded_quantity)::int as qty,
-           sum(si.net_cents)::bigint as net
-    from sales s
-    join sale_items si on si.sale_id = s.id
-    join product_variants v on v.id = si.variant_id
+    with lines as (${revenueLines(ctx, range, branchId)})
+    select min(lines.product_name) as product_name, p.id as product_id, sum(lines.qty)::int as qty, sum(lines.net)::bigint as net
+    from lines
+    join product_variants v on v.id = lines.variant_id
     join products p on p.id = v.product_id
-    where s.business_id = ${ctx.businessId} and s.status = 'completed' and s.completed_at >= ${range.from} and s.completed_at < ${range.to}
-      and si.product_type <> 'service' ${branchCond("s", branchId)}
-    group by si.product_name, p.id
+    where lines.product_type <> 'service'
+    group by p.id
+    having sum(lines.qty) > 0
     order by qty desc, net desc
     limit ${limit}`);
   return res.rows.map((r) => ({ productName: r.product_name, productId: r.product_id, quantity: n(r.qty), netCents: n(r.net) }));
@@ -194,13 +211,27 @@ export async function salesByStaff(ctx: Ctx, range: ResolvedRange, branchId?: st
       select s.id, s.sold_by_membership_id, s.total_cents from sales s
       where s.business_id = ${ctx.businessId} and s.status = 'completed' and s.completed_at >= ${range.from} and s.completed_at < ${range.to} ${branchCond("s", branchId)}
     ),
-    lines as (select si.sale_id, sum(si.net_cents) as net from sale_items si join s on s.id = si.sale_id group by si.sale_id)
-    select coalesce(u.name, 'Unassigned') as name, count(*)::int as tx, sum(s.total_cents)::bigint as total, sum(coalesce(lines.net, 0))::bigint as net
-    from s
-    left join lines on lines.sale_id = s.id
-    left join business_memberships m on m.id = s.sold_by_membership_id
-    left join users u on u.id = m.user_id
-    group by u.name order by 3 desc`);
+    sold as (
+      select s.sold_by_membership_id as m, count(*)::int as tx, sum(s.total_cents)::bigint as total,
+             sum((select coalesce(sum(si.net_cents), 0) from sale_items si where si.sale_id = s.id))::bigint as net
+      from s group by 1
+    ),
+    -- Revenue refunds dated in the period reduce the seller's net (all refunds, with or without items).
+    returned as (
+      select s.sold_by_membership_id as m, sum(r.amount_cents - r.tax_cents)::bigint as net
+      from refunds r join sales s on s.id = r.sale_id
+      where r.business_id = ${ctx.businessId} and r.affects_revenue and r.created_at >= ${range.from} and r.created_at < ${range.to} ${branchCond("s", branchId)}
+      group by 1
+    ),
+    staff as (select m from sold union select m from returned)
+    select coalesce(u.name, 'Unassigned') as name, coalesce(sold.tx, 0)::int as tx, coalesce(sold.total, 0)::bigint as total,
+           (coalesce(sold.net, 0) - coalesce(returned.net, 0))::bigint as net
+    from staff
+    left join sold on sold.m is not distinct from staff.m
+    left join returned on returned.m is not distinct from staff.m
+    left join business_memberships bm on bm.id = staff.m
+    left join users u on u.id = bm.user_id
+    order by 3 desc`);
   return res.rows.map((r) => ({ name: r.name, transactions: n(r.tx), totalCents: n(r.total), netCents: n(r.net) }));
 }
 
@@ -409,7 +440,8 @@ export async function dashboard(ctx: Ctx, range: ResolvedRange, branchId?: strin
       : null,
     series,
     categories,
-    topProducts: products,
+    // Units sold are operational; the revenue figure is financial data — strip it without analytics.view.
+    topProducts: products && !can(ctx, "analytics.view") ? products.map((p) => ({ ...p, netCents: null as number | null })) : products,
     leads: leadsM,
     customers: customersM,
     appointments: apptM,

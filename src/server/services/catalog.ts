@@ -1,12 +1,18 @@
 import { onProductChanged } from "@/server/integrations/ghl/triggers";
 import { and, asc, desc, eq, inArray, isNotNull, isNull, ne, sql, type SQL } from "drizzle-orm";
+import { z } from "zod";
+import { parseMoney } from "@/lib/money";
 import { productInput, CATEGORY_KINDS, type ProductInput } from "@/lib/schemas";
 import { getDb, type Executor } from "@/server/db";
 import {
+  branches,
   inventoryBalances,
+  inventoryLocations,
   productCategories,
   products,
   productVariants,
+  purchaseOrderItems,
+  purchaseOrders,
   saleItems,
   suppliers,
 } from "@/server/db/schema";
@@ -185,11 +191,20 @@ function checkVariantDupes(variants: { sku: string; barcode?: string | null }[])
 
 export type OpeningStock = { variantIndex: number; locationId: string; quantity: number }[];
 
-export async function createProduct(ctx: Ctx, raw: ProductInput, opening: OpeningStock = []) {
+const openingInput = z
+  .array(z.object({ variantIndex: z.number().int().min(0).max(199), locationId: z.string().uuid(), quantity: z.number().int().min(0, "Opening stock can't be negative.").max(1_000_000) }))
+  .max(500)
+  .default([]);
+
+export async function createProduct(ctx: Ctx, raw: ProductInput, rawOpening: unknown = []) {
   requirePermission(ctx, "products.manage");
   const input = productInput.parse(raw);
+  const opening = openingInput.parse(rawOpening ?? []).filter((o) => o.quantity > 0);
   checkVariantDupes(input.variants);
   if (input.productType !== "stock" && opening.length) throw invalid("Only stocked items can have opening stock.");
+  // Creating stock is a receiving operation: it needs the same permission as a delivery.
+  if (opening.length) requirePermission(ctx, "inventory.receive");
+  const hideCost = !can(ctx, "products.costs");
   try {
     return await getDb().transaction(async (tx) => {
       await assertRefs(tx, ctx, input);
@@ -224,7 +239,7 @@ export async function createProduct(ctx: Ctx, raw: ProductInput, opening: Openin
             label: v.label || "Default",
             options: v.options,
             priceCents: v.priceCents,
-            costCents: v.costCents,
+            costCents: hideCost ? 0 : v.costCents,
             reorderPoint: input.productType === "stock" ? v.reorderPoint : 0,
             reorderQty: input.productType === "stock" ? v.reorderQty : 0,
             isActive: v.isActive,
@@ -234,9 +249,17 @@ export async function createProduct(ctx: Ctx, raw: ProductInput, opening: Openin
           })),
         )
         .returning();
+      if (opening.length) {
+        const locs = await tx
+          .select({ id: inventoryLocations.id })
+          .from(inventoryLocations)
+          .innerJoin(branches, eq(branches.id, inventoryLocations.branchId))
+          .where(and(eq(inventoryLocations.businessId, ctx.businessId), eq(branches.isActive, true), inArray(inventoryLocations.id, [...new Set(opening.map((o) => o.locationId))])));
+        if (locs.length !== new Set(opening.map((o) => o.locationId)).size) throw invalid("Opening stock must go to an active branch's stockroom.");
+      }
 
       // Opening stock is recorded as a movement like any other receipt — never a silent number.
-      for (const o of opening.filter((o) => o.quantity > 0)) {
+      for (const o of opening) {
         const variant = variants[o.variantIndex];
         if (!variant) throw invalid("Opening stock refers to an unknown variant.");
         const balances = await lockBalances(tx, ctx, o.locationId, [variant.id]);
@@ -245,7 +268,7 @@ export async function createProduct(ctx: Ctx, raw: ProductInput, opening: Openin
           variantId: variant.id,
           locationId: o.locationId,
           quantity: o.quantity,
-          unitCostCents: input.variants[o.variantIndex].costCents,
+          unitCostCents: hideCost ? 0 : input.variants[o.variantIndex].costCents,
           reason: "Opening stock",
           referenceType: "product",
           referenceId: product.id,
@@ -279,7 +302,17 @@ export async function updateProduct(ctx: Ctx, productId: string, raw: ProductInp
       if (!existing) throw notFound("Product");
       if (existing.archivedAt) throw invalid("Restore this product before editing it.");
       await assertRefs(tx, ctx, input);
+      // Lock the variant rows first: receipts (which blend average cost) and reservations lock them too,
+      // so the checks below can't be invalidated by a concurrent delivery.
+      await tx.select({ id: productVariants.id }).from(productVariants).where(and(eq(productVariants.businessId, ctx.businessId), eq(productVariants.productId, productId))).for("update");
       if (input.productType !== existing.productType) {
+        const [{ open }] = await tx
+          .select({ open: sql<number>`count(*)::int` })
+          .from(purchaseOrderItems)
+          .innerJoin(purchaseOrders, eq(purchaseOrders.id, purchaseOrderItems.purchaseOrderId))
+          .innerJoin(productVariants, eq(productVariants.id, purchaseOrderItems.variantId))
+          .where(and(eq(productVariants.productId, productId), sql`${purchaseOrders.status} in ('draft', 'ordered', 'partially_received')`, sql`${purchaseOrderItems.quantityReceived} < ${purchaseOrderItems.quantityOrdered}`));
+        if (Number(open) > 0) throw conflict("This product is on an open purchase order. Receive, close or cancel it before changing the product's type.");
         const [{ moved }] = await tx
           .select({ moved: sql<number>`count(*)::int` })
           .from(inventoryBalances)
@@ -382,6 +415,7 @@ export async function setProductArchived(ctx: Ctx, productId: string, archived: 
         .for("update");
       if (!p) throw notFound("Product");
       if (archived) {
+        await tx.select({ id: productVariants.id }).from(productVariants).where(and(eq(productVariants.businessId, ctx.businessId), eq(productVariants.productId, productId))).for("update");
         const [{ units, reserved }] = await tx
           .select({ units: sql<number>`coalesce(sum(b.on_hand), 0)::int`, reserved: sql<number>`coalesce(sum(b.reserved), 0)::int` })
           .from(inventoryBalances)
@@ -574,73 +608,108 @@ export async function importProducts(ctx: Ctx, records: Record<string, string>[]
   requirePermission(ctx, "products.manage");
   if (records.length === 0) throw invalid("The file has no rows.");
   if (records.length > 2000) throw invalid("Import up to 2,000 rows at a time.");
+  const hideCost = !can(ctx, "products.costs");
   const cats = await listCategories(ctx);
   const sups = await db().select().from(suppliers).where(eq(suppliers.businessId, ctx.businessId));
   const catByName = new Map(cats.map((c) => [c.name.toLowerCase(), c]));
   const supByCode = new Map(sups.map((s) => [s.code.toLowerCase(), s]));
+  // Cells exported by us start with "'" when they look like a formula (spreadsheet-injection guard); undo it.
+  const text = (v: string | undefined) => (v ?? "").trim().replace(/^'(?=[=+\-@])/, "");
+  const has = (r: Record<string, string>, k: string) => r[k] !== undefined && r[k].trim() !== "";
   const errors: string[] = [];
+  const seenSku = new Map<string, number>();
+  const seenBarcode = new Map<string, number>();
   const groups = new Map<string, { rows: { rowNo: number; r: Record<string, string> }[] }>();
   records.forEach((r, i) => {
-    const key = `${(r.product_name ?? "").trim().toLowerCase()}|${(r.brand ?? "").trim().toLowerCase()}`;
-    if (!r.product_name?.trim()) errors.push(`Row ${i + 2}: product_name is required.`);
-    if (!r.sku?.trim()) errors.push(`Row ${i + 2}: sku is required.`);
-    if (!catByName.has((r.category ?? "").trim().toLowerCase())) errors.push(`Row ${i + 2}: unknown category "${r.category ?? ""}".`);
-    if (r.supplier_code?.trim() && !supByCode.has(r.supplier_code.trim().toLowerCase())) errors.push(`Row ${i + 2}: unknown supplier code "${r.supplier_code}".`);
-    if (Number.isNaN(Number(r.price))) errors.push(`Row ${i + 2}: price must be a number.`);
+    const row = i + 2;
+    const sku = text(r.sku).toUpperCase();
+    const key = `${text(r.product_name).toLowerCase()}|${text(r.brand).toLowerCase()}`;
+    if (!text(r.product_name)) errors.push(`Row ${row}: product_name is required.`);
+    if (!sku) errors.push(`Row ${row}: sku is required.`);
+    else if (seenSku.has(sku)) errors.push(`Row ${row}: SKU ${sku} already appears on row ${seenSku.get(sku)}.`);
+    else seenSku.set(sku, row);
+    const barcode = text(r.barcode);
+    if (barcode) {
+      if (seenBarcode.has(barcode)) errors.push(`Row ${row}: barcode ${barcode} already appears on row ${seenBarcode.get(barcode)}.`);
+      else seenBarcode.set(barcode, row);
+    }
+    if (!catByName.has(text(r.category).toLowerCase())) errors.push(`Row ${row}: unknown category "${r.category ?? ""}".`);
+    if (has(r, "supplier_code") && !supByCode.has(text(r.supplier_code).toLowerCase())) errors.push(`Row ${row}: unknown supplier code "${r.supplier_code}".`);
+    if (has(r, "price")) {
+      const cents = parseMoney(r.price);
+      if (cents === null || cents < 0) errors.push(`Row ${row}: price "${r.price}" isn't a valid amount.`);
+    }
+    if (has(r, "cost")) {
+      const cents = parseMoney(r.cost);
+      if (cents === null || cents < 0) errors.push(`Row ${row}: cost "${r.cost}" isn't a valid amount.`);
+    }
+    for (const k of ["reorder_point", "reorder_qty"]) {
+      if (has(r, k) && !/^\d{1,6}$/.test(r[k].trim())) errors.push(`Row ${row}: ${k} must be a whole number of 0 or more.`);
+    }
     const g = groups.get(key) ?? { rows: [] };
-    g.rows.push({ rowNo: i + 2, r });
+    g.rows.push({ rowNo: row, r });
     groups.set(key, g);
+  });
+
+  const skus = [...seenSku.keys()];
+  const existing = skus.length
+    ? await db()
+        .select({ id: productVariants.id, sku: productVariants.sku, productId: productVariants.productId, productName: products.name, brand: products.brand })
+        .from(productVariants)
+        .innerJoin(products, eq(products.id, productVariants.productId))
+        .where(and(eq(productVariants.businessId, ctx.businessId), inArray(productVariants.sku, skus)))
+    : [];
+  const existingBySku = new Map(existing.map((e) => [e.sku, e]));
+  // A new variant needs a price; an existing one keeps its price when the cell is blank.
+  records.forEach((r, i) => {
+    if (!existingBySku.has(text(r.sku).toUpperCase()) && !has(r, "price")) errors.push(`Row ${i + 2}: price is required for new SKU ${text(r.sku).toUpperCase()}.`);
   });
   if (errors.length) throw invalid(`Fix these rows and try again: ${errors.slice(0, 10).join(" ")}${errors.length > 10 ? ` (+${errors.length - 10} more)` : ""}`);
 
-  const skus = records.map((r) => r.sku.trim().toUpperCase());
-  const existing = await db()
-    .select({ id: productVariants.id, sku: productVariants.sku, productId: productVariants.productId })
-    .from(productVariants)
-    .where(and(eq(productVariants.businessId, ctx.businessId), inArray(productVariants.sku, skus)));
-  const existingBySku = new Map(existing.map((e) => [e.sku, e]));
   let created = 0;
   let updated = 0;
-  const toCents = (v: string | undefined) => Math.round(Number(v || 0) * 100);
-  const yes = (v: string | undefined, d: boolean) => (v === undefined || v === "" ? d : /^(y|yes|true|1)$/i.test(v.trim()));
+  const touched = new Set<string>();
+  const yes = (v: string | undefined, d: boolean) => (v === undefined || v.trim() === "" ? d : /^(y|yes|true|1)$/i.test(v.trim()));
 
   try {
     await getDb().transaction(async (tx) => {
-      for (const { rows } of groups.values()) {
+      for (const [groupKey, { rows }] of groups) {
         const first = rows[0].r;
-        const newRows = rows.filter(({ r }) => !existingBySku.has(r.sku.trim().toUpperCase()));
+        const newRows = rows.filter(({ r }) => !existingBySku.has(text(r.sku).toUpperCase()));
         for (const { r } of rows) {
-          const e = existingBySku.get(r.sku.trim().toUpperCase());
+          const e = existingBySku.get(text(r.sku).toUpperCase());
           if (!e) continue;
-          await tx
-            .update(productVariants)
-            .set({
-              priceCents: toCents(r.price),
-              label: r.variant_label?.trim() || "Default",
-              barcode: r.barcode?.trim() || null,
-              reorderPoint: Number(r.reorder_point || 0),
-              reorderQty: Number(r.reorder_qty || 0),
-              isActive: yes(r.active, true),
-              updatedAt: now(ctx),
-            })
-            .where(eq(productVariants.id, e.id));
+          // Only columns present in the file and filled in are changed — never blanked or defaulted.
+          const patch: Partial<typeof productVariants.$inferInsert> = { updatedAt: now(ctx) };
+          if (has(r, "price")) patch.priceCents = parseMoney(r.price)!;
+          if (has(r, "variant_label")) patch.label = text(r.variant_label);
+          if (has(r, "barcode")) patch.barcode = text(r.barcode);
+          if (has(r, "reorder_point")) patch.reorderPoint = Number(r.reorder_point);
+          if (has(r, "reorder_qty")) patch.reorderQty = Number(r.reorder_qty);
+          if (has(r, "active")) patch.isActive = yes(r.active, true);
+          await tx.update(productVariants).set(patch).where(eq(productVariants.id, e.id));
+          touched.add(e.productId);
           updated++;
         }
         if (!newRows.length) continue;
-        const productId = existingBySku.get(rows.find(({ r }) => existingBySku.has(r.sku.trim().toUpperCase()))?.r.sku.trim().toUpperCase() ?? "")?.productId;
-        let pid = productId;
+        // New SKUs join an existing product only if it is the same product (same name and brand).
+        const sameProduct = rows
+          .map(({ r }) => existingBySku.get(text(r.sku).toUpperCase()))
+          .find((e) => e && `${e.productName.toLowerCase()}|${(e.brand ?? "").toLowerCase()}` === groupKey);
+        let pid = sameProduct?.productId;
         if (!pid) {
-          const cat = catByName.get(first.category.trim().toLowerCase())!;
-          const type = ["stock", "service", "made_to_order"].includes(first.type?.trim()) ? (first.type.trim() as "stock") : cat.kind === "services" ? "service" : "stock";
+          const cat = catByName.get(text(first.category).toLowerCase())!;
+          const t = text(first.type);
+          const type = ["stock", "service", "made_to_order"].includes(t) ? (t as "stock") : cat.kind === "services" ? "service" : "stock";
           const [p] = await tx
             .insert(products)
             .values({
               businessId: ctx.businessId,
               categoryId: cat.id,
-              supplierId: first.supplier_code?.trim() ? supByCode.get(first.supplier_code.trim().toLowerCase())!.id : null,
-              name: first.product_name.trim(),
-              brand: first.brand?.trim() || null,
-              description: first.description?.trim() || null,
+              supplierId: has(first, "supplier_code") ? supByCode.get(text(first.supplier_code).toLowerCase())!.id : null,
+              name: text(first.product_name),
+              brand: text(first.brand) || null,
+              description: text(first.description) || null,
               productType: type,
               taxExempt: yes(first.tax_exempt, false),
               isActive: yes(first.active, true),
@@ -652,19 +721,21 @@ export async function importProducts(ctx: Ctx, records: Record<string, string>[]
           newRows.map(({ r }, i) => ({
             businessId: ctx.businessId,
             productId: pid!,
-            sku: r.sku.trim().toUpperCase(),
-            barcode: r.barcode?.trim() || null,
-            label: r.variant_label?.trim() || "Default",
-            priceCents: toCents(r.price),
-            costCents: toCents(r.cost),
-            reorderPoint: Number(r.reorder_point || 0),
-            reorderQty: Number(r.reorder_qty || 0),
+            sku: text(r.sku).toUpperCase(),
+            barcode: text(r.barcode) || null,
+            label: text(r.variant_label) || "Default",
+            priceCents: parseMoney(r.price)!,
+            costCents: hideCost || !has(r, "cost") ? 0 : parseMoney(r.cost)!,
+            reorderPoint: has(r, "reorder_point") ? Number(r.reorder_point) : 0,
+            reorderQty: has(r, "reorder_qty") ? Number(r.reorder_qty) : 0,
             isActive: yes(r.active, true),
-            sortOrder: i,
+            sortOrder: 100 + i,
           })),
         );
+        touched.add(pid!);
         created += newRows.length;
       }
+      for (const productId of touched) await onProductChanged(tx, ctx.businessId, productId);
       await audit(tx, ctx, {
         action: "product.imported",
         entityType: "product",

@@ -152,7 +152,7 @@ async function Content({ searchParams }: { searchParams: SP }) {
             </CardBody>
           </Card>
           <Card>
-            <CardHeader title="Sales by category" subtitle="Net of discounts, before returns" />
+            <CardHeader title="Sales by category" subtitle="Net of discounts and item returns" />
             <CardBody>
               <BarList items={r.byCategory.map((x) => ({ label: x.name, value: x.netCents, sub: `${x.quantity} units` }))} valueFormat="money" money={f.moneyMeta} />
             </CardBody>

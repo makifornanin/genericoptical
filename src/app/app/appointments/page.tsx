@@ -12,7 +12,7 @@ import { WEEKDAYS } from "@/lib/types";
 import { getBranchContext, requireSession } from "@/server/auth/session";
 import { getDb } from "@/server/db";
 import { appointmentTypesFor, listAppointments, practitioners as listPractitioners } from "@/server/services/appointments";
-import { can } from "@/server/services/core";
+import { can, isUuid } from "@/server/services/core";
 import { leads } from "@/server/db/schema";
 import { and, eq } from "drizzle-orm";
 import { AppointmentFormDialog } from "./appointment-form";
@@ -120,9 +120,14 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
   };
 
   let leadPrefill: { id: string; name: string; branchId: string | null } | null = null;
-  if (typeof sp.lead === "string") {
-    const [l] = await getDb().select({ id: leads.id, firstName: leads.firstName, lastName: leads.lastName, branchId: leads.preferredBranchId }).from(leads).where(and(eq(leads.businessId, session.business.id), eq(leads.id, sp.lead))).limit(1);
-    if (l) leadPrefill = { id: l.id, name: `${l.firstName} ${l.lastName}`, branchId: l.branchId };
+  if (typeof sp.lead === "string" && isUuid(sp.lead) && can(ctx, "leads.view")) {
+    const [l] = await getDb()
+      .select({ id: leads.id, firstName: leads.firstName, lastName: leads.lastName, branchId: leads.preferredBranchId, assigned: leads.assignedMembershipId })
+      .from(leads)
+      .where(and(eq(leads.businessId, session.business.id), eq(leads.id, sp.lead)))
+      .limit(1);
+    // Only leads this person may see (sales staff see their assigned leads).
+    if (l && (can(ctx, "leads.view_all") || l.assigned === ctx.membershipId)) leadPrefill = { id: l.id, name: `${l.firstName} ${l.lastName}`, branchId: l.branchId };
   }
   const defaultBranch = leadPrefill?.branchId ?? branchId ?? session.membership.defaultBranchId ?? branches[0]?.id ?? "";
   const defaultType = types[0];

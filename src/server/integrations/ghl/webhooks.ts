@@ -35,7 +35,7 @@ export function verifyGhlSignature(rawBody: string, headers: Headers): { ok: boo
   }
   if (ed) {
     try {
-      const key = createPublicKey(env().GHL_WEBHOOK_ED25519_PUBLIC_KEY ?? GHL_WEBHOOK_ED25519_PUBLIC_KEY);
+      const key = createPublicKey(pem(env().GHL_WEBHOOK_ED25519_PUBLIC_KEY) ?? GHL_WEBHOOK_ED25519_PUBLIC_KEY);
       const sig = Buffer.from(ed, "base64");
       if (candidates.some((c) => verify(null, Buffer.from(c, "utf8"), key, sig))) return { ok: true, scheme: "ed25519" };
     } catch {
@@ -44,7 +44,7 @@ export function verifyGhlSignature(rawBody: string, headers: Headers): { ok: boo
   }
   if (rsa) {
     try {
-      const key = createPublicKey(env().GHL_WEBHOOK_RSA_PUBLIC_KEY ?? GHL_WEBHOOK_RSA_PUBLIC_KEY);
+      const key = createPublicKey(pem(env().GHL_WEBHOOK_RSA_PUBLIC_KEY) ?? GHL_WEBHOOK_RSA_PUBLIC_KEY);
       const sig = Buffer.from(rsa, "base64");
       if (candidates.some((c) => verify("sha256", Buffer.from(c, "utf8"), key, sig))) return { ok: true, scheme: "rsa" };
     } catch {
@@ -53,6 +53,9 @@ export function verifyGhlSignature(rawBody: string, headers: Headers): { ok: boo
   }
   return { ok: false, scheme: null };
 }
+
+/** A PEM key override from the environment; one-line values use "\n" escapes for line breaks. */
+const pem = (value: string | undefined) => (value ? value.replace(/\\n/g, "\n") : undefined);
 
 type Route = { eventType: string; category: SyncCategory; payload: (body: Record<string, unknown>) => Record<string, unknown>; externalId: (body: Record<string, unknown>) => string | null };
 

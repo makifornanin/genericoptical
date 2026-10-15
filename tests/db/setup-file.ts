@@ -21,6 +21,18 @@ for (let attempt = 0; ; attempt++) {
 await admin.end();
 process.env.DATABASE_URL = `${base}/${name}`;
 process.env.APP_SECRET ??= "test-secret-test-secret-test-secret-1234";
+// GoHighLevel tests talk to an in-memory simulator; these are dummy values, never real credentials.
+process.env.GHL_CLIENT_ID ??= "test-client-id";
+process.env.GHL_CLIENT_SECRET ??= "test-client-secret";
+process.env.APP_URL ??= "http://localhost:3000";
+process.env.LOG_LEVEL ??= "error";
+if (!process.env.GHL_TEST_WEBHOOK_PRIVATE_KEY) {
+  // A throwaway Ed25519 key pair stands in for HighLevel's signing key.
+  const { generateKeyPairSync } = await import("node:crypto");
+  const { publicKey, privateKey } = generateKeyPairSync("ed25519");
+  process.env.GHL_WEBHOOK_ED25519_PUBLIC_KEY = publicKey.export({ type: "spki", format: "pem" }).toString();
+  process.env.GHL_TEST_WEBHOOK_PRIVATE_KEY = privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+}
 
 afterAll(async () => {
   await closeDb();

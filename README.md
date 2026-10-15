@@ -1,14 +1,22 @@
 # Specta: white-label optical business platform
 
-One app for an optical shop or eye clinic: a public website with lead capture and online booking, plus a staff dashboard for POS, customer orders, inventory, purchasing, CRM, appointments, expenses, reports and staff permissions. Everything is stored in PostgreSQL, and every permission is checked on the server.
+A staff dashboard for an optical shop or eye clinic: POS, customer orders, inventory, purchasing, CRM, appointments, expenses, reports and staff permissions. Everything is stored in PostgreSQL, and every permission is checked on the server.
 
-It is white-label: name, logo, colours, tax, currency, hours, branches, services and website copy are all settings. Nothing about a specific business is hard-coded.
+The customer-facing website, forms, booking and marketing run on **GoHighLevel**. The dashboard connects to each business's GHL sub-account and stays the source of truth for stock, sales, payments and fulfilment. The original website is archived in [customer-website-reference/](customer-website-reference/README.md), with a GHL migration guide.
+
+It is white-label: name, logo, colours, tax, currency, hours, branches and services are all settings. Nothing about a specific business is hard-coded.
 
 - Architecture and data rules: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Design research and design system: [docs/DESIGN.md](docs/DESIGN.md)
-- GoHighLevel, payments and email: [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)
-- Deploying to production: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
-- What's finished, what's verified and known limitations: [docs/STATUS.md](docs/STATUS.md)
+- GoHighLevel:
+  - [architecture and data ownership](docs/GHL_ARCHITECTURE.md)
+  - [API capability matrix](docs/GHL_API_CAPABILITY_MATRIX.md)
+  - [setup guide](docs/GHL_SETUP_GUIDE.md)
+  - [test plan](docs/SYNC_TEST_PLAN.md)
+- Payments and email: [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)
+- Deploying to production: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) and the readiness audit [docs/DEPLOYMENT_READINESS.md](docs/DEPLOYMENT_READINESS.md)
+- What's finished and verified: [docs/STATUS.md](docs/STATUS.md) (Phase 1) and [docs/PHASE2_STATUS.md](docs/PHASE2_STATUS.md)
+- Bugs found and fixed in Phase 2: [docs/BUG_AUDIT.md](docs/BUG_AUDIT.md)
 
 ## Quick start (demo)
 
@@ -23,8 +31,7 @@ npm run db:seed                   # demo business: ~9 months of interconnected r
 npm run dev                       # http://localhost:3000
 ```
 
-- Public website: http://localhost:3000
-- Staff dashboard: http://localhost:3000/login. Demo accounts are listed on the login page (password `Lensmere-demo-2026`): owner, manager, sales, inventory and optometrist.
+- Staff dashboard: http://localhost:3000 (redirects to sign-in). Demo accounts are listed on the login page (password `Lensmere-demo-2026`): owner, manager, sales, inventory and optometrist.
 
 The demo business, *Lensmere Optical*, is fictional. Its names, phone numbers and prescriptions are generated, and no real patient data is used. When `DEMO_MODE=true`, the owner can rebuild it from **Settings → Demo data**, or you can run `npm run db:reset-demo`. Both refuse to run unless `DEMO_MODE=true`, and they only delete businesses flagged as demo.
 
@@ -36,9 +43,12 @@ There is no public sign-up. Create each business and its first owner from the co
 DEMO_MODE=false npm run setup:business -- --name "Clear Optics" --owner-email ana@clearoptics.ph --owner-name "Ana Cruz" --branch "Makati" --branch-code MKT
 ```
 
-This creates the business, one branch with its stockroom, default product categories, appointment types and expense categories, and an owner account. A temporary password is printed once; set `OWNER_PASSWORD` to choose it instead. Then sign in and complete **Settings**: branding, tax, hours, branches, appointment prices and website copy. After that, add staff under **Staff** and products under **Products**, or import them with **Products → Import CSV**.
+This creates the business, one branch with its stockroom, default product categories, appointment types and expense categories, and an owner account. A temporary password is printed once; set `OWNER_PASSWORD` to choose it instead.
 
-Set `SITE_BUSINESS_SLUG` to the slug the command prints, so the public website serves that business.
+Then sign in and complete **Settings**: branding, tax, hours, branches and appointment prices. After that:
+- add staff under **Staff**;
+- add products under **Products**, or import them with **Products → Import CSV**;
+- connect GoHighLevel under **Settings → Integrations** (see [docs/GHL_SETUP_GUIDE.md](docs/GHL_SETUP_GUIDE.md)).
 
 ## Commands
 
@@ -58,9 +68,16 @@ Set `SITE_BUSINESS_SLUG` to the slug the command prints, so the public website s
 
 ### Tests
 
-- `npm test` starts its own throwaway PostgreSQL instance, so it doesn't need `db:start` and never touches your data. The `db` project runs the services against real PostgreSQL. It covers concurrency (last-unit checkout, retried payments, double-booking), tenant isolation, permissions, financial calculations, GoHighLevel webhook and outbox behaviour, and demo-data reconciliation.
+- `npm test` starts its own throwaway PostgreSQL instance, so it doesn't need `db:start` and never touches your data. The `db` project runs the services against real PostgreSQL. It covers:
+  - concurrency (last-unit checkout, retried payments, double-booking);
+  - tenant isolation, permissions and financial calculations;
+  - the GoHighLevel integration, against a simulated GHL API (`tests/db/ghl-fake.ts`);
+  - a regression test for each bug fixed in Phase 2;
+  - demo-data reconciliation.
 - `npm run test:e2e` needs the seeded demo database (`db:start` + `db:reset-demo`). It reuses a running dev server or starts one. Point `E2E_BASE_URL` at another server (for example a production build on port 3100) to test that instead. The tests create uniquely named records, so they can be re-run without reseeding. Run `npx playwright install chromium` once beforehand.
 
 ## Environment
 
-See [.env.example](.env.example). Required: `DATABASE_URL`, `APP_SECRET` (32+ characters; encrypts stored integration credentials), `APP_URL`. Optional: `DEMO_MODE`, `SITE_BUSINESS_SLUG`, `UPLOAD_DIR`, `CRON_SECRET`.
+See [.env.example](.env.example) (placeholders only).
+- **Required:** `DATABASE_URL`, `APP_SECRET` (32+ characters; encrypts stored integration credentials), `APP_URL`.
+- **Optional:** `DEMO_MODE`, `SITE_BUSINESS_SLUG`, `PUBLIC_WEBSITE_URL`, `UPLOAD_DIR`, `CRON_SECRET`, `TRUST_PROXY_HOPS`, `LOG_LEVEL`, and the GoHighLevel app settings (`GHL_CLIENT_ID`, `GHL_CLIENT_SECRET`, `GHL_REDIRECT_URI`, `GHL_MARKETPLACE_URL`).

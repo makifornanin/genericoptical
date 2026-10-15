@@ -50,6 +50,20 @@
       "when": 1792068893033,
       "tag": "0006_ghl_sync_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792071241404,
+      "tag": "0007_request_hash",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792071612472,
+      "tag": "0008_zero_value_returns",
+      "breakpoints": true
     }
   ]
 }

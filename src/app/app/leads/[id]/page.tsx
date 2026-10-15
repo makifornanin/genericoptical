@@ -33,11 +33,6 @@ async function Content({ params }: { params: Promise<{ id: string }> }) {
   const [staff, { branches }] = await Promise.all([staffForAssignment(ctx), getBranchContext(session.business.id)]);
   const manage = can(ctx, "leads.manage");
   const closed = l.stage === "converted" || l.stage === "lost";
-  const toLocal = (d: Date | null) => {
-    if (!d) return "";
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  };
 
   return (
     <>
@@ -81,7 +76,7 @@ async function Content({ params }: { params: Promise<{ id: string }> }) {
                 message: l.message ?? "",
                 assignedMembershipId: l.assignedMembershipId ?? "",
                 preferredBranchId: l.preferredBranchId ?? "",
-                followUpAt: toLocal(l.followUpAt),
+                followUpAt: l.followUpAt ? l.followUpAt.toISOString() : "",
                 estimatedValueCents: l.estimatedValueCents,
                 smsConsent: l.smsConsent,
                 marketingConsent: l.marketingConsent,

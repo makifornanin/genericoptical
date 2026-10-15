@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import type { Permission } from "@/lib/permissions";
 import { getDb } from "@/server/db";
+import { clientIp } from "@/server/http";
 import { branches } from "@/server/db/schema";
 import { resolveSession, type SessionInfo } from "@/server/services/auth";
 
@@ -14,7 +15,7 @@ export const BRANCH_COOKIE = "specta_branch";
 export async function requestMeta() {
   const h = await headers();
   return {
-    ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || null,
+    ip: clientIp(h.get("x-forwarded-for"), h.get("x-real-ip")),
     userAgent: h.get("user-agent"),
   };
 }

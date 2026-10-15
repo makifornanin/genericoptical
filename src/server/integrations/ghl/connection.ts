@@ -35,6 +35,13 @@ import { GhlError, GhlReauthRequiredError } from "./errors";
 type ConnectionRow = typeof integrationConnections.$inferSelect;
 const REFRESH_MARGIN_MS = 5 * 60_000;
 
+/** HTTP implementation for all GHL calls. Tests swap in a simulator; production uses global fetch. */
+let defaultFetch: Fetch = (input, init) => fetch(input, init);
+export function setGhlFetch(impl: Fetch | null) {
+  defaultFetch = impl ?? ((input, init) => fetch(input, init));
+}
+export const ghlFetch: Fetch = (input, init) => defaultFetch(input, init);
+
 export function oauthConfigured() {
   const e = env();
   return Boolean(e.GHL_CLIENT_ID && e.GHL_CLIENT_SECRET);
@@ -170,7 +177,7 @@ export function tokenSourceFor(row: ConnectionRow, fetchImpl: Fetch): TokenSourc
 }
 
 /** A ready-to-use API for the business's connected sub-account, or a typed error explaining why not. */
-export async function apiFor(businessId: string, fetchImpl: Fetch = fetch) {
+export async function apiFor(businessId: string, fetchImpl: Fetch = ghlFetch) {
   const row = await connectionRow(businessId);
   if (!row || !row.externalAccountId || row.status === "disabled" || row.status === "not_configured") throw new GhlReauthRequiredError("GoHighLevel isn't connected for this business.");
   if (row.status === "reauth_required") throw new GhlReauthRequiredError();
@@ -204,7 +211,7 @@ export async function startOAuth(ctx: Ctx) {
  * this business in the last 15 minutes. (HighLevel's docs don't confirm that `state` is echoed back;
  * if it isn't, the member's most recent unused state is used — the binding to their session remains.)
  */
-export async function completeOAuth(ctx: Ctx, params: { code: string | null; state: string | null }, fetchImpl: Fetch = fetch) {
+export async function completeOAuth(ctx: Ctx, params: { code: string | null; state: string | null }, fetchImpl: Fetch = ghlFetch) {
   requirePermission(ctx, "integrations.manage");
   if (!params.code) throw invalid("GoHighLevel didn't return an authorisation code. Try connecting again.");
   const db = getDb();
@@ -244,7 +251,7 @@ const privateTokenInput = z.object({
 });
 
 /** Connects with a Private Integration token after verifying it can read the sub-account. */
-export async function connectPrivateToken(ctx: Ctx, raw: unknown, fetchImpl: Fetch = fetch) {
+export async function connectPrivateToken(ctx: Ctx, raw: unknown, fetchImpl: Fetch = ghlFetch) {
   requirePermission(ctx, "integrations.manage");
   const input = privateTokenInput.parse(raw);
   return saveConnection(ctx, { authType: "private_token", locationId: input.locationId, companyId: null, accessToken: input.token, refreshToken: null, expiresIn: null, scopes: null, fetchImpl });

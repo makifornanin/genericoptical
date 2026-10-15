@@ -342,7 +342,7 @@ export async function savePrescription(ctx: Ctx, id: string | null, raw: unknown
         const [r] = await tx
           .update(prescriptions)
           .set({ ...values, updatedAt: at })
-          .where(and(eq(prescriptions.businessId, ctx.businessId), eq(prescriptions.id, id)))
+          .where(and(eq(prescriptions.businessId, ctx.businessId), eq(prescriptions.id, id), eq(prescriptions.customerId, input.customerId)))
           .returning({ id: prescriptions.id });
         if (!r) throw notFound("Prescription");
       } else {

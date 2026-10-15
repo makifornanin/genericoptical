@@ -23,22 +23,31 @@ DEMO_MODE=false npm run setup:business -- --name "…" --owner-email … --owner
 |---|---|---|
 | `DATABASE_URL` | yes | Use the provider's **pooled** connection string on serverless hosts. |
 | `APP_SECRET` | yes | 32+ random characters. Encrypts stored integration credentials. If you rotate it, stored GoHighLevel tokens can no longer be decrypted and must be re-entered. |
-| `APP_URL` | yes | The public origin, e.g. `https://clearoptics.ph`. Used in reset links, webhook URLs and the sitemap. |
+| `APP_URL` | yes | The dashboard origin, e.g. `https://app.clearoptics.ph`. Used in reset links, the OAuth redirect and webhook URLs. |
 | `DEMO_MODE` | yes in production | Must be **`false`**. When it is `false`, the demo banner, demo accounts and the demo reset tool are unavailable, and the seed script refuses to run. |
-| `SITE_BUSINESS_SLUG` | recommended | Which business the public website shows. Without it, the first non-demo business is used. |
-| `CRON_SECRET` | if GoHighLevel is used | Enables `POST /api/integrations/ghl/process`. Schedule it every few minutes. |
+| `SITE_BUSINESS_SLUG` | optional | Which business's name and colours the sign-in page shows. Without it, the first non-demo business is used. |
+| `PUBLIC_WEBSITE_URL` | optional (build time) | The GoHighLevel website. When set, old public paths (`/book`, `/contact`, …) redirect there; otherwise they return 404. |
+| `CRON_SECRET` | if GoHighLevel is used | Enables the sync worker. Call `POST /api/integrations/ghl/process` every 1–5 minutes, and `…?reconcile=1` hourly. Also unlocks detailed `/api/health`. |
+| `GHL_CLIENT_ID`, `GHL_CLIENT_SECRET` | for OAuth | From the GHL marketplace app. Server-side only. See GHL_SETUP_GUIDE.md. |
+| `GHL_REDIRECT_URI`, `GHL_MARKETPLACE_URL` | optional | Override the OAuth redirect, or use the white-label marketplace host. |
+| `TRUST_PROXY_HOPS` | optional | How many proxies append to `X-Forwarded-For` (default 1). Used for sign-in throttling by IP. |
+| `LOG_LEVEL` | optional | `debug`, `info` (default), `warn` or `error`. Logs are JSON lines with secrets redacted. |
 | `UPLOAD_DIR` | optional | Expense receipt storage on local disk (default `.data/uploads`). It must be a persistent volume. |
 
 ## Hosting notes
 
 - **Single server, VM or container** (recommended for this build): run `npm start` behind a reverse proxy, with `UPLOAD_DIR` on a persistent volume and PostgreSQL managed separately.
 - **Vercel or another serverless host**: pages, actions and API routes work as they are, but the local-disk receipt storage does not persist. Replace `src/server/storage.ts` with an object-storage adapter (S3, R2, Vercel Blob) before enabling receipt uploads. Use a Vercel Cron job for the GoHighLevel endpoint.
-- **Several instances**: the public-form rate limiter is in memory, per instance. Add an edge or WAF rate limit (or a shared store) for `/contact` and `/book` submissions. Login throttling is stored in the database, so it already works across instances.
+- **Several instances**: login throttling and every idempotency and sync guarantee are stored in PostgreSQL, so they work across instances. The public forms are no longer served by this app; they run on GoHighLevel.
 - **Backups**: rely on the database provider's point-in-time recovery. Financial records are never hard-deleted by the app, so a restore is the only way data disappears.
 
 ## Checks after a deploy
 
 - `GET /api/health` returns `{"status":"ok","database":"ok"}`, or 503 if the database is unreachable.
+- With `Authorization: Bearer $CRON_SECRET` it also returns `migrations.pending` (must be 0) and the sync backlog. It returns 503 if migrations are missing.
+- `/robots.txt` disallows everything, and `/` redirects to the dashboard.
 - `/app` redirects to `/login` when signed out.
 - Response headers include `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy` and `Permissions-Policy` (set in `next.config.ts`).
 - Optional: run the Playwright suite against a staging copy that has the demo seeded: `E2E_BASE_URL=https://staging… npm run test:e2e`. Never point it at production; it creates records.
+
+For the full pre-production checklist (what is verified, what isn't, and the go/no-go conditions), see [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md).

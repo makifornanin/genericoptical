@@ -213,6 +213,15 @@ async function assertTrackedVariant(ex: Executor, ctx: Ctx, variantId: string) {
 
 // ─── Manual operations ───────────────────────────────────────────────────────
 
+async function movementByKey(tx: Tx, ctx: Ctx, key: string) {
+  const [m] = await tx
+    .select({ id: stockMovements.id, referenceId: stockMovements.referenceId })
+    .from(stockMovements)
+    .where(and(eq(stockMovements.businessId, ctx.businessId), eq(stockMovements.idempotencyKey, key)))
+    .limit(1);
+  return m ?? null;
+}
+
 export async function adjustStock(ctx: Ctx, raw: unknown) {
   requirePermission(ctx, "inventory.adjust");
   const input = adjustmentInput.parse(raw);
@@ -221,6 +230,10 @@ export async function adjustStock(ctx: Ctx, raw: unknown) {
     const location = await assertLocation(tx, ctx, input.locationId);
     const balances = await lockBalances(tx, ctx, input.locationId, [input.variantId]);
     const bal = balances.get(input.variantId)!;
+    // Replay (same key): return the original result before recomputing anything — a repeated
+    // "set count to 7" must not be rejected as "matches current stock", nor audited twice.
+    const prior = await movementByKey(tx, ctx, `adj:${input.idempotencyKey}`);
+    if (prior) return { onHand: bal.onHand, replayed: true };
     let delta: number;
     let type: MovementType;
     switch (input.mode) {
@@ -288,6 +301,8 @@ export async function transferStock(ctx: Ctx, raw: unknown) {
     const lockB = await lockBalances(tx, ctx, second, [input.variantId]);
     const fromBal = first === from.id ? lockA : lockB;
     const toBal = first === to.id ? lockA : lockB;
+    const prior = await movementByKey(tx, ctx, `xfer:${input.idempotencyKey}:out`);
+    if (prior) return { referenceId: prior.referenceId, replayed: true };
     const src = fromBal.get(input.variantId)!;
     if (src.onHand - src.reserved < input.quantity) {
       throw new AppError(`Only ${src.onHand - src.reserved} unit(s) are available to transfer from ${from.name}.`, "conflict");

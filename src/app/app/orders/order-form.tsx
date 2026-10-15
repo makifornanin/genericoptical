@@ -54,7 +54,8 @@ export function OrderForm({
   const [labReference, setLabReference] = useState("");
   const [notes, setNotes] = useState("");
   const [confirm, setConfirm] = useState(true);
-  const [key] = useState(newKey());
+  const [key, setKey] = useState(newKey());
+  const [attempt, setAttempt] = useState<string | null>(null);
   const byId = useMemo(() => new Map(items.map((i) => [i.variantId, i])), [items]);
   const save = useAction(createOrderAction, { success: (r) => `Order ${r.number} created`, onSuccess: (r) => router.push(`/app/orders/${r.saleId}`) });
 
@@ -92,8 +93,8 @@ export function OrderForm({
   }
   const total = priced?.totalCents ?? 0;
 
-  const submit = () =>
-    save.run({
+  const submit = () => {
+    const payload = {
       branchId,
       customerId: customer?.id ?? "",
       items: lines.map((l) => {
@@ -113,8 +114,14 @@ export function OrderForm({
       labReference: labReference || null,
       notes,
       confirm,
-      idempotencyKey: key,
-    });
+    };
+    // Same order details → same request id (safe retry); edited after a failure → a new request.
+    const fingerprint = JSON.stringify(payload);
+    const requestKey = attempt === null || attempt === fingerprint ? key : newKey();
+    if (requestKey !== key) setKey(requestKey);
+    setAttempt(fingerprint);
+    return save.run({ ...payload, idempotencyKey: requestKey });
+  };
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">

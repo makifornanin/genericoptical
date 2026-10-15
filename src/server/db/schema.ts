@@ -804,6 +804,7 @@ export const purchaseOrderReceipts = pgTable(
     receivedByMembershipId: uuid("received_by_membership_id"),
     notes: text("notes"),
     idempotencyKey: text("idempotency_key"),
+    requestHash: text("request_hash"),
     createdAt: createdAt(),
   },
   (t) => [
@@ -859,6 +860,8 @@ export const sales = pgTable(
     labSupplierId: uuid("lab_supplier_id"),
     labReference: text("lab_reference"),
     idempotencyKey: text("idempotency_key"),
+    /** Fingerprint of the request that created the row; a replay with the same key must match it. */
+    requestHash: text("request_hash"),
     /** in_store = POS/orders rung up in the dashboard; ghl_online = imported from a GoHighLevel checkout. */
     channel: text("channel").$type<"in_store" | "ghl_online">().notNull().default("in_store"),
     externalGhlOrderId: text("external_ghl_order_id"),
@@ -967,6 +970,7 @@ export const payments = pgTable(
     receivedAt: ts("received_at").notNull().defaultNow(),
     notes: text("notes"),
     idempotencyKey: text("idempotency_key"),
+    requestHash: text("request_hash"),
     voidedAt: ts("voided_at"),
     voidReason: text("void_reason"),
     createdAt: createdAt(),
@@ -1009,6 +1013,7 @@ export const refunds = pgTable(
     reason: text("reason").notNull(),
     processedByMembershipId: uuid("processed_by_membership_id"),
     idempotencyKey: text("idempotency_key"),
+    requestHash: text("request_hash"),
     createdAt: createdAt(),
   },
   (t) => [
@@ -1016,7 +1021,9 @@ export const refunds = pgTable(
     unique("refunds_business_id_id_key").on(t.businessId, t.id),
     uniqueIndex("refunds_idempotency_key").on(t.businessId, t.idempotencyKey).where(sql`${t.idempotencyKey} is not null`),
     index().on(t.businessId, t.createdAt),
-    check("refunds_amounts", sql`${t.amountCents} > 0 and ${t.taxCents} >= 0 and ${t.costReversalCents} >= 0`),
+    // Zero is allowed for returns of free lines (a complimentary case goes back on the shelf); the service
+    // only accepts a zero amount when items are returned.
+    check("refunds_amounts", sql`${t.amountCents} >= 0 and ${t.taxCents} >= 0 and ${t.costReversalCents} >= 0`),
     foreignKey({ columns: [t.businessId, t.saleId], foreignColumns: [sales.businessId, sales.id] }),
     foreignKey({
       columns: [t.businessId, t.processedByMembershipId],

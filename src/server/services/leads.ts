@@ -9,6 +9,7 @@ import {
   diff,
   forbidden,
   invalid,
+  isUuid,
   likePattern,
   mapDbError,
   nextNumber,
@@ -89,12 +90,12 @@ export type LeadFilter = {
 
 function leadConds(ctx: Ctx, f: LeadFilter): SQL[] {
   const conds: SQL[] = [eq(leads.businessId, ctx.businessId), isNull(leads.archivedAt), scope(ctx)];
-  if (f.stage) conds.push(sql`${leads.stage} = ${f.stage}`);
+  if (f.stage && (LEAD_STAGES as readonly string[]).includes(f.stage)) conds.push(sql`${leads.stage} = ${f.stage}`);
   if (f.open) conds.push(notInArray(leads.stage, ["converted", "lost"]));
   if (f.source) conds.push(eq(leads.source, f.source));
   if (f.assigned === "unassigned") conds.push(isNull(leads.assignedMembershipId));
   else if (f.assigned === "me" && ctx.membershipId) conds.push(eq(leads.assignedMembershipId, ctx.membershipId));
-  else if (f.assigned) conds.push(eq(leads.assignedMembershipId, f.assigned));
+  else if (isUuid(f.assigned)) conds.push(eq(leads.assignedMembershipId, f.assigned));
   if (f.followUp === "due") conds.push(lte(leads.followUpAt, new Date(Date.now() + 86_400_000)), notInArray(leads.stage, ["converted", "lost"]));
   if (f.followUp === "overdue") conds.push(lte(leads.followUpAt, new Date()), notInArray(leads.stage, ["converted", "lost"]));
   if (f.q) {
@@ -354,6 +355,12 @@ export async function convertLead(ctx: Ctx, id: string, opts: { customerId?: str
         customerId = c.id;
       } else {
         const code = await nextNumber(tx, ctx.businessId, "customer", "CUS-", 5);
+      // A customer may already hold this GHL contact (matched by email earlier) — then the new customer
+      // starts without it rather than failing on the unique key; the GHL contact mirror links them later.
+      const [ghlHolder] = lead.externalGhlContactId
+        ? await tx.select({ id: customers.id }).from(customers).where(and(eq(customers.businessId, ctx.businessId), eq(customers.externalGhlContactId, lead.externalGhlContactId))).limit(1)
+        : [];
+      const ghlIdFree = !ghlHolder;
         const [c] = await tx
           .insert(customers)
           .values({
@@ -369,7 +376,7 @@ export async function convertLead(ctx: Ctx, id: string, opts: { customerId?: str
             marketingConsent: lead.marketingConsent,
             smsConsent: lead.smsConsent,
             convertedFromLeadId: lead.id,
-            externalGhlContactId: lead.externalGhlContactId,
+            externalGhlContactId: ghlIdFree ? lead.externalGhlContactId : null,
             createdByMembershipId: ctx.membershipId,
             createdAt: at,
             updatedAt: at,
@@ -474,8 +481,14 @@ export async function capturePublicLead(businessId: string, raw: unknown, meta: 
         .limit(1)
         .for("update");
       if (existing) {
-        await activity(tx, ctx, existing.id, { type: "inquiry", body: message || "Submitted another website inquiry.", metadata: { interest: input.interest, kind: input.kind } });
-        await tx.update(leads).set({ updatedAt: now(ctx), smsConsent: existing.smsConsent || input.smsConsent, marketingConsent: existing.marketingConsent || input.marketingConsent }).where(eq(leads.id, existing.id));
+        // Anyone can type an email or phone into a public form, so a repeat submission never switches
+        // consent on for the existing person; the request is logged for staff to confirm instead.
+        await activity(tx, ctx, existing.id, {
+          type: "inquiry",
+          body: message || "Submitted another website inquiry.",
+          metadata: { interest: input.interest, kind: input.kind, consentRequested: { sms: input.smsConsent, marketing: input.marketingConsent } },
+        });
+        await tx.update(leads).set({ updatedAt: now(ctx) }).where(eq(leads.id, existing.id));
         return { ok: true as const, leadId: existing.id };
       }
       const code = await nextNumber(tx, businessId, "lead", "LD-", 5);

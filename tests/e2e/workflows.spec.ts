@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { withE2eGhlConnection } from "./ghl";
 import { cents, signIn, uniq } from "./helpers";
 
 /**
@@ -49,15 +50,25 @@ async function pickCustomer(page: Page) {
   return name;
 }
 
-test("Workflow A — lead to customer: form → CRM → stage → appointment → conversion, history kept", async ({ page }) => {
+test("Workflow A — lead to customer: GHL form webhook → CRM → stage → appointment → conversion, history kept", async ({ page }) => {
   const id = uniq();
   const fullName = `Flow Lead ${id}`;
-  await page.goto("/contact");
-  await page.getByLabel("Full name").fill(fullName);
-  await page.getByLabel("Mobile number").fill(`0919${String(Date.now()).slice(-7)}`);
-  await page.getByLabel("Message").fill("Looking for an eye exam and new frames.");
-  await page.getByRole("button", { name: "Send message" }).click();
-  await expect(page.getByText("We've received your message")).toBeVisible();
+  // The public website (and its forms) moved to GoHighLevel. A GHL form submission reaches the dashboard
+  // through the workflow webhook — the same request a GHL workflow "Webhook" action sends.
+  const ghl = await withE2eGhlConnection();
+  try {
+    const res = await page.request.post(`/api/integrations/ghl/webhook/${ghl.slug}`, {
+      headers: { "x-webhook-secret": ghl.secret, "x-event-id": `e2e-${id}` },
+      data: { contact_id: `e2e-contact-${id}`, full_name: fullName, phone: `+63919${String(Date.now()).slice(-7)}`, customData: { message: "Looking for an eye exam and new frames." } },
+    });
+    expect(res.status()).toBe(200);
+    expect(await res.json()).toMatchObject({ status: "processed" });
+    // A wrong secret is refused.
+    const bad = await page.request.post(`/api/integrations/ghl/webhook/${ghl.slug}`, { headers: { "x-webhook-secret": "wrong" }, data: { contact_id: "x" } });
+    expect(bad.status()).toBe(401);
+  } finally {
+    await ghl.restore();
+  }
 
   await signIn(page, "manager");
   await page.goto(`/app/leads?q=${id}`);

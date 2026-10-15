@@ -23,13 +23,12 @@
 ```
 src/
   app/
-    (site)/            public website: home, about, eyewear (+ product pages), services, book, contact,
-                       faq, privacy, terms; its server actions (inquiry, slots, booking) and components
+    page.tsx           "/" redirects to the dashboard (the public website moved to GoHighLevel)
     (auth)/            login, forgot-password, reset-password
     (print)/           printable receipts and order slips (outside the dashboard shell)
     app/               authenticated dashboard, one folder per module (+ account page)
-    api/               CSV exports, expense attachments, health, GHL webhook and outbox processor
-    sitemap.ts, robots.ts
+    api/               CSV exports, expense attachments, health, GHL OAuth callback, webhooks and sync worker
+    robots.ts          disallows all crawling (dashboard-only deployment)
   components/
     ui/                design-system primitives (Button, Card, Table, Dialog, Field, Pill, …)
     app/               dashboard shell, charts, filters, KPI tiles, status pills, customer picker
@@ -37,13 +36,18 @@ src/
     db/                schema.ts and the lazily created client
     auth/              password hashing, tokens and encryption, session cookies
     services/          business logic, one file per domain; the ONLY code that touches the DB
-    integrations/      ghl.ts: GoHighLevel client, outbox processor and webhook handler
+    integrations/ghl/  GoHighLevel: OAuth/connection, API client, durable sync engine, handlers,
+                       webhooks, reconciliation (see GHL_ARCHITECTURE.md)
     demo/              demo business definition and simulation-based seed
     actions.ts         Server Action wrapper (session → ctx → service → typed result)
+    log.ts             structured JSON logging with secret redaction
+    http.ts            capped body reads, Content-Disposition, trusted client IP
     mail.ts, storage.ts
   lib/                 isomorphic helpers: money, pricing, dates, permissions, validation schemas, CSV
   proxy.ts             optimistic sign-in redirect for /app (real checks happen in services)
 scripts/               db server, migrate, seed/reset demo, create a business, product art generator
+customer-website-reference/  archived public website (source, standalone HTML/CSS/JS, screenshots,
+                       GHL migration guide); not built or served
 drizzle/               SQL migrations
 tests/                 unit/, db/ (services on real Postgres), components/ (jsdom), e2e/ (Playwright)
 ```
@@ -56,9 +60,17 @@ tests/                 unit/, db/ (services on real Postgres), components/ (jsdo
    - Cross-table references use **composite foreign keys** `(business_id, x_id) → x(business_id, id)`, so the database itself rejects a row in Business A that points at a row in Business B.
 3. **Money is integer minor units** (`bigint` centavos) and quantities are integers. Totals are always recalculated on the server; client totals are ignored.
 4. **Inventory changes only happen through `stock_movements`.** A movement and its balance update are written in the same transaction, and each movement carries a reason and a reference. `inventory_balances` has `CHECK (on_hand >= 0 AND reserved >= 0 AND reserved <= on_hand)`, so negative or over-reserved stock is impossible even under a race. Balance rows are locked `FOR UPDATE` in a deterministic order to avoid deadlocks.
-5. **Idempotency.** Checkout, payments, refunds and receiving accept an idempotency key (unique per business). A retried request returns the original result instead of writing twice. Payment references (e.g. a GCash reference number) are unique per method.
+5. **Idempotency.**
+   - Checkout, orders, payments, refunds, receiving, adjustments and transfers accept an idempotency key, unique per business.
+   - A retried request returns the original result instead of writing twice, including a duplicate that arrives while the first is still running (it is re-checked after the lock).
+   - The key is bound to a fingerprint of the request (`request_hash`), so reusing it with different details is refused rather than answered with the old result.
+   - Payment references (e.g. a GCash reference number) are unique per method.
 6. **Nothing financial is deleted.** Sales are cancelled (voided), payments are voided, refunds are separate records, and products and customers are archived.
 7. **Audit log.** Every state-changing service writes an `audit_logs` row: actor, action, entity and a before/after summary.
+8. **Transactions retry on serialization failures and deadlocks** (`40001`, `40P01`), up to 3 attempts with jitter, for root transactions only (`server/db/index.ts`). Advisory locks serialise sign-in attempts per email and the demo reset.
+9. **Operations.**
+   - Logs are one JSON object per line (`server/log.ts`); keys that look like tokens, secrets, passwords or cookies are redacted.
+   - `GET /api/health` reports database reachability. With `Authorization: Bearer $CRON_SECRET` it adds pending migrations and the integration backlog.
 
 ## Sales, orders and payments model
 
@@ -82,7 +94,7 @@ POS sales and customer orders share one financial document, `sales`, with `kind 
 | Gross sales | Σ line amounts before discounts, for sales recognised in the period |
 | Discounts | Σ line and order discounts on those sales |
 | Refunds | Σ refund amounts dated in the period |
-| Net sales | Gross sales − discounts − refunds (excluding tax) |
+| Net sales | Gross sales − discounts − refunds (excluding tax). Category, product and staff breakdowns subtract item returns dated in the period, so they add up to net sales (amount-only refunds can't be attributed to a line and reduce the totals only). |
 | Tax collected | Σ tax on recognised sales − tax portion of refunds |
 | COGS | Σ quantity × unit cost (snapshotted at sale) for recognised lines − restocked returns |
 | Gross profit | Net sales − COGS |
@@ -104,13 +116,14 @@ POS sales and customer orders share one financial document, `sales`, with `kind 
 - One practitioner can't be double-booked. This is enforced by a Postgres **exclusion constraint** on `(practitioner_membership_id, tstzrange(starts_at, ends_at))` for active statuses, so it holds even under concurrent requests. Appointment types that don't need a practitioner can run concurrently.
 - Times are stored as `timestamptz` (UTC) and validated against branch business hours in the **business time zone** (default `Asia/Manila`).
 
-## Public website
+## Public website (moved to GoHighLevel)
 
-- Every page reads the business from the database: name, logo, colours (applied as CSS variables), hours, branches, appointment types, website copy, FAQs, and products marked *Show on website*. One deployment serves one business (`SITE_BUSINESS_SLUG`, else the first non-demo business).
-- Pages are partially prerendered: the static shell is served immediately and business data streams in per request, so edits in Settings appear on the next page load with no rebuild.
-- **Contact and product inquiries** call `capturePublicLead`, which creates a lead (source *website*, with interest, preferred branch and SMS/marketing consent) or, if the same email or phone already has an open lead created in the last 30 days, adds the inquiry to that lead's timeline. **Online booking** calls `availableSlots`, built from branch hours, appointment durations and practitioners' existing bookings, then `requestPublicAppointment`, which re-checks the slot inside a transaction. The database exclusion constraint is the final guard against two people taking the same slot.
-- Spam controls: a hidden honeypot field (bots get a fake success and nothing is stored), server-side validation, per-IP rate limits (in memory, per instance), and 30-day de-duplication.
-- Demo businesses are marked `noindex` and left out of the sitemap.
+- The customer website now runs on GoHighLevel. The Phase 1 pages are archived, unchanged, in `customer-website-reference/`, which also holds standalone HTML/CSS/JS, screenshots, a per-section classification and `ghl-migration-guide.md`. The archive is excluded from the TypeScript, lint and Tailwind builds.
+- This deployment serves only the dashboard and integration endpoints:
+  - `/` redirects to `/app`;
+  - `robots.txt` disallows everything;
+  - old public paths return 404, or redirect to `PUBLIC_WEBSITE_URL` when it is set at build time.
+- Leads from GHL forms arrive through the GHL webhooks (see GHL_ARCHITECTURE.md). The services behind the old forms (`capturePublicLead`, `requestPublicAppointment`, `availableSlots`) are kept and tested, but are no longer reachable over HTTP.
 
 ## Businesses, onboarding and demo mode
 
@@ -118,6 +131,19 @@ POS sales and customer orders share one financial document, `sales`, with `kind 
 - `DEMO_MODE=true` enables the demo banner, the demo accounts on the login page, and the owner-only **Settings → Demo data** reset. The reset and `npm run db:reset-demo` delete only businesses flagged `is_demo`. Both are unavailable when `DEMO_MODE=false`.
 - The demo seed **simulates about 9 months of trading through the real service functions**, on a simulated clock: bookings, exams, prescriptions, POS sales, orders through every fulfilment stage, deposits and balances, refunds, purchase orders with partial deliveries, transfers, adjustments, expenses and leads. It then runs 7 reconciliation checks (balances = Σ movements, reservations, payments and refunds against stored totals, and so on) and fails if any of them disagree.
 
+## Reporting periods (design decision)
+
+- **Refunds** are dated when they're issued, so a refund this month reduces this month's net sales, even for a sale from last month.
+- **Voids and cancellations** correct the original record. A cancelled sale disappears from the period it was in, so past periods can change.
+- This is deliberate: a cancellation means the sale shouldn't have existed, while a refund is a new event. Reports are operational and are not frozen like a closed accounting period.
+
 ## GoHighLevel integration
 
-See `docs/INTEGRATIONS.md`. It uses an outbox (`integration_sync_events`) written in the same transaction as the business change, external-ID columns, idempotency keys from webhook event IDs, a declared owner per record type to prevent sync loops, and AES-256-GCM encrypted credentials. Its status is *not configured* until a business saves credentials and the connection test passes.
+See [GHL_ARCHITECTURE.md](GHL_ARCHITECTURE.md) (ownership, engine, webhooks, reconciliation), [GHL_API_CAPABILITY_MATRIX.md](GHL_API_CAPABILITY_MATRIX.md) and [GHL_SETUP_GUIDE.md](GHL_SETUP_GUIDE.md).
+
+In short:
+- outbound changes go through a transactional outbox in `integration_sync_events`;
+- webhooks are verified, deduplicated and queued in the same table;
+- every field has one owner, so there is no uncontrolled two-way sync;
+- credentials and tokens are encrypted with AES-256-GCM and never leave the server;
+- a status is marked *synced* only after GHL confirms the change.

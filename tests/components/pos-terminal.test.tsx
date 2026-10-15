@@ -108,4 +108,26 @@ describe("POS terminal", () => {
     expect(first).toMatchObject({ branchId: "b1", customerId: null, items: [{ variantId: "v-exam", quantity: 1 }], payments: [{ method: "cash", amountCents: 50000 }] });
     expect(await screen.findByText("Sale S-00001 completed")).toBeInTheDocument();
   });
+
+  it("A2: uses a new idempotency key when the cart changes after a failed attempt", async () => {
+    const user = userEvent.setup();
+    pos.checkoutAction
+      .mockResolvedValueOnce({ ok: false, error: "Couldn't reach the server." })
+      .mockResolvedValueOnce({ ok: true, data: { saleId: "s2", number: "S-00002", totalCents: 85000, balanceDueCents: 0 } });
+    renderPos();
+    await user.click(tile(/Eye Examination/));
+    const charge = () => screen.getByRole("button", { name: /Complete sale/ });
+    await user.click(charge());
+    await waitFor(() => expect(charge()).toBeEnabled());
+    // The cashier adds an item before retrying: that is a different sale, so it can't reuse the old key
+    // (the server would otherwise answer with the first request's result, or reject the mismatch).
+    await user.click(tile(/Hard Shell Case/));
+    await user.click(charge());
+    await waitFor(() => expect(pos.checkoutAction).toHaveBeenCalledTimes(2));
+    const [first] = pos.checkoutAction.mock.calls[0];
+    const [second] = pos.checkoutAction.mock.calls[1];
+    expect(second.items).toHaveLength(2);
+    expect(second.idempotencyKey).toBeTruthy();
+    expect(second.idempotencyKey).not.toBe(first.idempotencyKey);
+  });
 });

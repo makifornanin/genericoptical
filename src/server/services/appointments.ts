@@ -63,7 +63,12 @@ function assertWithinHours(day: string, time: string, duration: number, timezone
   }
 }
 
-async function loadRefs(tx: Executor, ctx: Ctx, input: { branchId: string; appointmentTypeId: string; customerId: string | null; leadId: string | null; practitionerMembershipId: string | null }) {
+async function loadRefs(
+  tx: Executor,
+  ctx: Ctx,
+  input: { branchId: string; appointmentTypeId: string; customerId: string | null; leadId: string | null; practitionerMembershipId: string | null },
+  currentLeadId: string | null = null,
+) {
   const [branch] = await tx.select().from(branches).where(and(eq(branches.businessId, ctx.businessId), eq(branches.id, input.branchId))).limit(1);
   if (!branch || !branch.isActive) throw invalid("Choose an active branch.");
   const [type] = await tx
@@ -79,7 +84,11 @@ async function loadRefs(tx: Executor, ctx: Ctx, input: { branchId: string; appoi
   let lead: typeof leads.$inferSelect | undefined;
   if (input.leadId) {
     [lead] = await tx.select().from(leads).where(and(eq(leads.businessId, ctx.businessId), eq(leads.id, input.leadId))).limit(1);
-    if (!lead) throw invalid("Unknown lead.");
+    // Same visibility rules as the CRM when a lead is attached: staff who only see their assigned leads can't
+    // book (and move the stage of) someone else's lead. Rescheduling an appointment that already belongs to
+    // the lead stays allowed — calendar access is governed by the appointment permissions.
+    const visible = lead && can(ctx, "leads.view") && (can(ctx, "leads.view_all") || lead.assignedMembershipId === ctx.membershipId);
+    if (!lead || (ctx.role !== "system" && input.leadId !== currentLeadId && !visible)) throw invalid("Unknown lead.");
   }
   let practitionerName: string | null = null;
   if (input.practitionerMembershipId) {
@@ -206,7 +215,7 @@ export async function availableSlots(
   const biz = await bizSettings(ex, businessId);
   const [branch] = await ex.select().from(branches).where(and(eq(branches.businessId, businessId), eq(branches.id, opts.branchId))).limit(1);
   const [type] = await ex.select().from(appointmentTypes).where(and(eq(appointmentTypes.businessId, businessId), eq(appointmentTypes.id, opts.appointmentTypeId))).limit(1);
-  if (!branch || !type) return [];
+  if (!branch || !type || !type.isActive || !branch.isActive) return [];
   const hours = hoursFor(opts.date, biz.timezone, branch.businessHours, biz.hours);
   if (!hours) return [];
   const step = opts.stepMinutes ?? 30;
@@ -342,7 +351,7 @@ export async function updateAppointment(ctx: Ctx, id: string, raw: unknown) {
         throw invalid(`${APPOINTMENT_STATUS_LABELS[existing.status]} appointments can't be edited. Book a new one instead.`);
       }
       const biz = await bizSettings(tx, ctx.businessId);
-      const { branch, type, practitionerName } = await loadRefs(tx, ctx, input);
+      const { branch, type, practitionerName } = await loadRefs(tx, ctx, input, existing.leadId);
       const duration = input.durationMinutes ?? type.durationMinutes;
       assertWithinHours(input.date, input.time, duration, biz.timezone, branch.businessHours, biz.hours);
       const startsAt = zonedInstant(input.date, input.time, biz.timezone);
@@ -443,14 +452,21 @@ export async function requestPublicAppointment(businessId: string, raw: unknown,
   const input = publicAppointmentInput.parse(raw);
   if (input.website) return { ok: true as const, appointmentId: null };
   const ctx = { ...systemCtx(businessId, "Website"), ip: meta.ip ?? null };
+  // Check the type first so a retired or staff-only type gets a clear answer (not "that time was taken").
+  const [bookable] = await getDb()
+    .select({ id: appointmentTypes.id })
+    .from(appointmentTypes)
+    .where(and(eq(appointmentTypes.businessId, businessId), eq(appointmentTypes.id, input.appointmentTypeId), eq(appointmentTypes.isPublic, true), eq(appointmentTypes.isActive, true)))
+    .limit(1);
+  if (!bookable) throw invalid("That appointment type can't be booked online.");
   const slots = await availableSlots(businessId, { branchId: input.branchId, appointmentTypeId: input.appointmentTypeId, date: input.date });
   const slot = slots.find((s) => s.time === input.time);
   if (!slot) throw conflict("That time was just taken or is outside opening hours. Please pick another slot.");
   try {
     return await getDb().transaction(async (tx) => {
       const biz = await bizSettings(tx, businessId);
-      const [type] = await tx.select().from(appointmentTypes).where(and(eq(appointmentTypes.businessId, businessId), eq(appointmentTypes.id, input.appointmentTypeId), eq(appointmentTypes.isPublic, true))).limit(1);
-      if (!type) throw invalid("That appointment type can't be booked online.");
+      const [type] = await tx.select().from(appointmentTypes).where(and(eq(appointmentTypes.businessId, businessId), eq(appointmentTypes.id, input.appointmentTypeId), eq(appointmentTypes.isPublic, true), eq(appointmentTypes.isActive, true))).limit(1);
+      if (!type) throw invalid("That appointment type can\'t be booked online.");
       const [branch] = await tx.select().from(branches).where(and(eq(branches.businessId, businessId), eq(branches.id, input.branchId), eq(branches.isActive, true))).limit(1);
       if (!branch) throw invalid("Choose a branch.");
       const startsAt = zonedInstant(input.date, input.time, biz.timezone);

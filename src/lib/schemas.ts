@@ -29,7 +29,7 @@ export const optPhone = z
   .max(40)
   .transform((v) => (v === "" ? null : v))
   .nullish()
-  .refine((v) => !v || /^[+()0-9\s.-]{6,40}$/.test(v), "Enter a valid phone number.");
+  .refine((v) => !v || (/^[+()0-9\s.-]{6,40}$/.test(v) && v.replace(/\D/g, "").length >= 7), "Enter a valid phone number (at least 7 digits).");
 
 export const uuid = z.uuid("Invalid reference.");
 export const optUuid = z
@@ -400,7 +400,11 @@ export const appointmentInput = z
 export const publicAppointmentInput = z.object({
   fullName: reqText("Your name", 120),
   email: optEmail,
-  phone: z.string().trim().min(6, "Add a phone number so we can confirm.").max(40),
+  phone: z
+    .string()
+    .trim()
+    .max(40)
+    .refine((v) => v.replace(/\D/g, "").length >= 7, "Add a phone number (at least 7 digits) so we can confirm."),
   branchId: uuid,
   appointmentTypeId: uuid,
   date: dayString,

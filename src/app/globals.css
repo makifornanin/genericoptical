@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* Archived website, docs and test output aren't part of this app: don't generate classes from them. */
+@source not "../../customer-website-reference";
+@source not "../../docs";
+@source not "../../test-results";
 
 /*
  * Specta design tokens (see docs/DESIGN.md).
@@ -148,4 +152,12 @@ table th {
   body {
     background: #fff;
   }
+}
+
+/* Dropdown arrow for the Select control (appearance: none removes the native one). */
+@utility select-chevron {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386888d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-size: 12px;
+  background-position: right 10px center;
+  background-repeat: no-repeat;
 }

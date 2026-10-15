@@ -122,7 +122,7 @@ async function DashboardContent({ searchParams }: { searchParams: SP }) {
               </CardBody>
             </Card>
             <Card>
-              <CardHeader title="Sales by category" subtitle="Net of discounts, before returns" />
+              <CardHeader title="Sales by category" subtitle="Net of discounts and item returns" />
               <CardBody>
                 <BarList
                   items={(d.categories ?? []).slice(0, 7).map((c) => ({ label: c.name, value: c.netCents, sub: totalCategory ? `${Math.round((c.netCents / totalCategory) * 100)}%` : undefined }))}
@@ -179,7 +179,7 @@ async function DashboardContent({ searchParams }: { searchParams: SP }) {
             <Card>
               <CardHeader title="Top products" subtitle={`Units sold · ${range.label.toLowerCase()}`} />
               <CardBody>
-                <BarList items={d.topProducts.map((p) => ({ label: p.productName, value: p.quantity, sub: f.compact(p.netCents), href: `/app/products/${p.productId}` }))} />
+                <BarList items={d.topProducts.map((p) => ({ label: p.productName, value: p.quantity, sub: p.netCents == null ? undefined : f.compact(p.netCents), href: `/app/products/${p.productId}` }))} />
               </CardBody>
             </Card>
           ) : null}

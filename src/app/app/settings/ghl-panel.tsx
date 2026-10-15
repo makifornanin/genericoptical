@@ -203,6 +203,14 @@ export function GhlSyncStatus({ overview }: { overview: GhlOverview }) {
   return (
     <Card>
       <CardHeader title="Synchronisation" subtitle="Per area: queued, needing attention, and when GoHighLevel last confirmed a change." />
+      {overview.backlog.stale || overview.backlog.stuckEvents ? (
+        <p role="status" className="mx-4 mb-3 rounded-[10px] bg-warn-soft px-3 py-2 text-[12.5px] text-warn">
+          {overview.backlog.stale && overview.backlog.oldestQueuedAt
+            ? `Changes have been waiting to sync since ${new Date(overview.backlog.oldestQueuedAt).toLocaleString()}. Check that the scheduled sync worker is running and the connection is healthy, or use Sync now.`
+            : null}
+          {overview.backlog.stuckEvents ? ` ${overview.backlog.stuckEvents} event(s) were left mid-send by a stopped worker; the next run picks them up again.` : null}
+        </p>
+      ) : null}
       <div className="grid grid-cols-2 gap-px overflow-hidden border-t border-line bg-line sm:grid-cols-3 lg:grid-cols-4">
         {areas.map((a) => {
           const s = overview.byCategory[a] ?? { pending: 0, synced: 0, failed: 0, review: 0, lastSyncedAt: null };

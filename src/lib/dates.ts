@@ -30,6 +30,14 @@ export type ResolvedRange = {
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** A real calendar day in yyyy-MM-dd form (rejects 2026-02-30 or 2026-13-01 instead of rolling them over). */
+export function isRealDay(day: string | undefined | null): day is string {
+  if (!day || !DAY_RE.test(day)) return false;
+  const [y, m, d] = day.split("-").map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d));
+  return y >= 2000 && y <= 2100 && t.getUTCFullYear() === y && t.getUTCMonth() === m - 1 && t.getUTCDate() === d;
+}
+
 export function zonedDay(day: string, timezone: string): TZDate {
   const [y, m, d] = day.split("-").map(Number);
   return new TZDate(y, m - 1, d, timezone);
@@ -71,7 +79,7 @@ export function resolveRange(
       to = startOfMonth(today);
       break;
     case "custom": {
-      if (custom?.from && custom?.to && DAY_RE.test(custom.from) && DAY_RE.test(custom.to)) {
+      if (isRealDay(custom?.from) && isRealDay(custom?.to)) {
         let a = zonedDay(custom.from, timezone);
         let b = zonedDay(custom.to, timezone);
         if (b < a) [a, b] = [b, a];

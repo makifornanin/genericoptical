@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { join, resolve, sep } from "node:path";
 import { env } from "@/server/env";
 import { invalid } from "@/server/services/core";
@@ -34,6 +34,14 @@ export async function saveAttachment(businessId: string, file: File) {
   const key = `${businessId}/${randomUUID()}.${ALLOWED.get(file.type)}`;
   await writeFile(join(root(), key), bytes);
   return { path: key, name: file.name.slice(0, 120) };
+}
+
+/** Removes a stored attachment (orphans from failed saves, or a replaced receipt). Missing files are fine. */
+export async function deleteAttachment(key: string | null | undefined) {
+  if (!key) return;
+  const full = resolve(root(), key);
+  if (!full.startsWith(root() + sep)) return;
+  await unlink(full).catch(() => undefined);
 }
 
 export async function readAttachment(key: string) {

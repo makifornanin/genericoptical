@@ -734,13 +734,14 @@ export async function seedDemo(opts: { days?: number; log?: (m: string) => void 
   }
 
   // Appointment outcomes are decided when the day arrives.
-  async function bookAppointment(day: string, bookingDay: string, branch: string, typeCode: string, who: { customer?: Cust; leadId?: string }) {
+  async function bookAppointment(day: string, bookingDay: string, branch: string, typeCode: string, who: { customer?: Cust; leadId?: string; booker?: Ctx }) {
     const type = apptType[typeCode];
     const practitioner = type.requiresPractitioner ? practitionerFor[branch] : null;
     const h = hoursOf(day);
     const slot = h.open + Math.floor(R() * ((h.close - h.open - type.durationMinutes) / 30)) * 30;
     const time = hhmm(slot);
-    const booker = weighted([[pick(salesFor[branch]), 3], [manager, 1]]);
+    // A lead's appointment is booked by the staff member who owns the lead (others can't see it).
+    const booker = who.booker ?? weighted([[pick(salesFor[branch]), 3], [manager, 1]]);
     setClock(zonedInstant(bookingDay, randomTime(bookingDay), TZ));
     if (zonedInstant(day, time, TZ) <= clock.now) return;
     try {
@@ -901,7 +902,7 @@ export async function seedDemo(opts: { days?: number; log?: (m: string) => void 
     const dBook = addDays(dQual, int(0, 2));
     const apptDay = addDays(dBook, int(1, 6));
     schedule(dBook, randomTime(dBook), "lead books", async () => {
-      await bookAppointment(apptDay, dBook, branch, interest === "contact_lenses" ? "contact_lens_fitting" : "eye_exam", { leadId });
+      await bookAppointment(apptDay, dBook, branch, interest === "contact_lenses" ? "contact_lens_fitting" : "eye_exam", { leadId, booker: ownerCtx });
     });
   }
 

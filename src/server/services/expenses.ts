@@ -3,7 +3,7 @@ import { formatMoney } from "@/lib/money";
 import { expenseInput } from "@/lib/schemas";
 import { getDb } from "@/server/db";
 import { branches, businessMemberships, expenseCategories, expenses, users } from "@/server/db/schema";
-import { audit, db, diff, invalid, likePattern, mapDbError, notFound, now, pageOf, paging, requirePermission, type Ctx } from "./core";
+import { audit, db, diff, invalid, isUuid, likePattern, mapDbError, notFound, now, pageOf, paging, requirePermission, type Ctx } from "./core";
 
 export async function listExpenseCategories(ctx: Ctx) {
   return db()
@@ -33,7 +33,7 @@ export async function listExpenses(ctx: Ctx, f: ExpenseFilter) {
   const conds: SQL[] = [eq(expenses.businessId, ctx.businessId)];
   if (f.status) conds.push(sql`${expenses.status} = ${f.status}`);
   else conds.push(eq(expenses.status, "recorded"));
-  if (f.categoryId) conds.push(eq(expenses.categoryId, f.categoryId));
+  if (isUuid(f.categoryId)) conds.push(eq(expenses.categoryId, f.categoryId));
   if (f.branchId) conds.push(eq(expenses.branchId, f.branchId));
   if (f.fromDay) conds.push(gte(expenses.expenseDate, f.fromDay));
   if (f.toDay) conds.push(lte(expenses.expenseDate, f.toDay));

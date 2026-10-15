@@ -1,0 +1,2 @@
+ALTER TABLE "refunds" DROP CONSTRAINT "refunds_amounts";--> statement-breakpoint
+ALTER TABLE "refunds" ADD CONSTRAINT "refunds_amounts" CHECK ("refunds"."amount_cents" >= 0 and "refunds"."tax_cents" >= 0 and "refunds"."cost_reversal_cents" >= 0);

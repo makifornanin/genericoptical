@@ -6,7 +6,7 @@ import { hashPassword, passwordProblem } from "@/server/auth/password";
 import { getDb } from "@/server/db";
 import type { Executor } from "@/server/db";
 import { auditLogs, branches, businesses, businessMemberships, loginAttempts, sessions, users } from "@/server/db/schema";
-import { audit, conflict, db, forbidden, invalid, likePattern, mapDbError, notFound, now, pageOf, paging, requirePermission, type Ctx, ref } from "./core";
+import { audit, conflict, db, forbidden, invalid, isUuid, likePattern, mapDbError, notFound, now, pageOf, paging, requirePermission, type Ctx, ref } from "./core";
 
 export const staffInput = z.object({
   name: reqText("Name", 120),
@@ -239,7 +239,7 @@ export async function listActivity(ctx: Ctx, f: { q?: string; entityType?: strin
   const { page, pageSize, offset } = paging({ ...f, pageSize: f.pageSize ?? 50 });
   const conds: SQL[] = [eq(auditLogs.businessId, ctx.businessId)];
   if (f.entityType) conds.push(eq(auditLogs.entityType, f.entityType));
-  if (f.actor) conds.push(eq(auditLogs.actorMembershipId, f.actor));
+  if (isUuid(f.actor)) conds.push(eq(auditLogs.actorMembershipId, f.actor));
   if (f.from) conds.push(sql`${auditLogs.createdAt} >= ${f.from}`);
   if (f.to) conds.push(sql`${auditLogs.createdAt} < ${f.to}`);
   if (f.q) conds.push(sql`(${auditLogs.summary} ilike ${likePattern(f.q)} or ${auditLogs.action} ilike ${likePattern(f.q)} or ${auditLogs.actorLabel} ilike ${likePattern(f.q)})`);

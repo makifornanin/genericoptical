@@ -1,6 +1,7 @@
 import { getSession } from "@/server/auth/session";
 import { AppError } from "@/server/services/core";
 import { getExpenseAttachment } from "@/server/services/expenses";
+import { contentDisposition } from "@/server/http";
 import { readAttachment } from "@/server/storage";
 
 export async function GET(_request: Request, ctx: RouteContext<"/api/expenses/[id]/attachment">) {
@@ -13,7 +14,7 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/expenses/[i
     return new Response(new Uint8Array(file.bytes), {
       headers: {
         "Content-Type": file.type,
-        "Content-Disposition": `inline; filename="${(meta.name ?? "attachment").replace(/["\r\n]/g, "")}"`,
+        "Content-Disposition": contentDisposition(meta.name ?? "attachment"),
         "Cache-Control": "private, no-store",
         "X-Content-Type-Options": "nosniff",
       },

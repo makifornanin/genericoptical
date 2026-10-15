@@ -70,6 +70,7 @@ export function PosTerminal({
   const [partial, setPartial] = useState(false);
   const [notes, setNotes] = useState("");
   const [cartKey, setCartKey] = useState(newKey());
+  const [attempt, setAttempt] = useState<{ fingerprint: string } | null>(null);
   const [done, setDone] = useState<{ saleId: string; number: string; totalCents: number; balanceDueCents: number; changeCents: number } | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const byId = useMemo(() => new Map(items.map((i) => [i.variantId, i])), [items]);
@@ -153,13 +154,14 @@ export function PosTerminal({
     setPartial(false);
     setNotes("");
     setCartKey(newKey());
+    setAttempt(null);
     setDone(null);
     act.reset();
     searchRef.current?.focus();
   };
 
-  const submit = () =>
-    act.run({
+  const submit = () => {
+    const payload = {
       branchId,
       customerId: customer?.id ?? null,
       items: lines.map((l) => {
@@ -169,8 +171,15 @@ export function PosTerminal({
       orderDiscount,
       payments: effectivePayments.filter((p) => (p.amountCents ?? 0) > 0).map((p) => ({ method: p.method, amountCents: p.amountCents!, tenderedCents: p.method === "cash" ? p.tenderedCents : null, reference: p.reference || null })),
       notes,
-      idempotencyKey: cartKey,
-    });
+    };
+    // A retry of the same cart reuses its request id (so a lost response can't charge twice); if the cart
+    // changed after a failed attempt it is a different request and gets a new id.
+    const fingerprint = JSON.stringify(payload);
+    const key = !attempt || attempt.fingerprint === fingerprint ? cartKey : newKey();
+    if (key !== cartKey) setCartKey(key);
+    setAttempt({ fingerprint });
+    return act.run({ ...payload, idempotencyKey: key });
+  };
 
   return (
     <div className="grid gap-4 lg:h-[calc(100vh-150px)] lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_420px]">

@@ -8,7 +8,8 @@ const instrument = Instrument_Sans({ variable: "--font-instrument", subsets: ["l
 
 export const metadata: Metadata = {
   title: { default: "Optical business platform", template: "%s" },
-  description: "Eye care and eyewear — website, point of sale, CRM, inventory and reporting.",
+  description: "Eye care and eyewear — point of sale, orders, inventory, CRM and reporting.",
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {

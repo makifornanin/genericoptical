@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { getTableName, sql, type Column } from "drizzle-orm";
 import type { Permission, Role } from "@/lib/permissions";
 import { getDb, type Executor } from "@/server/db";
@@ -187,9 +188,13 @@ export function isUniqueViolation(error: unknown, constraint?: string): boolean 
 
 export type Page<T> = { rows: T[]; total: number; page: number; pageSize: number; pageCount: number };
 
+const finite = (n: unknown, d: number) => (typeof n === "number" && Number.isFinite(n) ? n : d);
+
+export const isUuid = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+
 export function paging(input: { page?: number; pageSize?: number }, maxSize = 100) {
-  const pageSize = Math.min(Math.max(1, Math.floor(input.pageSize ?? 25)), maxSize);
-  const page = Math.max(1, Math.floor(input.page ?? 1));
+  const pageSize = Math.min(Math.max(1, Math.floor(finite(input.pageSize, 25))), maxSize);
+  const page = Math.min(Math.max(1, Math.floor(finite(input.page, 1))), 100_000);
   return { page, pageSize, offset: (page - 1) * pageSize };
 }
 
@@ -201,3 +206,15 @@ export function pageOf<T>(rows: T[], total: number, page: number, pageSize: numb
 export function likePattern(q: string): string {
   return `%${q.trim().replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
 }
+
+// ─── Idempotency ─────────────────────────────────────────────────────────────
+
+/** Stable fingerprint of a request (minus its idempotency key) — a replay must carry the same details. */
+export function requestHash(input: Record<string, unknown>) {
+  const { idempotencyKey: _k, ...rest } = input;
+  void _k;
+  const canonical = (v: unknown): unknown =>
+    Array.isArray(v) ? v.map(canonical) : v && typeof v === "object" ? Object.fromEntries(Object.keys(v as object).sort().map((k) => [k, canonical((v as Record<string, unknown>)[k])])) : v;
+  return createHash("sha256").update(JSON.stringify(canonical(rest))).digest("hex").slice(0, 40);
+}
+

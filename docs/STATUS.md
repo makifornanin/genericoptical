@@ -1,5 +1,12 @@
 # Project status (2026-10-15)
 
+> **Phase 2 update (2026-10-16):** this file describes the Phase 1 build. Phase 2 changed several parts of it:
+> - The **public website moved to GoHighLevel** and was removed from the app; it is archived in `customer-website-reference/`.
+> - The **GoHighLevel integration was rebuilt**.
+> - **44 audit findings** were handled.
+>
+> For current status, see [PHASE2_STATUS.md](PHASE2_STATUS.md), [BUG_AUDIT.md](BUG_AUDIT.md) and [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md). The rows below about the public website and the Phase 1 GHL integration are historical.
+
 **Summary.** Every module in the brief is built on a real backend: PostgreSQL, server-side permissions, tenant isolation, and transactional stock and money handling. All five connected workflows (A–E) are tested end-to-end through the UI. Lint, typecheck, 101 unit/database/component tests, 19 end-to-end tests and the production build all pass.
 
 It is **not production-ready yet**. Before taking real customers' money and records, see *Before going live* below: GoHighLevel hasn't been verified against a live account, email isn't integrated, receipt storage is local disk only, and the receipts and legal pages need a compliance review.

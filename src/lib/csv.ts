@@ -34,7 +34,7 @@ export function parseCsv(text: string): string[][] {
           i++;
         } else quoted = false;
       } else cell += ch;
-    } else if (ch === '"') quoted = true;
+    } else if (ch === '"' && cell === "") quoted = true; // quotes only open a field at its start (RFC 4180); a stray " inside a cell is literal
     else if (ch === ",") {
       row.push(cell);
       cell = "";
@@ -46,9 +46,17 @@ export function parseCsv(text: string): string[][] {
       cell = "";
     } else cell += ch;
   }
+  if (quoted) throw new CsvError("The file has a quoted value that is never closed (a missing \"). Check the row near the end of the file.");
   row.push(cell);
   if (row.some((c) => c !== "")) rows.push(row);
   return rows;
+}
+
+export class CsvError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CsvError";
+  }
 }
 
 /** Parses CSV text into objects keyed by the (lower-cased, trimmed) header row. */

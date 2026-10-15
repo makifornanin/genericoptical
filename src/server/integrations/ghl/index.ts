@@ -72,6 +72,9 @@ export async function processAllDue(opts: { maxBusinesses?: number; reconcile?: 
 
 // ─── Monitoring overview (Settings → Integrations) ───────────────────────────
 
+/** Queued sync work older than this is reported as stalled. */
+export const BACKLOG_STALE_MINUTES = 30;
+
 export async function ghlOverview(ctx: Ctx) {
   requirePermission(ctx, "integrations.manage");
   const db = getDb();
@@ -90,6 +93,15 @@ export async function ghlOverview(ctx: Ctx) {
       return [c, { pending: count("pending") + count("retry_scheduled") + count("processing"), synced: count("synced"), failed: count("failed"), review: count("needs_review"), lastSyncedAt: last ? new Date(last).toISOString() : null }];
     }),
   ) as Record<string, { pending: number; synced: number; failed: number; review: number; lastSyncedAt: string | null }>;
+  // Stale-sync detection: queued work older than BACKLOG_STALE_MINUTES means the scheduled worker isn't
+  // running, GHL is unreachable, or the business is paused — staff see a warning instead of silence.
+  const [backlog] = (
+    await db.execute<{ oldest: Date | null; stuck: number }>(sql`
+      select min(created_at) filter (where status in ('pending', 'retry_scheduled')) as oldest,
+             count(*) filter (where status = 'processing' and locked_at < now() - interval '10 minutes')::int as stuck
+      from integration_sync_events where business_id = ${ctx.businessId} and provider = ${GHL}`)
+  ).rows;
+  const oldestQueuedAt = backlog?.oldest ? new Date(backlog.oldest) : null;
   const [pipelines, calendars, ghlUserRows, staff, branchRows, typeRows, locations, mismatchCount, productCounts] = await Promise.all([
     db.select().from(ghlPipelines).where(eq(ghlPipelines.businessId, ctx.businessId)).orderBy(asc(ghlPipelines.name)),
     db.select().from(ghlCalendars).where(eq(ghlCalendars.businessId, ctx.businessId)).orderBy(asc(ghlCalendars.name)),
@@ -130,6 +142,11 @@ export async function ghlOverview(ctx: Ctx) {
     settings,
     byCategory,
     openMismatches: Number(mismatchCount[0]?.n ?? 0),
+    backlog: {
+      oldestQueuedAt: oldestQueuedAt?.toISOString() ?? null,
+      stale: Boolean(oldestQueuedAt && Date.now() - oldestQueuedAt.getTime() > BACKLOG_STALE_MINUTES * 60_000),
+      stuckEvents: Number(backlog?.stuck ?? 0),
+    },
     counts: productCounts.rows[0] ?? { linked: 0, contacts: 0, opportunities: 0 },
     mapping: {
       pipelines: pipelines.map((p) => ({ id: p.ghlPipelineId, name: p.name, stages: p.stages })),

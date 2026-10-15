@@ -116,7 +116,7 @@ async function Content({ params, searchParams }: { params: Promise<{ id: string 
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-[26px] font-semibold">{p.name}</h1>
               {p.archivedAt ? <Pill>Archived</Pill> : !p.isActive ? <Pill>Inactive</Pill> : null}
-              {p.showOnWebsite ? <Pill tone="accent">On website</Pill> : null}
+              {p.showOnWebsite ? <Pill tone="accent">In online store</Pill> : null}
             </div>
             <p className="text-[13px] text-text-2">
               {[p.brand, data.categoryName, PRODUCT_TYPE_LABELS[p.productType]].filter(Boolean).join(" · ")}

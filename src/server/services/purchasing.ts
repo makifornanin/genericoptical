@@ -15,7 +15,7 @@ import {
   suppliers,
   users,
 } from "@/server/db/schema";
-import { audit, db, diff, invalid, isUniqueViolation, likePattern, mapDbError, nextNumber, notFound, now, pageOf, paging, requirePermission, type Ctx, ref } from "./core";
+import { audit, conflict, db, diff, invalid, requestHash, isUniqueViolation, likePattern, mapDbError, nextNumber, notFound, now, pageOf, paging, requirePermission, type Ctx, ref } from "./core";
 import { lockBalances, receiveUnits } from "./inventory";
 
 // ─── Suppliers ───────────────────────────────────────────────────────────────
@@ -372,16 +372,21 @@ export async function receivePurchaseOrder(ctx: Ctx, raw: unknown) {
   const input = receiveInput.parse(raw);
   const lines = input.items.filter((i) => i.quantity > 0);
   if (!lines.length) throw invalid("Enter the quantity received for at least one line.");
+  const hash = requestHash(input as unknown as Record<string, unknown>);
   const lookup = async () => {
     const [r] = await db()
-      .select({ receiptId: purchaseOrderReceipts.id })
+      .select({ receiptId: purchaseOrderReceipts.id, requestHash: purchaseOrderReceipts.requestHash })
       .from(purchaseOrderReceipts)
       .where(and(eq(purchaseOrderReceipts.businessId, ctx.businessId), eq(purchaseOrderReceipts.idempotencyKey, input.idempotencyKey)))
       .limit(1);
     return r ?? null;
   };
+  const replay = (r: { receiptId: string; requestHash: string | null }) => {
+    if (r.requestHash && r.requestHash !== hash) throw conflict("This delivery was already recorded with different quantities. Reopen the receive dialog to record another delivery.");
+    return { receiptId: r.receiptId, replayed: true };
+  };
   const prior = await lookup();
-  if (prior) return { ...prior, replayed: true };
+  if (prior) return replay(prior);
   try {
     return await getDb().transaction(async (tx) => {
       const [po] = await tx
@@ -390,6 +395,9 @@ export async function receivePurchaseOrder(ctx: Ctx, raw: unknown) {
         .where(and(eq(purchaseOrders.businessId, ctx.businessId), eq(purchaseOrders.id, input.purchaseOrderId)))
         .for("update");
       if (!po) throw notFound("Purchase order");
+      // A duplicate that waited for the lock returns the first delivery instead of failing the checks below.
+      const raced = await lookup();
+      if (raced) throw new ReceiptReplay(raced);
       if (po.status === "draft") throw invalid("Confirm this purchase order with the supplier before receiving stock.");
       if (po.status === "received" || po.status === "cancelled") throw invalid("This purchase order is closed.");
       const items = await tx
@@ -399,6 +407,15 @@ export async function receivePurchaseOrder(ctx: Ctx, raw: unknown) {
         .for("update");
       const byId = new Map(items.map((i) => [i.id, i]));
       if (lines.some((l) => !byId.has(l.itemId))) throw invalid("A received line isn't on this purchase order.");
+      // The product may have changed since the PO was raised: only active, stocked items can receive stock.
+      const variantIds = lines.map((l) => byId.get(l.itemId)!.variantId);
+      const kinds = await tx
+        .select({ id: productVariants.id, productType: products.productType, archived: products.archivedAt, variantArchived: productVariants.archivedAt, name: products.name })
+        .from(productVariants)
+        .innerJoin(products, eq(products.id, productVariants.productId))
+        .where(and(eq(productVariants.businessId, ctx.businessId), inArray(productVariants.id, variantIds)));
+      const notStock = kinds.filter((k) => k.productType !== "stock" || k.archived || k.variantArchived);
+      if (notStock.length) throw invalid(`${notStock.map((k) => k.name).join(", ")} is no longer an active stocked item, so it can't be received. Close the PO short or restore the product.`);
       if (new Set(lines.map((l) => l.itemId)).size !== lines.length) throw invalid("Each line can only appear once per delivery.");
       const at = now(ctx);
       const [receipt] = await tx
@@ -410,6 +427,7 @@ export async function receivePurchaseOrder(ctx: Ctx, raw: unknown) {
           receivedByMembershipId: ctx.membershipId,
           notes: input.notes,
           idempotencyKey: input.idempotencyKey,
+          requestHash: hash,
           createdAt: at,
         })
         .returning({ id: purchaseOrderReceipts.id });
@@ -457,11 +475,18 @@ export async function receivePurchaseOrder(ctx: Ctx, raw: unknown) {
       return { receiptId: receipt.id, replayed: false, complete };
     });
   } catch (error) {
+    if (error instanceof ReceiptReplay) return replay(error.prior);
     if (isUniqueViolation(error, "purchase_order_receipts_idempotency_key")) {
       const again = await lookup();
-      if (again) return { ...again, replayed: true };
+      if (again) return replay(again);
     }
     mapDbError(error);
+  }
+}
+
+class ReceiptReplay extends Error {
+  constructor(public prior: { receiptId: string; requestHash: string | null }) {
+    super("replay");
   }
 }
 

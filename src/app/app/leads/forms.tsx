@@ -50,7 +50,9 @@ const toIso = (local: string) => (local ? new Date(local).toISOString() : "");
 
 export function LeadFormDialog({ id, initial, staff, branches, canAssign, trigger }: { id?: string; initial?: Partial<LeadFormValues>; staff: Option[]; branches: Option[]; canAssign: boolean; trigger?: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const [v, setV] = useState<LeadFormValues>({ ...EMPTY, ...initial });
+  // `initial.followUpAt` is an ISO instant; the input shows it in the browser's local time.
+  const fromInitial = (): LeadFormValues => ({ ...EMPTY, ...initial, followUpAt: initial?.followUpAt ? toLocalInput(initial.followUpAt) : "" });
+  const [v, setV] = useState<LeadFormValues>(fromInitial);
   const router = useRouter();
   const save = useAction(saveLeadAction, {
     onSuccess: (r) => {
@@ -61,7 +63,7 @@ export function LeadFormDialog({ id, initial, staff, branches, canAssign, trigge
   const set = <K extends keyof LeadFormValues>(k: K, val: LeadFormValues[K]) => setV((p) => ({ ...p, [k]: val }));
   const submit = () => save.run(id ?? null, { ...v, followUpAt: toIso(v.followUpAt), interest: v.interest || null });
   return (
-    <DialogRoot open={open} onOpenChange={(o) => { setOpen(o); if (o) { setV({ ...EMPTY, ...initial }); save.reset(); } }}>
+    <DialogRoot open={open} onOpenChange={(o) => { setOpen(o); if (o) { setV(fromInitial()); save.reset(); } }}>
       <DialogTrigger asChild>
         {trigger ?? (
           <Button variant="primary">

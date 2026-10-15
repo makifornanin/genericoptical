@@ -167,9 +167,19 @@ describe("appointments", () => {
   });
 
   it("books a lead's appointment, moving the lead to Appointment scheduled", async () => {
-    const lead = await leads.createLead(f.ctx.manager, { firstName: "Lead", lastName: "Booker", phone: "+63 918 555 0099" });
+    // Created by sales staff, so assigned to them (they only see their own leads).
+    const lead = await leads.createLead(f.ctx.sales, { firstName: "Lead", lastName: "Booker", phone: "+63 918 555 0099" });
     await appointments.createAppointment(f.ctx.sales, { branchId: f.main.id, appointmentTypeId: f.consultTypeId, leadId: lead!.id, date: futureDay(5), time: "15:00" });
     expect((await leads.getLead(f.ctx.manager, lead!.id)).lead.stage).toBe("appointment_scheduled");
+  });
+
+  it("B12: staff can't book a lead they can't see, but can reschedule an existing booking for it", async () => {
+    const lead = await leads.createLead(f.ctx.manager, { firstName: "Hidden", lastName: "Lead", phone: "+63 918 555 0123" });
+    const input = { branchId: f.main.id, appointmentTypeId: f.consultTypeId, leadId: lead!.id, date: futureDay(6), time: "15:00" };
+    await expect(appointments.createAppointment(f.ctx.sales, input)).rejects.toThrow(/unknown lead/i);
+    const a = await appointments.createAppointment(f.ctx.manager, input);
+    const moved = await appointments.updateAppointment(f.ctx.sales, a!.id, { ...input, time: "16:00" });
+    expect(moved!.leadId).toBe(lead!.id);
   });
 
   it("respects a chosen practitioner's bookings even for types that don't require one", async () => {

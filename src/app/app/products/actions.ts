@@ -1,7 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { parseCsvRecords } from "@/lib/csv";
+import { CsvError, parseCsvRecords } from "@/lib/csv";
 import type { ProductInput } from "@/lib/schemas";
 import { runAction } from "@/server/actions";
 import * as catalog from "@/server/services/catalog";
@@ -39,7 +39,13 @@ export async function createCategoryAction(name: string, kind: string) {
 export async function importProductsAction(csvText: string) {
   return runAction(async (ctx) => {
     if (csvText.length > 2_000_000) throw invalid("The file is too large (2 MB max).");
-    const records = parseCsvRecords(csvText);
+    let records: Record<string, string>[];
+    try {
+      records = parseCsvRecords(csvText);
+    } catch (error) {
+      if (error instanceof CsvError) throw invalid(error.message);
+      throw error;
+    }
     const res = await catalog.importProducts(ctx, records);
     refresh();
     return res;

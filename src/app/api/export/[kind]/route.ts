@@ -5,12 +5,16 @@ import { resolveRange } from "@/lib/dates";
 import { formatInZone } from "@/lib/dates";
 import { getSession } from "@/server/auth/session";
 import { getDb } from "@/server/db";
+import { contentDisposition } from "@/server/http";
 import { branches, customers, expenseCategories, expenses, inventoryLocations, products, productVariants, sales, stockMovements, users, businessMemberships } from "@/server/db/schema";
 import { exportProductsCsvRows, PRODUCT_CSV_COLUMNS } from "@/server/services/catalog";
 import { can } from "@/server/services/core";
 import { financialReport } from "@/server/services/reports";
 
 const money = (c: number) => (c / 100).toFixed(2);
+
+/** Row ceiling for range-based exports. Larger exports are refused rather than silently cut short. */
+const MAX_ROWS = 50_000;
 
 /** CSV exports. Every export re-checks the session and permission server-side and is business-scoped. */
 export async function GET(request: NextRequest, ctx: RouteContext<"/api/export/[kind]">) {
@@ -56,7 +60,8 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/export/[
         .leftJoin(users, eq(users.id, businessMemberships.userId))
         .where(and(eq(sales.businessId, biz.id), gte(sales.createdAt, range.from), lt(sales.createdAt, range.to)))
         .orderBy(asc(sales.createdAt))
-        .limit(20000);
+        .limit(MAX_ROWS + 1);
+      if (r.length > MAX_ROWS) return tooMany();
       rows = r.map(({ s, branch, first, last, seller }) => [
         s.number,
         s.kind === "order" ? "order" : "pos",
@@ -104,7 +109,8 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/export/[
         .innerJoin(inventoryLocations, eq(inventoryLocations.id, stockMovements.locationId))
         .where(and(...conds))
         .orderBy(asc(stockMovements.createdAt))
-        .limit(50000);
+        .limit(MAX_ROWS + 1);
+      if (r.length > MAX_ROWS) return tooMany();
       const showCost = can(c, "products.costs");
       rows = r.map(({ m, name, sku, loc }) => [formatInZone(m.createdAt, biz.timezone, "yyyy-MM-dd HH:mm"), name, sku, loc, m.type, m.quantity, m.onHandAfter, showCost ? money(m.unitCostCents) : "", m.reason ?? ""]);
       break;
@@ -146,10 +152,14 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/export/[
   return new Response("﻿" + csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${file}"`,
+      "Content-Disposition": contentDisposition(file, "attachment"),
       "Cache-Control": "no-store",
     },
   });
+}
+
+function tooMany() {
+  return new Response(`This export has more than ${MAX_ROWS.toLocaleString("en-US")} rows. Choose a shorter date range and export it in parts.`, { status: 422 });
 }
 
 function forbidden() {

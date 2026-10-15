@@ -200,7 +200,7 @@ export function ProductForm({
               {!IMAGES.some(([u]) => u === v.imageUrl) ? <option value="custom">Custom URL</option> : null}
             </SelectField>
             <TextField label="…or image URL" value={v.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} error={save.fe("imageUrl")} placeholder="https://…" />
-            <Checkbox label="Show on website" description="Listed on the public eyewear page." checked={v.showOnWebsite} onChange={(e) => set("showOnWebsite", e.target.checked)} />
+            <Checkbox label="Show in online store" description="Listed in the GoHighLevel online store when product sync is on." checked={v.showOnWebsite} onChange={(e) => set("showOnWebsite", e.target.checked)} />
             <Checkbox label="Tax exempt" description="No VAT charged on this item." checked={v.taxExempt} onChange={(e) => set("taxExempt", e.target.checked)} />
             <Checkbox label="Active" description="Inactive products can't be sold." checked={v.isActive} onChange={(e) => set("isActive", e.target.checked)} />
           </CardBody>

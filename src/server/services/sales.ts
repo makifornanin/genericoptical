@@ -47,6 +47,7 @@ import {
   pageOf,
   paging,
   ref,
+  requestHash,
   requireAny,
   requirePermission,
   type Ctx,
@@ -58,21 +59,48 @@ type SaleRow = typeof sales.$inferSelect;
 
 // ─── Shared helpers ──────────────────────────────────────────────────────────
 
-/** Runs `run` in a transaction unless `lookup` finds a prior result for the same idempotency key. */
+/** Thrown inside a transaction when a concurrent request with the same key committed first. */
+class Replay<T> extends Error {
+  constructor(public prior: T) {
+    super("replay");
+  }
+}
+
+/**
+ * Runs `run` in a transaction unless `lookup` finds a prior result for the same idempotency key.
+ * - The stored request hash must match: a key reused with different details is rejected, never
+ *   silently answered with the old result.
+ * - `run` may call `recheck()` after taking its locks; a duplicate that waited on the lock then
+ *   returns the first request's result instead of failing a business check.
+ */
 async function idempotent<T extends object>(
-  lookup: () => Promise<T | null>,
-  run: (tx: Tx) => Promise<T>,
+  lookup: () => Promise<(T & { requestHash?: string | null }) | null>,
+  run: (tx: Tx, recheck: () => Promise<void>) => Promise<T>,
   constraint: string,
+  hash: string,
 ): Promise<T & { replayed: boolean }> {
+  const replay = (prior: T & { requestHash?: string | null }) => {
+    if (prior.requestHash && prior.requestHash !== hash) {
+      throw conflict("This request was already processed with different details. Start again (the screen will use a new request id).");
+    }
+    const { requestHash: _h, ...rest } = prior;
+    void _h;
+    return { ...(rest as T), replayed: true };
+  };
   const prior = await lookup();
-  if (prior) return { ...prior, replayed: true };
+  if (prior) return replay(prior);
+  const recheck = async () => {
+    const again = await lookup();
+    if (again) throw new Replay(again);
+  };
   try {
-    const result = await getDb().transaction(run);
+    const result = await getDb().transaction((tx) => run(tx, recheck));
     return { ...result, replayed: false };
   } catch (error) {
+    if (error instanceof Replay) return replay(error.prior as T & { requestHash?: string | null });
     if (isUniqueViolation(error, constraint)) {
       const again = await lookup();
-      if (again) return { ...again, replayed: true };
+      if (again) return replay(again);
     }
     mapDbError(error);
   }
@@ -194,7 +222,12 @@ async function buildLines(
   return { pricing, meta };
 }
 
+/** Largest sale total accepted (₱/$ 1 billion in minor units) — keeps all tax/allocation maths exact. */
+const MAX_TOTAL_CENTS = 100_000_000_000;
+
 function price(pricing: PricingLineInput[], tax: { taxRateBps: number; pricesIncludeTax: boolean }, discount: Parameters<typeof priceSale>[2]) {
+  const gross = pricing.reduce((s, l) => s + l.unitPriceCents * l.quantity, 0);
+  if (!Number.isSafeInteger(gross) || gross > MAX_TOTAL_CENTS) throw invalid("That total is too large to process. Split it into smaller sales.");
   try {
     return priceSale(pricing, { rateBps: tax.taxRateBps, pricesIncludeTax: tax.pricesIncludeTax }, discount ?? null);
   } catch (error) {
@@ -311,9 +344,10 @@ const money = (cents: number) => formatMoney(cents);
 export async function checkout(ctx: Ctx, raw: unknown) {
   requirePermission(ctx, "pos.use");
   const input = checkoutInput.parse(raw);
+  const hash = requestHash(input as unknown as Record<string, unknown>);
   const lookup = async () => {
     const [s] = await db()
-      .select({ saleId: sales.id, number: sales.number, totalCents: sales.totalCents, balanceDueCents: sales.balanceDueCents })
+      .select({ saleId: sales.id, number: sales.number, totalCents: sales.totalCents, balanceDueCents: sales.balanceDueCents, requestHash: sales.requestHash })
       .from(sales)
       .where(and(eq(sales.businessId, ctx.businessId), eq(sales.idempotencyKey, input.idempotencyKey)))
       .limit(1);
@@ -337,7 +371,7 @@ export async function checkout(ctx: Ctx, raw: unknown) {
       if (paid < priced.totalCents && !input.customerId) throw invalid("Link a customer to leave a balance due on this sale.");
       const tenders = input.payments.map(validatePayment);
 
-      const saleId = randomUUID();
+      const saleId: string = randomUUID();
       const number = await nextNumber(tx, ctx.businessId, "sale", "S-");
       const at = now(ctx);
       const cost = meta.reduce((s, m, i) => s + m.unitCostCents * priced.lines[i].quantity, 0);
@@ -367,6 +401,7 @@ export async function checkout(ctx: Ctx, raw: unknown) {
         orderDiscountValue: input.orderDiscount ? (input.orderDiscount.type === "percent" ? input.orderDiscount.valueBps : input.orderDiscount.valueCents) : null,
         notes: input.notes,
         idempotencyKey: input.idempotencyKey,
+        requestHash: hash,
         createdAt: at,
         completedAt: at,
         updatedAt: at,
@@ -424,6 +459,7 @@ export async function checkout(ctx: Ctx, raw: unknown) {
       return { saleId, number, totalCents: priced.totalCents, balanceDueCents: settled.balanceDueCents };
     },
     "sales_idempotency_key",
+    hash,
   );
 }
 
@@ -432,9 +468,10 @@ export async function checkout(ctx: Ctx, raw: unknown) {
 export async function createOrder(ctx: Ctx, raw: unknown) {
   requirePermission(ctx, "orders.manage");
   const input = orderInput.parse(raw);
+  const hash = requestHash(input as unknown as Record<string, unknown>);
   const lookup = async () => {
     const [s] = await db()
-      .select({ saleId: sales.id, number: sales.number })
+      .select({ saleId: sales.id, number: sales.number, requestHash: sales.requestHash })
       .from(sales)
       .where(and(eq(sales.businessId, ctx.businessId), eq(sales.idempotencyKey, input.idempotencyKey)))
       .limit(1);
@@ -454,7 +491,7 @@ export async function createOrder(ctx: Ctx, raw: unknown) {
       enforceDiscountLimit(ctx, priced, tax.settings.maxStaffDiscountBps ?? 2000);
       if (input.deposit && input.deposit.amountCents > priced.totalCents) throw invalid("The deposit can't exceed the order total.");
 
-      const saleId = randomUUID();
+      const saleId: string = randomUUID();
       const number = await nextNumber(tx, ctx.businessId, "order", "ORD-");
       const at = now(ctx);
       const cost = meta.reduce((s, m, i) => s + m.unitCostCents * priced.lines[i].quantity, 0);
@@ -486,6 +523,7 @@ export async function createOrder(ctx: Ctx, raw: unknown) {
         labSupplierId: input.labSupplierId,
         labReference: input.labReference,
         idempotencyKey: input.idempotencyKey,
+        requestHash: hash,
         createdAt: at,
         updatedAt: at,
       });
@@ -522,6 +560,7 @@ export async function createOrder(ctx: Ctx, raw: unknown) {
       return { saleId, number };
     },
     "sales_idempotency_key",
+    hash,
   );
 }
 
@@ -605,6 +644,21 @@ async function transitionInTx(tx: Tx, ctx: Ctx, saleId: string, to: FulfillmentS
     const reservedByItem = new Map(active.map((r) => [r.saleItemId, r]));
     if (stockItems.length) {
       const balances = await lockBalances(tx, ctx, sale.locationId, stockItems.map((i) => i.variantId));
+      // COGS is recognised now, so use today's moving-average cost (not the cost when the order was taken).
+      const costs = await tx
+        .select({ id: productVariants.id, costCents: productVariants.costCents })
+        .from(productVariants)
+        .where(and(eq(productVariants.businessId, ctx.businessId), inArray(productVariants.id, [...new Set(stockItems.map((i) => i.variantId))])))
+        .for("update");
+      const costOf = new Map(costs.map((c) => [c.id, c.costCents]));
+      for (const i of stockItems) {
+        const current = costOf.get(i.variantId) ?? i.unitCostCents;
+        if (current !== i.unitCostCents) {
+          await tx.update(saleItems).set({ unitCostCents: current }).where(eq(saleItems.id, i.id));
+          i.unitCostCents = current;
+        }
+      }
+      patch.costCents = items.reduce((sum, i) => sum + i.unitCostCents * i.quantity, 0);
       const unreserved = stockItems.filter((i) => !reservedByItem.has(i.id));
       if (unreserved.length) {
         const needs = new Map<string, { qty: number; name: string }>();
@@ -700,7 +754,13 @@ export async function updateOrder(
         if (sale.fulfillmentStatus !== "new") throw invalid("Items can only be changed while the order is still New. Cancel and re-create it instead.");
         const tax = { taxRateBps: sale.taxRateBps, pricesIncludeTax: sale.pricesIncludeTax };
         const { pricing, meta } = await buildLines(tx, ctx, parsed.items, sale.customerId);
-        const discount = parsed.orderDiscount !== undefined ? toDiscount(parsed.orderDiscount) : null;
+        const stored =
+          sale.orderDiscountType && sale.orderDiscountValue != null
+            ? sale.orderDiscountType === "percent"
+              ? { type: "percent" as const, valueBps: sale.orderDiscountValue }
+              : { type: "amount" as const, valueCents: sale.orderDiscountValue }
+            : null;
+        const discount = parsed.orderDiscount !== undefined ? toDiscount(parsed.orderDiscount) : stored;
         const priced = price(pricing, tax, discount);
         const b = await businessTax(tx, ctx);
         enforceDiscountLimit(ctx, priced, b.settings.maxStaffDiscountBps ?? 2000);
@@ -735,9 +795,10 @@ export async function updateOrder(
 export async function recordPayment(ctx: Ctx, raw: unknown) {
   requirePermission(ctx, "payments.record");
   const input = paymentInput.parse(raw);
+  const hash = requestHash(input as unknown as Record<string, unknown>);
   const lookup = async () => {
     const [p] = await db()
-      .select({ paymentId: payments.id, saleId: payments.saleId })
+      .select({ paymentId: payments.id, saleId: payments.saleId, requestHash: payments.requestHash })
       .from(payments)
       .where(and(eq(payments.businessId, ctx.businessId), eq(payments.idempotencyKey, input.idempotencyKey)))
       .limit(1);
@@ -745,8 +806,9 @@ export async function recordPayment(ctx: Ctx, raw: unknown) {
   };
   return idempotent(
     lookup,
-    async (tx) => {
+    async (tx, recheck) => {
       const sale = await lockSale(tx, ctx, input.saleId);
+      await recheck();
       if (sale.status === "cancelled") throw invalid("Payments can't be recorded on a cancelled sale.");
       if (input.amountCents > sale.balanceDueCents) {
         throw invalid(sale.balanceDueCents === 0 ? "This sale is already fully paid." : `The balance due is ${money(sale.balanceDueCents)}. Enter that amount or less.`);
@@ -767,6 +829,7 @@ export async function recordPayment(ctx: Ctx, raw: unknown) {
           receivedByMembershipId: ctx.membershipId,
           receivedAt: at,
           idempotencyKey: input.idempotencyKey,
+          requestHash: hash,
           createdAt: at,
         })
         .returning({ id: payments.id });
@@ -781,6 +844,7 @@ export async function recordPayment(ctx: Ctx, raw: unknown) {
       return { paymentId: p.id, saleId: sale.id };
     },
     "payments_idempotency_key",
+    hash,
   );
 }
 
@@ -789,14 +853,16 @@ export async function voidPayment(ctx: Ctx, paymentId: string, reason: string) {
   if (!reason?.trim()) throw invalid("Give a reason for voiding this payment.");
   try {
     return await getDb().transaction(async (tx) => {
-      const [p] = await tx
-        .select()
+      const [ref] = await tx
+        .select({ saleId: payments.saleId })
         .from(payments)
         .where(and(eq(payments.businessId, ctx.businessId), eq(payments.id, paymentId)))
         .limit(1);
-      if (!p) throw notFound("Payment");
-      const sale = await lockSale(tx, ctx, p.saleId);
-      if (p.status !== "completed") throw invalid("This payment is already voided.");
+      if (!ref) throw notFound("Payment");
+      // Lock the sale, then re-read the payment under lock: a concurrent void must see it already voided.
+      const sale = await lockSale(tx, ctx, ref.saleId);
+      const [p] = await tx.select().from(payments).where(and(eq(payments.businessId, ctx.businessId), eq(payments.id, paymentId))).for("update");
+      if (!p || p.status !== "completed") throw invalid("This payment is already voided.");
       const paid = sale.paidCents - p.amountCents;
       if (sale.refundedCashCents > paid) throw invalid("Money has already been refunded against this payment. Void the refund's effect first.");
       const at = now(ctx);
@@ -825,9 +891,10 @@ const share = (amount: number, qty: number, before: number, after: number) =>
 export async function refundSale(ctx: Ctx, raw: unknown) {
   requirePermission(ctx, "sales.refund");
   const input = refundInput.parse(raw);
+  const hash = requestHash(input as unknown as Record<string, unknown>);
   const lookup = async () => {
     const [r] = await db()
-      .select({ refundId: refunds.id, number: refunds.number, saleId: refunds.saleId })
+      .select({ refundId: refunds.id, number: refunds.number, saleId: refunds.saleId, requestHash: refunds.requestHash })
       .from(refunds)
       .where(and(eq(refunds.businessId, ctx.businessId), eq(refunds.idempotencyKey, input.idempotencyKey)))
       .limit(1);
@@ -835,8 +902,9 @@ export async function refundSale(ctx: Ctx, raw: unknown) {
   };
   return idempotent(
     lookup,
-    async (tx) => {
+    async (tx, recheck) => {
       const sale = await lockSale(tx, ctx, input.saleId);
+      await recheck();
       if (sale.status === "cancelled") throw invalid("This sale was cancelled.");
       if (input.items.length && sale.status !== "completed") throw invalid("Items can only be returned after the order has been handed over. Use a deposit refund instead.");
       if (!input.items.length && !input.amountCents) throw invalid("Choose items to return or enter a refund amount.");
@@ -847,7 +915,7 @@ export async function refundSale(ctx: Ctx, raw: unknown) {
         .where(and(eq(saleItems.businessId, ctx.businessId), eq(saleItems.saleId, sale.id)))
         .for("update");
       const byId = new Map(lines.map((l) => [l.id, l]));
-      const refundId = randomUUID();
+      const refundId: string = randomUUID();
       const at = now(ctx);
       let itemsAmount = 0;
       let itemsTax = 0;
@@ -878,7 +946,8 @@ export async function refundSale(ctx: Ctx, raw: unknown) {
       }
 
       const amount = input.amountCents ?? itemsAmount;
-      if (amount <= 0) throw invalid("The refund amount must be greater than zero.");
+      // A zero amount is only valid when returning free lines (restock without paying anything back).
+      if (amount < 0 || (amount === 0 && !input.items.length)) throw invalid("The refund amount must be greater than zero.");
       const isCash = input.method !== "balance_adjustment";
       const netCollected = sale.paidCents - sale.refundedCashCents;
       // On an order that hasn't been handed over, a refund just returns money (deposit); it doesn't change the order's value.
@@ -892,13 +961,24 @@ export async function refundSale(ctx: Ctx, raw: unknown) {
         throw invalid(`Only ${money(netCollected)} has been collected, so that's the most you can pay back.${isDepositReturn ? "" : " Credit the rest to the balance instead."}`);
       }
       if (!isCash && amount > sale.balanceDueCents) throw invalid(`The balance due is only ${money(sale.balanceDueCents)}.`);
-      const tax = isDepositReturn
-        ? 0
-        : input.items.length && input.amountCents == null
-          ? itemsTax
-          : sale.totalCents > 0
-            ? Math.round((amount * sale.taxCents) / sale.totalCents)
-            : 0;
+      // Tax refunded: the returned lines' own tax; with a typed amount on returned lines, their tax ratio
+      // (not the whole sale's — lines can be taxed differently); amount-only refunds allocate the sale's
+      // tax cumulatively so repeated partial refunds never return more tax than was collected.
+      let tax = 0;
+      if (!isDepositReturn) {
+        if (input.items.length && input.amountCents == null) tax = itemsTax;
+        else if (input.items.length) tax = itemsAmount > 0 ? Math.round((amount * itemsTax) / itemsAmount) : 0;
+        else if (sale.totalCents > 0) {
+          const before = Math.round((sale.taxCents * sale.refundedCents) / sale.totalCents);
+          const after = Math.round((sale.taxCents * (sale.refundedCents + amount)) / sale.totalCents);
+          tax = after - before;
+        }
+        const [{ refundedTax }] = await tx
+          .select({ refundedTax: sql<number>`coalesce(sum(${refunds.taxCents}), 0)::bigint` })
+          .from(refunds)
+          .where(and(eq(refunds.businessId, ctx.businessId), eq(refunds.saleId, sale.id), eq(refunds.affectsRevenue, true)));
+        tax = Math.max(0, Math.min(tax, sale.taxCents - Number(refundedTax)));
+      }
 
       const number = await nextNumber(tx, ctx.businessId, "refund", "RF-");
       await tx.insert(refunds).values({
@@ -914,6 +994,7 @@ export async function refundSale(ctx: Ctx, raw: unknown) {
         reason: input.reason,
         processedByMembershipId: ctx.membershipId,
         idempotencyKey: input.idempotencyKey,
+        requestHash: hash,
         createdAt: at,
       });
       if (rows.length) await tx.insert(refundItems).values(rows);
@@ -952,6 +1033,7 @@ export async function refundSale(ctx: Ctx, raw: unknown) {
       return { refundId, number, saleId: sale.id };
     },
     "refunds_idempotency_key",
+    hash,
   );
 }
 
@@ -1289,7 +1371,7 @@ export async function importOnlineSale(ctx: Ctx, input: OnlineSaleInput): Promis
       }
       const priced = price(pricing, tax, null);
       const paid = Math.min(priced.totalCents, input.payments.reduce((s, p) => s + p.amountCents, 0));
-      const saleId = randomUUID();
+      const saleId: string = randomUUID();
       const number = await nextNumber(tx, ctx.businessId, "sale", "S-");
       const at = input.orderedAt;
       await tx.insert(sales).values({

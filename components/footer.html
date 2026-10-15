@@ -1,0 +1,44 @@
+<!--
+  GLOBAL FOOTER — business details, booking button, up to 3 branches with hours, footer links.
+  GHL: put this in ONE Custom Code element inside a GLOBAL SECTION at the bottom of every page
+  (Section: full width, padding 0, background none). Content comes from OC_CONFIG (business,
+  branches, nav, social, links.staffLogin); the text below is the pre-script fallback.
+-->
+<footer class="oc oc-footer" data-oc-render="footer">
+  <div class="oc-container oc-footer__inner">
+    <div class="oc-footer__grid">
+      <div>
+        <p class="oc-footer__name" data-oc-text="business.name">Lensmere Optical</p>
+        <p class="oc-footer__tagline" data-oc-text="business.tagline">Eye care &amp; eyewear</p>
+        <div class="oc-footer__contact">
+          <p><a href="tel:+63280000100" data-oc-tel="business.phone">+63 2 8000 0100</a></p>
+          <p><a href="mailto:hello@lensmere.example" data-oc-mailto="business.email">hello@lensmere.example</a></p>
+          <p data-oc-text="business.address">2F Linden Arcade, 118 Lumen Street, Makati City</p>
+        </div>
+        <div class="oc-footer__social" data-oc-social hidden></div>
+        <div class="oc-footer__cta">
+          <a class="oc-btn oc-btn--accent" href="/book" data-oc-href="links.booking">Book an eye exam
+            <svg class="oc-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+        </div>
+      </div>
+      <div class="oc-footer__branches" data-oc-footer-branches>
+        <div>
+          <p class="oc-eyebrow oc-eyebrow--inherit">Makati</p>
+          <p class="oc-footer__address">2F Linden Arcade, 118 Lumen Street<br>Makati City</p>
+        </div>
+      </div>
+    </div>
+    <div class="oc-footer__bottom">
+      <nav class="oc-footer__nav" aria-label="Footer" data-oc-footer-nav>
+        <a href="/eyewear">Eyewear</a>
+        <a href="/services">Services</a>
+        <a href="/about">About</a>
+        <a href="/faq">FAQ</a>
+        <a href="/contact">Contact</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+      </nav>
+      <p class="oc-footer__copy">© <span data-oc-year>2026</span> <span data-oc-text="business.legalName">Lensmere Optical Co.</span><a href="#" data-oc-staff-login hidden> · Staff sign in</a></p>
+    </div>
+  </div>
+</footer>

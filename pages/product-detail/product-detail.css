@@ -1,0 +1,162 @@
+/*
+ * Product detail — page styles (GoHighLevel-ready)
+ * Paste into this page's custom CSS (page Settings → Custom CSS), or wrapped in a style tag in the
+ * page's first Custom Code block. Requires the global styles/oc-base.css. Every selector is scoped
+ * under `.oc`.
+ */
+
+.oc .oc-product {
+  padding-block: 40px;
+}
+.oc .oc-back {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  color: var(--oc-text-2);
+}
+.oc .oc-back:hover {
+  color: var(--oc-text);
+}
+.oc .oc-product__layout {
+  margin-top: 24px;
+  display: grid;
+  gap: 40px;
+}
+.oc .oc-product__layout > * {
+  min-width: 0;
+}
+.oc .oc-product__gallery {
+  display: grid;
+  gap: 12px;
+}
+.oc .oc-thumbs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+}
+.oc .oc-thumb {
+  width: 84px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--oc-art-bg);
+}
+.oc .oc-thumb[aria-pressed="true"] {
+  border-color: var(--oc-ink);
+}
+.oc .oc-product__title {
+  margin-top: 12px;
+  font-family: var(--oc-font-display);
+  font-size: 38px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.oc .oc-product__price {
+  margin-top: 16px;
+  font-family: var(--oc-font-display);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.oc .oc-product__from {
+  font-size: 16px;
+  color: var(--oc-text-3);
+}
+.oc .oc-product__desc {
+  margin-top: 20px;
+  font-size: 16px;
+  line-height: 1.625;
+  color: var(--oc-text-2);
+}
+.oc .oc-product__label {
+  margin-top: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--oc-text-2);
+}
+.oc .oc-chips {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.oc .oc-chip {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--oc-line-strong);
+  border-radius: var(--oc-radius-pill);
+  background: var(--oc-surface);
+  padding: 0 14px;
+  font-size: 13px;
+  color: var(--oc-text);
+}
+.oc button.oc-chip:hover {
+  border-color: var(--oc-text-3);
+}
+.oc .oc-chip[aria-pressed="true"] {
+  border-color: var(--oc-ink);
+  box-shadow: inset 0 0 0 1px var(--oc-ink);
+}
+.oc .oc-chip__price {
+  color: var(--oc-text-3);
+  font-variant-numeric: tabular-nums;
+}
+.oc .oc-availability {
+  margin-top: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--oc-text-2);
+}
+.oc .oc-availability .oc-icon {
+  margin-top: 3px;
+  color: var(--oc-text-3);
+}
+.oc .oc-product__actions {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.oc .oc-product__inquiry {
+  margin-top: 32px;
+}
+.oc .oc-related {
+  margin-top: 96px;
+  border-top: 1px solid var(--oc-line);
+  padding-top: 32px;
+}
+.oc .oc-related__title {
+  font-family: var(--oc-font-display);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.oc .oc-related .oc-product-grid {
+  margin-top: 24px;
+  gap: 32px 16px;
+}
+@media (min-width: 640px) {
+  .oc .oc-product__title {
+    font-size: 46px;
+  }
+}
+@media (min-width: 1024px) {
+  .oc .oc-product__layout {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 56px;
+  }
+  .oc .oc-product__gallery {
+    position: sticky;
+    top: calc(var(--oc-header-h) + 24px);
+    align-self: start;
+  }
+}

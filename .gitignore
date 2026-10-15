@@ -1,0 +1,5 @@
+previews/node_modules/
+previews/test-results/
+previews/playwright-report/
+.DS_Store
+Thumbs.db

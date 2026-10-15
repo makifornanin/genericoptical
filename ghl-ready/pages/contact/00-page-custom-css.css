@@ -1,0 +1,65 @@
+/*
+ * Contact — page styles (GoHighLevel-ready)
+ * Paste into this page's custom CSS (page Settings → Custom CSS), or wrapped in a style tag in the
+ * page's first Custom Code block. Requires the global styles/oc-base.css. Every selector is scoped
+ * under `.oc`.
+ */
+
+.oc .oc-contact {
+  display: grid;
+  gap: 48px;
+  padding-block: 56px;
+}
+.oc .oc-contact > * {
+  min-width: 0;
+}
+.oc .oc-contact__direct {
+  margin-top: 16px;
+  font-size: 15px;
+}
+.oc .oc-contact__direct p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.oc .oc-contact__direct p + p {
+  margin-top: 12px;
+}
+.oc .oc-contact__direct a:hover,
+.oc .oc-contact-branch a:hover {
+  text-decoration: underline;
+}
+.oc .oc-contact-branch {
+  margin-top: 32px;
+  border-top: 1px solid var(--oc-line);
+  padding-top: 20px;
+}
+.oc .oc-contact-branch__name {
+  font-family: var(--oc-font-display);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.oc .oc-contact-branch__line {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--oc-text-2);
+}
+.oc .oc-contact-branch__line .oc-icon {
+  margin-top: 3px;
+  color: var(--oc-text-3);
+}
+.oc .oc-contact__routing {
+  margin-top: 24px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--oc-text-3);
+}
+@media (min-width: 1024px) {
+  .oc .oc-contact {
+    grid-template-columns: 1.3fr 1fr;
+  }
+}

@@ -1,0 +1,35 @@
+/*
+ * FAQ — page script (GoHighLevel-ready)
+ * Paste wrapped in a script tag in this page's Settings → Tracking Code → Footer (or a Custom Code
+ * element at the bottom of the page). Requires the site-wide scripts; load order does not matter.
+ */
+(window.OC_QUEUE = window.OC_QUEUE || []).push(function (oc) {
+  oc.register("faq-list", function (el) {
+    var faqs = oc.list("faqs").filter(function (f) {
+      return f && f.q && f.a;
+    });
+    if (!faqs.length) {
+      el.innerHTML = '<p class="oc-faq__answer">No questions published yet — <a class="oc-text-link" href="' + oc.esc(oc.link(oc.val("links.contact", "/contact"))) + '">ask us directly</a>.</p>';
+      return;
+    }
+    el.innerHTML = faqs
+      .map(function (f, i) {
+        return "<details" + (i === 0 ? " open" : "") + "><summary>" + oc.esc(f.q) + ' <span class="oc-plus" aria-hidden="true">+</span></summary><p class="oc-faq__answer">' + oc.esc(f.a) + "</p></details>";
+      })
+      .join("");
+    // FAQPage structured data, kept in sync with the visible questions.
+    if (!document.getElementById("oc-faq-jsonld")) {
+      var s = document.createElement("script");
+      s.type = "application/ld+json";
+      s.id = "oc-faq-jsonld";
+      s.textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map(function (f) {
+          return { "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } };
+        }),
+      });
+      document.head.appendChild(s);
+    }
+  });
+});

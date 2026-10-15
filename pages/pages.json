@@ -1,0 +1,107 @@
+{
+  "$comment": "Page list for GHL setup and the local preview. path = the GHL page path to create; title/description = the page's SEO settings in GHL (replace {business} with the business name). Blocks are pasted in this order, one Custom Code element each. {business} is filled from OC_CONFIG.business.name in the preview.",
+  "pages": [
+    {
+      "id": "home",
+      "catalogue": true,
+      "name": "Home",
+      "path": "/",
+      "preview": "index.html",
+      "title": "{business} — Eye care & eyewear",
+      "description": "Comprehensive eye examinations, prescription eyewear and contact lens fittings — with optometrists who take the time to explain your options."
+    },
+    {
+      "id": "eyewear",
+      "catalogue": true,
+      "name": "Eyewear",
+      "path": "/eyewear",
+      "preview": "eyewear.html",
+      "title": "Eyewear · {business}",
+      "description": "Prescription frames, sunglasses, contact lenses and eye-care accessories. Try anything on in branch."
+    },
+    {
+      "id": "product-detail",
+      "catalogue": true,
+      "name": "Product",
+      "path": "/eyewear-item",
+      "preview": "product.html",
+      "previewQuery": "?p=arden-101",
+      "title": "Eyewear · {business}",
+      "description": "Frame details, available sizes and colours, and how to try it on or reserve it."
+    },
+    {
+      "id": "services",
+      "name": "Services",
+      "path": "/services",
+      "preview": "services.html",
+      "title": "Services · {business}",
+      "description": "Eye examinations, contact lens consultations, prescription eyewear, lens replacement and frame repairs."
+    },
+    {
+      "id": "booking",
+      "name": "Book",
+      "path": "/book",
+      "preview": "book.html",
+      "title": "Book an appointment · {business}",
+      "description": "Book an eye examination, contact lens consultation or eyewear consultation online."
+    },
+    {
+      "id": "contact",
+      "name": "Contact",
+      "path": "/contact",
+      "preview": "contact.html",
+      "title": "Contact us · {business}",
+      "description": "Questions about eye exams, glasses, contact lenses or an order? Send us a message or call a branch."
+    },
+    {
+      "id": "about",
+      "name": "About",
+      "path": "/about",
+      "preview": "about.html",
+      "title": "About us · {business}",
+      "description": "How we work: thorough exams, honest guidance, made-to-measure lenses and aftercare included."
+    },
+    {
+      "id": "faq",
+      "name": "FAQ",
+      "path": "/faq",
+      "preview": "faq.html",
+      "title": "Frequently asked questions · {business}",
+      "description": "Appointments, prescription turnaround, payment methods, contact lenses and frame warranty — answered."
+    },
+    {
+      "id": "privacy",
+      "name": "Privacy",
+      "path": "/privacy",
+      "preview": "privacy.html",
+      "title": "Privacy notice · {business}",
+      "description": "What personal information we collect, why we use it, who can see it and your rights."
+    },
+    {
+      "id": "terms",
+      "name": "Terms",
+      "path": "/terms",
+      "preview": "terms.html",
+      "title": "Terms of service · {business}",
+      "description": "Terms for using this website, booking appointments and ordering eyewear."
+    },
+    {
+      "id": "booking-confirmed",
+      "name": "Booking confirmed",
+      "path": "/booking-confirmed",
+      "preview": "booking-confirmed.html",
+      "title": "You're booked in · {business}",
+      "description": "Your appointment request has been received.",
+      "noindex": true
+    },
+    {
+      "id": "thank-you",
+      "name": "Thank you",
+      "path": "/thank-you",
+      "preview": "thank-you.html",
+      "title": "Message received · {business}",
+      "description": "Thanks for getting in touch.",
+      "noindex": true
+    }
+  ]
+}

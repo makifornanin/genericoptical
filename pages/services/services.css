@@ -1,0 +1,104 @@
+/*
+ * Services — page styles (GoHighLevel-ready)
+ * Paste into this page's custom CSS (page Settings → Custom CSS), or wrapped in a style tag in the
+ * page's first Custom Code block. Requires the global styles/oc-base.css. Every selector is scoped
+ * under `.oc`.
+ */
+
+.oc .oc-svc-cards {
+  display: grid;
+  gap: 16px;
+}
+.oc .oc-svc-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--oc-line);
+  border-radius: var(--oc-radius-card);
+  background: var(--oc-surface);
+  padding: 24px;
+}
+.oc .oc-svc-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.oc .oc-svc-card__title {
+  font-family: var(--oc-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.oc .oc-svc-card__price {
+  flex-shrink: 0;
+  font-family: var(--oc-font-display);
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.oc .oc-svc-card__meta {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  font-size: 13px;
+  color: var(--oc-text-3);
+}
+.oc .oc-svc-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.oc .oc-svc-card__desc {
+  margin-top: 16px;
+  font-size: 14.5px;
+  line-height: 1.625;
+  color: var(--oc-text-2);
+}
+.oc .oc-svc-card__action {
+  margin-top: auto;
+  padding-top: 24px;
+}
+.oc .oc-price-list {
+  border-block: 1px solid var(--oc-line);
+}
+.oc .oc-price-list > li {
+  display: grid;
+  gap: 4px;
+  padding-block: 16px;
+}
+.oc .oc-price-list > li + li {
+  border-top: 1px solid var(--oc-line);
+}
+.oc .oc-price-list__name {
+  font-size: 15.5px;
+  font-weight: 500;
+}
+.oc .oc-price-list__desc {
+  margin-top: 2px;
+  max-width: 640px;
+  font-size: 13.5px;
+  line-height: 1.625;
+  color: var(--oc-text-2);
+}
+.oc .oc-price-list__price {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 640px) {
+  .oc .oc-price-list > li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 32px;
+  }
+  .oc .oc-price-list__price {
+    text-align: right;
+  }
+}
+@media (min-width: 768px) {
+  .oc .oc-svc-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

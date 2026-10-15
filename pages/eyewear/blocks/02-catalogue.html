@@ -1,0 +1,25 @@
+<!-- EYEWEAR · 02 CATALOGUE — showcase grid from scripts/oc-catalogue.js with category filter and
+     search (eyewear.js). Filters are kept in the URL (?category=frames&q=tortoise) so they can be
+     linked to. This is a curated showcase, not live stock: live stock and checkout are in the native
+     GHL store (see ghl-setup-guide.md → Products). -->
+<section class="oc" data-oc-render="catalogue">
+  <div class="oc-container oc-catalogue">
+    <div class="oc-catalogue__bar">
+      <div class="oc-pills" role="group" aria-label="Filter by category" data-oc-pills></div>
+      <div class="oc-search">
+        <label class="oc-sr-only" for="oc-catalogue-search">Search eyewear</label>
+        <svg class="oc-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="oc-input" id="oc-catalogue-search" type="search" placeholder="Search name, brand or colour" autocomplete="off" enterkeyhint="search" data-oc-search>
+      </div>
+    </div>
+    <p class="oc-catalogue__status" role="status" aria-live="polite" data-oc-status></p>
+    <ul class="oc-product-grid oc-product-grid--catalogue" data-oc-grid></ul>
+    <div class="oc-empty" data-oc-empty hidden>
+      <p>Nothing matches that search. Try another word, or ask us — we may have it in branch.</p>
+      <button type="button" class="oc-btn oc-btn--outline" data-oc-clear>Clear filters</button>
+      <a class="oc-btn oc-btn--brand" href="/contact" data-oc-href="links.contact">Ask us</a>
+    </div>
+    <p class="oc-catalogue__note" data-oc-text="business.priceNote">Prices include VAT where applicable. Prescription lenses are priced separately based on your prescription and lens options; availability varies by branch.</p>
+    <p class="oc-catalogue__note" data-oc-store-callout hidden></p>
+  </div>
+</section>

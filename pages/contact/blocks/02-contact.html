@@ -1,0 +1,24 @@
+<!-- CONTACT · 02 FORM + DETAILS — left: the NATIVE GHL inquiry form (OC_CONFIG.forms.contact,
+     embedded with GHL's official widget code; a labelled placeholder until it is set). Right: phone,
+     email and every branch (contact.js). Submissions create/update the contact in GHL; the dashboard
+     integration then syncs the lead. -->
+<section class="oc">
+  <div class="oc-container oc-contact">
+    <div>
+      <div class="oc-embed-card">
+        <div class="oc-embed" data-oc-render="embed-form" data-form="contact" data-kind="contact" data-title="Website inquiry form">
+          <p class="oc-catalogue__note">The inquiry form loads here on the published page.</p>
+        </div>
+      </div>
+      <p class="oc-contact__routing">We use your details only to reply to you — see our <a class="oc-text-link" href="/privacy" data-oc-href="links.privacy">privacy notice</a>. Messages reach our customer team, who pass them to your preferred branch.</p>
+    </div>
+    <div>
+      <p class="oc-eyebrow">Reach us directly</p>
+      <div class="oc-contact__direct">
+        <p><svg class="oc-icon oc-icon--muted" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg><a href="tel:+63280000100" data-oc-tel="business.phone">+63 2 8000 0100</a></p>
+        <p><svg class="oc-icon oc-icon--muted" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><a href="mailto:hello@lensmere.example" data-oc-mailto="business.email">hello@lensmere.example</a></p>
+      </div>
+      <div data-oc-render="contact-branches"></div>
+    </div>
+  </div>
+</section>

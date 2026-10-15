@@ -1,0 +1,43 @@
+<!-- BOOKING · 02 BOOKING — branch and service choice (from OC_CONFIG) + the NATIVE GHL calendar
+     for that choice (booking.js). GHL is the system of record for appointments: availability,
+     the booking form and confirmations all happen inside the GHL calendar widget. Deep links:
+     /book?branch=<branch-id>&service=<service-id>. Without a configured calendar a labelled
+     placeholder is shown and nothing can be booked. -->
+<section class="oc" data-oc-render="booking">
+  <div class="oc-container oc-booking">
+    <div class="oc-booking-card">
+      <div class="oc-step" data-oc-step="branch">
+        <h2 class="oc-step__title"><span class="oc-step__num" data-oc-step-num>1</span>Choose a branch</h2>
+        <div class="oc-choices oc-choices--3" role="group" aria-label="Branch" data-oc-branches></div>
+      </div>
+      <div class="oc-step" data-oc-step="service">
+        <h2 class="oc-step__title"><span class="oc-step__num" data-oc-step-num>2</span>Choose a service</h2>
+        <div class="oc-choices oc-choices--2" role="group" aria-label="Service" data-oc-services></div>
+      </div>
+      <div class="oc-step" data-oc-step="time">
+        <h2 class="oc-step__title"><span class="oc-step__num" data-oc-step-num>3</span>Pick a date and time</h2>
+        <p class="oc-booking__services" role="status" aria-live="polite" data-oc-summary></p>
+        <div class="oc-embed" data-oc-calendar style="margin-top:16px"></div>
+      </div>
+    </div>
+    <aside class="oc-booking-aside" aria-label="Booking information">
+      <div>
+        <p class="oc-eyebrow">How it works</p>
+        <ol class="oc-booking-aside__list">
+          <li><span class="oc-mono">01</span><span>Choose a branch and the service you need.</span></li>
+          <li><span class="oc-mono">02</span><span>Pick an open time in the calendar and add your details.</span></li>
+          <li><span class="oc-mono">03</span><span>You'll get a confirmation by email or text; we'll call if anything needs checking.</span></li>
+        </ol>
+      </div>
+      <div>
+        <p class="oc-eyebrow">Opening hours <span data-oc-hours-branch></span></p>
+        <ul class="oc-booking-aside__hours" data-oc-hours></ul>
+      </div>
+      <div>
+        <p class="oc-eyebrow">Prefer to call?</p>
+        <a class="oc-booking-aside__phone" href="tel:+63280000100" data-oc-phone>+63 2 8000 0100</a>
+        <p class="oc-booking-aside__note">Need to change or cancel? Use the link in your confirmation, or call the branch.</p>
+      </div>
+    </aside>
+  </div>
+</section>

@@ -1,0 +1,154 @@
+/*
+ * Booking — page styles (GoHighLevel-ready)
+ * Paste into this page's custom CSS (page Settings → Custom CSS), or wrapped in a style tag in the
+ * page's first Custom Code block. Requires the global styles/oc-base.css. Every selector is scoped
+ * under `.oc`.
+ */
+
+.oc .oc-booking {
+  display: grid;
+  gap: 40px;
+  padding-block: 48px;
+}
+.oc .oc-booking > * {
+  min-width: 0;
+}
+.oc .oc-booking-card {
+  border: 1px solid var(--oc-line);
+  border-radius: 24px;
+  background: var(--oc-surface);
+  padding: 20px;
+}
+.oc .oc-step {
+  border-top: 1px solid var(--oc-line);
+  padding-block: 28px;
+}
+.oc .oc-step:first-child {
+  border-top: 0;
+  padding-top: 4px;
+}
+.oc .oc-step:last-child {
+  padding-bottom: 4px;
+}
+.oc .oc-step__title {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.oc .oc-step__num {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--oc-brand);
+  color: var(--oc-brand-ink);
+  font-family: var(--oc-font-mono);
+  font-size: 12px;
+}
+.oc .oc-choices {
+  display: grid;
+  gap: 12px;
+}
+.oc .oc-choice {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--oc-line-strong);
+  border-radius: 14px;
+  background: var(--oc-surface);
+  padding: 16px;
+  text-align: left;
+  transition: border-color 0.15s;
+}
+.oc .oc-choice:hover {
+  border-color: var(--oc-text-3);
+}
+.oc .oc-choice[aria-pressed="true"] {
+  border-color: var(--oc-ink);
+  box-shadow: inset 0 0 0 1px var(--oc-ink);
+}
+.oc .oc-choice__name {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+.oc .oc-choice__sub {
+  margin-top: 4px;
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--oc-text-3);
+}
+.oc .oc-booking__services {
+  margin-top: 12px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--oc-text-2);
+}
+.oc .oc-booking-aside > * + * {
+  margin-top: 32px;
+}
+.oc .oc-booking-aside__list {
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 1.625;
+  color: var(--oc-text-2);
+}
+.oc .oc-booking-aside__list li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+}
+.oc .oc-booking-aside__list li + li {
+  margin-top: 12px;
+}
+.oc .oc-booking-aside__list .oc-mono {
+  font-size: 12.5px;
+  color: var(--oc-text-3);
+  padding-top: 1px;
+}
+.oc .oc-booking-aside__hours {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--oc-text-2);
+}
+.oc .oc-booking-aside__phone {
+  margin-top: 12px;
+  display: block;
+  font-family: var(--oc-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.oc .oc-booking-aside__phone:hover {
+  text-decoration: underline;
+}
+.oc .oc-booking-aside__note {
+  margin-top: 12px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--oc-text-3);
+}
+@media (min-width: 640px) {
+  .oc .oc-booking-card {
+    padding: 32px;
+  }
+  .oc .oc-choices--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .oc .oc-choices--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .oc .oc-booking {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+  .oc .oc-booking-aside {
+    padding-top: 8px;
+  }
+}

@@ -52,7 +52,7 @@ import {
   type Ctx,
 } from "./core";
 import { applyMovement, applyReservationDelta, lockBalances, locationForBranch, receiveUnits } from "./inventory";
-import { enqueueOutbound } from "./outbox";
+import { onOrderReady, onSaleChanged } from "@/server/integrations/ghl/triggers";
 
 type SaleRow = typeof sales.$inferSelect;
 
@@ -414,6 +414,7 @@ export async function checkout(ctx: Ctx, raw: unknown) {
       }
       const settled = await settle(tx, ctx, { id: saleId, totalCents: priced.totalCents, paidCents: paid, refundedCents: 0, refundedCashCents: 0, status: "completed" });
 
+      await onSaleChanged(tx, ctx.businessId, saleId);
       await audit(tx, ctx, {
         action: "sale.completed",
         entityType: "sale",
@@ -510,6 +511,7 @@ export async function createOrder(ctx: Ctx, raw: unknown) {
         paid = input.deposit.amountCents;
       }
       await settle(tx, ctx, { id: saleId, totalCents: priced.totalCents, paidCents: paid, refundedCents: 0, refundedCashCents: 0, status: "open" });
+      await onSaleChanged(tx, ctx.businessId, saleId);
       await audit(tx, ctx, {
         action: "order.created",
         entityType: "sale",
@@ -656,16 +658,11 @@ async function transitionInTx(tx: Tx, ctx: Ctx, saleId: string, to: FulfillmentS
   await tx.update(sales).set(patch).where(eq(sales.id, saleId));
 
   if (to === "ready_for_pickup") {
-    const queued = await enqueueOutbound(tx, ctx, {
-      eventType: "order.ready_for_pickup",
-      entityType: "sale",
-      entityId: saleId,
-      payload: { number: sale.number, customerId: sale.customerId },
-      idempotencyKey: `order-ready:${saleId}:${at.getTime()}`,
-    });
+    const queued = sale.customerId ? await onOrderReady(tx, ctx.businessId, saleId, at.getTime()) : false;
     note += queued ? " · customer notification queued (GoHighLevel)" : " · no customer message sent (messaging not configured)";
   }
 
+  await onSaleChanged(tx, ctx.businessId, saleId);
   await audit(tx, ctx, {
     action: "order.status_changed",
     entityType: "sale",
@@ -724,6 +721,7 @@ export async function updateOrder(
       } else {
         await tx.update(sales).set(patch).where(eq(sales.id, saleId));
       }
+      await onSaleChanged(tx, ctx.businessId, saleId);
       await audit(tx, ctx, { action: "order.updated", entityType: "sale", entityId: saleId, summary: `Updated order ${sale.number}` });
       return { saleId };
     });
@@ -773,6 +771,7 @@ export async function recordPayment(ctx: Ctx, raw: unknown) {
         })
         .returning({ id: payments.id });
       const settled = await settle(tx, ctx, { ...sale, paidCents: sale.paidCents + input.amountCents });
+      await onSaleChanged(tx, ctx.businessId, sale.id);
       await audit(tx, ctx, {
         action: "payment.recorded",
         entityType: "sale",
@@ -803,6 +802,7 @@ export async function voidPayment(ctx: Ctx, paymentId: string, reason: string) {
       const at = now(ctx);
       await tx.update(payments).set({ status: "voided", voidedAt: at, voidReason: reason.trim() }).where(eq(payments.id, p.id));
       await settle(tx, ctx, { ...sale, paidCents: paid });
+      await onSaleChanged(tx, ctx.businessId, sale.id);
       await audit(tx, ctx, {
         action: "payment.voided",
         entityType: "sale",
@@ -941,6 +941,7 @@ export async function refundSale(ctx: Ctx, raw: unknown) {
         refundedCents: sale.refundedCents + (isDepositReturn ? 0 : amount),
         refundedCashCents: sale.refundedCashCents + (isCash ? amount : 0),
       });
+      await onSaleChanged(tx, ctx.businessId, sale.id);
       await audit(tx, ctx, {
         action: "sale.refunded",
         entityType: "sale",
@@ -989,6 +990,7 @@ export async function cancelSale(ctx: Ctx, saleId: string, reason: string) {
         .update(sales)
         .set({ status: "cancelled", cancelledAt: at, cancelReason: reason.trim(), balanceDueCents: 0, updatedAt: at })
         .where(eq(sales.id, saleId));
+      await onSaleChanged(tx, ctx.businessId, saleId);
       await audit(tx, ctx, { action: "sale.cancelled", entityType: "sale", entityId: saleId, summary: `Cancelled sale ${sale.number}: ${reason.trim()}` });
       return { saleId };
     });
@@ -1227,4 +1229,159 @@ export async function outstandingSummary(ctx: Ctx, branchId?: string | null) {
     overdueCents: Number(r.overdue),
     overdueCount: Number(r.overdue_count),
   };
+}
+
+// ─── Online orders imported from GoHighLevel ─────────────────────────────────
+
+export type OnlineSaleInput = {
+  externalOrderId: string;
+  externalStatus: string | null;
+  branchId: string;
+  customerId: string | null;
+  lines: { variantId: string; quantity: number; unitPriceCents: number }[];
+  /** Successful GHL transactions for the order (amounts in minor units). */
+  payments: { reference: string; amountCents: number; receivedAt: Date }[];
+  orderedAt: Date;
+  notes: string | null;
+};
+
+/**
+ * Records a PAID GoHighLevel online order as a completed sale, exactly once per GHL order id.
+ * - Prices come from the GHL order (what the customer actually paid), tax follows the business setting.
+ * - Stock is consumed once, at import (the defined consumption event for online orders), with a
+ *   per-line idempotency key. A line with too little stock is still recorded (the money was taken) but
+ *   is reported as oversold instead of driving stock negative.
+ * - Payments use method "ghl_online" with the GHL transaction id as reference — they were processed by
+ *   GHL, unlike manual POS payments.
+ */
+export async function importOnlineSale(ctx: Ctx, input: OnlineSaleInput): Promise<{ saleId: string; number: string; created: boolean; oversold: string[]; totalCents: number }> {
+  requirePermission(ctx, "pos.use");
+  const existing = async () => {
+    const [s] = await db()
+      .select({ saleId: sales.id, number: sales.number, totalCents: sales.totalCents })
+      .from(sales)
+      .where(and(eq(sales.businessId, ctx.businessId), eq(sales.externalGhlOrderId, input.externalOrderId)))
+      .limit(1);
+    return s ?? null;
+  };
+  const prior = await existing();
+  if (prior) return { ...prior, created: false, oversold: [] };
+  try {
+    return await getDb().transaction(async (tx) => {
+      const tax = await businessTax(tx, ctx);
+      const branch = await activeBranch(tx, ctx, input.branchId);
+      const location = await locationForBranch(tx, ctx, branch.id);
+      const ids = [...new Set(input.lines.map((l) => l.variantId))];
+      const rows = await tx
+        .select({ id: productVariants.id, sku: productVariants.sku, label: productVariants.label, costCents: productVariants.costCents, productName: products.name, productType: products.productType, taxExempt: products.taxExempt, categoryId: products.categoryId })
+        .from(productVariants)
+        .innerJoin(products, eq(products.id, productVariants.productId))
+        .where(and(eq(productVariants.businessId, ctx.businessId), inArray(productVariants.id, ids)));
+      const byId = new Map(rows.map((r) => [r.id, r]));
+      const pricing: PricingLineInput[] = [];
+      const meta: LineMeta[] = [];
+      for (const l of input.lines) {
+        const v = byId.get(l.variantId);
+        if (!v) throw invalid("An online order line points at a product that no longer exists.");
+        const id = randomUUID();
+        pricing.push({ key: id, quantity: l.quantity, unitPriceCents: l.unitPriceCents, lineDiscountCents: 0, taxExempt: v.taxExempt });
+        meta.push({ id, variantId: v.id, productName: v.productName, variantLabel: v.label, sku: v.sku, productType: v.productType, categoryId: v.categoryId, unitCostCents: v.productType === "service" ? 0 : v.costCents, prescriptionId: null, notes: null });
+      }
+      const priced = price(pricing, tax, null);
+      const paid = Math.min(priced.totalCents, input.payments.reduce((s, p) => s + p.amountCents, 0));
+      const saleId = randomUUID();
+      const number = await nextNumber(tx, ctx.businessId, "sale", "S-");
+      const at = input.orderedAt;
+      await tx.insert(sales).values({
+        id: saleId,
+        businessId: ctx.businessId,
+        number,
+        kind: "pos",
+        status: "completed",
+        fulfillmentStatus: "completed",
+        paymentStatus: "unpaid",
+        branchId: branch.id,
+        locationId: location.id,
+        customerId: input.customerId,
+        soldByMembershipId: null,
+        currency: tax.currency,
+        taxRateBps: tax.taxRateBps,
+        pricesIncludeTax: tax.pricesIncludeTax,
+        subtotalCents: priced.subtotalCents,
+        discountCents: priced.discountCents,
+        taxCents: priced.taxCents,
+        totalCents: priced.totalCents,
+        costCents: meta.reduce((s, m, i) => s + m.unitCostCents * priced.lines[i].quantity, 0),
+        balanceDueCents: priced.totalCents,
+        notes: input.notes,
+        idempotencyKey: `ghl-order:${input.externalOrderId}`,
+        channel: "ghl_online",
+        externalGhlOrderId: input.externalOrderId,
+        externalGhlStatus: input.externalStatus,
+        createdAt: at,
+        completedAt: at,
+        updatedAt: new Date(),
+      });
+      await insertItems(tx, ctx, saleId, meta, priced);
+
+      const oversold: string[] = [];
+      const needs = stockNeeds(meta, priced);
+      if (needs.size) {
+        const balances = await lockBalances(tx, ctx, location.id, [...needs.keys()]);
+        for (let i = 0; i < meta.length; i++) {
+          const m = meta[i];
+          if (m.productType !== "stock") continue;
+          const b = balances.get(m.variantId);
+          const qty = priced.lines[i].quantity;
+          if (!b || b.onHand - b.reserved < qty) {
+            oversold.push(`${m.productName} (${m.sku}): ${Math.max(0, b ? b.onHand - b.reserved : 0)} available, ${qty} sold online`);
+            continue;
+          }
+          await applyMovement(tx, ctx, balances, {
+            variantId: m.variantId,
+            locationId: location.id,
+            type: "sale",
+            quantity: -qty,
+            unitCostCents: m.unitCostCents,
+            reason: `Online order ${number} (GoHighLevel)`,
+            referenceType: "sale",
+            referenceId: saleId,
+            referenceLineId: m.id,
+            idempotencyKey: `ghl-order:${input.externalOrderId}:${m.id}`,
+          });
+        }
+      }
+      let remaining = paid;
+      for (const p of input.payments) {
+        const amount = Math.min(p.amountCents, remaining);
+        if (amount <= 0) break;
+        remaining -= amount;
+        await tx.insert(payments).values({
+          businessId: ctx.businessId,
+          saleId,
+          method: "ghl_online",
+          amountCents: amount,
+          reference: p.reference,
+          receivedAt: p.receivedAt,
+          idempotencyKey: `ghl-order:${input.externalOrderId}:pay:${p.reference}`,
+          notes: "Processed by GoHighLevel online checkout",
+          createdAt: new Date(),
+        });
+      }
+      await settle(tx, ctx, { id: saleId, totalCents: priced.totalCents, paidCents: paid, refundedCents: 0, refundedCashCents: 0, status: "completed" });
+      await audit(tx, ctx, {
+        action: "sale.imported",
+        entityType: "sale",
+        entityId: saleId,
+        summary: `Imported GoHighLevel online order ${input.externalOrderId} as ${number}${oversold.length ? ` — ${oversold.length} line(s) oversold` : ""}`,
+      });
+      return { saleId, number, created: true, oversold, totalCents: priced.totalCents };
+    });
+  } catch (error) {
+    if (isUniqueViolation(error, "sales_ghl_order_key") || isUniqueViolation(error, "sales_idempotency_key")) {
+      const again = await existing();
+      if (again) return { ...again, created: false, oversold: [] };
+    }
+    mapDbError(error);
+  }
 }

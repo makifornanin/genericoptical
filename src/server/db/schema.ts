@@ -70,7 +70,7 @@ export const fulfillmentStatus = pgEnum("fulfillment_status", [
   "cancelled",
 ]);
 export const paymentStatus = pgEnum("payment_status", ["unpaid", "partially_paid", "paid"]);
-export const paymentMethod = pgEnum("payment_method", ["cash", "card", "bank_transfer", "gcash", "maya", "other"]);
+export const paymentMethod = pgEnum("payment_method", ["cash", "card", "bank_transfer", "gcash", "maya", "other", "ghl_online"]);
 export const refundMethod = pgEnum("refund_method", [
   "cash",
   "card",
@@ -100,9 +100,21 @@ export const purchaseOrderStatus = pgEnum("purchase_order_status", [
   "received",
   "cancelled",
 ]);
-export const integrationStatus = pgEnum("integration_status", ["not_configured", "connected", "error", "disabled"]);
 export const syncDirection = pgEnum("sync_direction", ["inbound", "outbound"]);
-export const syncStatus = pgEnum("sync_status", ["pending", "processed", "failed", "skipped"]);
+
+/** Connection lifecycle. `reauth_required` = the refresh token was rejected; an owner must reconnect. */
+export const INTEGRATION_STATUSES = ["not_configured", "connected", "error", "disabled", "reauth_required"] as const;
+export type IntegrationStatus = (typeof INTEGRATION_STATUSES)[number];
+/**
+ * Sync event lifecycle: pending -> processing -> synced | skipped | retry_scheduled -> ... | failed (gave up)
+ * | needs_review (a person must decide, e.g. a conflict). "synced" is only set after the external
+ * system confirmed the operation.
+ */
+export const SYNC_STATUSES = ["pending", "processing", "synced", "retry_scheduled", "failed", "needs_review", "skipped"] as const;
+export type SyncStatus = (typeof SYNC_STATUSES)[number];
+export const SYNC_CATEGORIES = ["contacts", "opportunities", "appointments", "products", "inventory", "sales", "orders", "system"] as const;
+export type SyncCategory = (typeof SYNC_CATEGORIES)[number];
+const inList = (values: readonly string[]) => sql.raw(values.map((v) => `'${v}'`).join(", "));
 
 // ─── Tenancy & identity ──────────────────────────────────────────────────────
 
@@ -459,6 +471,10 @@ export const appointments = pgTable(
     guestEmail: text("guest_email"),
     cancelReason: text("cancel_reason"),
     externalGhlAppointmentId: text("external_ghl_appointment_id"),
+    ghlCalendarId: text("ghl_calendar_id"),
+    ghlUpdatedAt: ts("ghl_updated_at"),
+    /** local = not linked to GHL; synced = matches GHL; pending/failed = a change still has to reach GHL. */
+    syncState: text("sync_state").$type<"local" | "synced" | "pending" | "failed">().notNull().default("local"),
     createdByMembershipId: uuid("created_by_membership_id"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -470,6 +486,7 @@ export const appointments = pgTable(
     index().on(t.businessId, t.practitionerMembershipId, t.startsAt),
     index().on(t.businessId, t.customerId),
     check("appointments_time_order", sql`${t.endsAt} > ${t.startsAt}`),
+    check("appointments_sync_state_check", sql`${t.syncState} in ('local', 'synced', 'pending', 'failed')`),
     foreignKey({ columns: [t.businessId, t.branchId], foreignColumns: [branches.businessId, branches.id] }),
     foreignKey({
       columns: [t.businessId, t.appointmentTypeId],
@@ -842,6 +859,10 @@ export const sales = pgTable(
     labSupplierId: uuid("lab_supplier_id"),
     labReference: text("lab_reference"),
     idempotencyKey: text("idempotency_key"),
+    /** in_store = POS/orders rung up in the dashboard; ghl_online = imported from a GoHighLevel checkout. */
+    channel: text("channel").$type<"in_store" | "ghl_online">().notNull().default("in_store"),
+    externalGhlOrderId: text("external_ghl_order_id"),
+    externalGhlStatus: text("external_ghl_status"),
     createdAt: createdAt(),
     /** Last time the order reached "ready for pickup" — measures turnaround against `dueOn`. */
     readyAt: ts("ready_at"),
@@ -854,6 +875,8 @@ export const sales = pgTable(
     unique().on(t.businessId, t.number),
     unique("sales_business_id_id_key").on(t.businessId, t.id),
     uniqueIndex("sales_idempotency_key").on(t.businessId, t.idempotencyKey).where(sql`${t.idempotencyKey} is not null`),
+    uniqueIndex("sales_ghl_order_key").on(t.businessId, t.externalGhlOrderId).where(sql`${t.externalGhlOrderId} is not null`),
+    check("sales_channel_check", sql`${t.channel} in ('in_store', 'ghl_online')`),
     index().on(t.businessId, t.completedAt),
     index().on(t.businessId, t.createdAt),
     index().on(t.businessId, t.customerId),
@@ -1106,18 +1129,40 @@ export const integrationConnections = pgTable(
     id: id(),
     businessId: businessId(),
     provider: text("provider").notNull(),
-    status: integrationStatus("status").notNull().default("not_configured"),
+    status: text("status").$type<IntegrationStatus>().notNull().default("not_configured"),
+    /** "oauth" (marketplace app, preferred) or "private_token" (single sub-account Private Integration). */
+    authType: text("auth_type").$type<"oauth" | "private_token">(),
     externalAccountId: text("external_account_id"),
+    accountName: text("account_name"),
+    accountTimezone: text("account_timezone"),
+    companyId: text("company_id"),
+    /** Private Integration token (private_token auth), AES-256-GCM encrypted. */
     credentialsEncrypted: text("credentials_encrypted"),
+    accessTokenEncrypted: text("access_token_encrypted"),
+    refreshTokenEncrypted: text("refresh_token_encrypted"),
+    tokenExpiresAt: ts("token_expires_at"),
+    scopes: text("scopes"),
     webhookSecretEncrypted: text("webhook_secret_encrypted"),
     settings: jsonb("settings").$type<Record<string, unknown>>().notNull().default({}),
+    connectedByMembershipId: uuid("connected_by_membership_id"),
+    connectedAt: ts("connected_at"),
     lastTestedAt: ts("last_tested_at"),
     lastSyncAt: ts("last_sync_at"),
+    lastSuccessAt: ts("last_success_at"),
+    rateLimitedUntil: ts("rate_limited_until"),
     lastError: text("last_error"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [unique().on(t.businessId, t.provider)],
+  (t) => [
+    unique().on(t.businessId, t.provider),
+    // One external account (GHL location) can belong to only one business.
+    uniqueIndex("integration_connections_external_account_key")
+      .on(t.provider, t.externalAccountId)
+      .where(sql`${t.externalAccountId} is not null and ${t.status} <> 'disabled'`),
+    check("integration_connections_status_check", sql`${t.status} in (${inList(INTEGRATION_STATUSES)})`),
+    check("integration_connections_auth_type_check", sql`${t.authType} is null or ${t.authType} in ('oauth', 'private_token')`),
+  ],
 );
 
 export const integrationSyncEvents = pgTable(
@@ -1132,19 +1177,229 @@ export const integrationSyncEvents = pgTable(
     entityId: uuid("entity_id"),
     externalId: text("external_id"),
     idempotencyKey: text("idempotency_key"),
-    status: syncStatus("status").notNull().default("pending"),
+    category: text("category").$type<SyncCategory>().notNull().default("system"),
+    status: text("status").$type<SyncStatus>().notNull().default("pending"),
     attempts: integer("attempts").notNull().default(0),
     lastError: text("last_error"),
+    lastHttpStatus: integer("last_http_status"),
     payload: jsonb("payload").$type<Record<string, unknown>>(),
+    /** What the handler concluded (external ids, counts) — shown in the sync log. */
+    result: jsonb("result").$type<Record<string, unknown>>(),
     nextAttemptAt: ts("next_attempt_at").notNull().defaultNow(),
+    lockedAt: ts("locked_at"),
+    lockedBy: text("locked_by"),
     createdAt: createdAt(),
     processedAt: ts("processed_at"),
+    reviewedAt: ts("reviewed_at"),
+    reviewedByMembershipId: uuid("reviewed_by_membership_id"),
   },
   (t) => [
     uniqueIndex("integration_sync_events_idempotency_key")
       .on(t.businessId, t.provider, t.direction, t.idempotencyKey)
       .where(sql`${t.idempotencyKey} is not null`),
     index().on(t.businessId, t.status, t.nextAttemptAt),
+    index("integration_sync_events_due").on(t.status, t.nextAttemptAt),
+    index().on(t.businessId, t.category, t.createdAt),
+    check("integration_sync_events_status_check", sql`${t.status} in (${inList(SYNC_STATUSES)})`),
+    check("integration_sync_events_category_check", sql`${t.category} in (${inList(SYNC_CATEGORIES)})`),
+  ],
+);
+
+/** Single-use OAuth `state` values, bound to the business and staff member who started the connection. */
+export const oauthStates = pgTable(
+  "oauth_states",
+  {
+    id: text("id").primaryKey(), // SHA-256 of the state value; the raw value only travels in the redirect
+    businessId: businessId(),
+    membershipId: uuid("membership_id").notNull(),
+    provider: text("provider").notNull(),
+    expiresAt: ts("expires_at").notNull(),
+    usedAt: ts("used_at"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    foreignKey({ columns: [t.businessId, t.membershipId], foreignColumns: [businessMemberships.businessId, businessMemberships.id] }).onDelete("cascade"),
+  ],
+);
+
+/** Local mirror of GHL contacts with links to the lead/customer they belong to. Keyed by the stable GHL id. */
+export const ghlContacts = pgTable(
+  "ghl_contacts",
+  {
+    id: id(),
+    businessId: businessId(),
+    ghlContactId: text("ghl_contact_id").notNull(),
+    leadId: uuid("lead_id"),
+    customerId: uuid("customer_id"),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
+    email: text("email"),
+    phone: text("phone"),
+    tags: jsonb("tags").$type<string[]>().notNull().default([]),
+    source: text("source"),
+    ghlUpdatedAt: ts("ghl_updated_at"),
+    lastSyncedAt: ts("last_synced_at"),
+    deletedAt: ts("deleted_at"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    unique("ghl_contacts_business_contact_key").on(t.businessId, t.ghlContactId),
+    index().on(t.businessId, t.leadId),
+    index().on(t.businessId, t.customerId),
+    foreignKey({ columns: [t.businessId, t.leadId], foreignColumns: [leads.businessId, leads.id] }),
+    foreignKey({ columns: [t.businessId, t.customerId], foreignColumns: [customers.businessId, customers.id] }),
+  ],
+);
+
+export const ghlPipelines = pgTable(
+  "ghl_pipelines",
+  {
+    id: id(),
+    businessId: businessId(),
+    ghlPipelineId: text("ghl_pipeline_id").notNull(),
+    name: text("name").notNull(),
+    stages: jsonb("stages").$type<{ id: string; name: string; position: number }[]>().notNull().default([]),
+    fetchedAt: ts("fetched_at").notNull().defaultNow(),
+  },
+  (t) => [unique("ghl_pipelines_business_pipeline_key").on(t.businessId, t.ghlPipelineId)],
+);
+
+/** Mirror of GHL opportunities. Pipeline value is CRM data — never revenue. */
+export const ghlOpportunities = pgTable(
+  "ghl_opportunities",
+  {
+    id: id(),
+    businessId: businessId(),
+    ghlOpportunityId: text("ghl_opportunity_id").notNull(),
+    ghlContactId: text("ghl_contact_id"),
+    leadId: uuid("lead_id"),
+    customerId: uuid("customer_id"),
+    /** The dashboard sale/order this opportunity represents, when it was created from one. */
+    saleId: uuid("sale_id"),
+    name: text("name").notNull(),
+    pipelineId: text("pipeline_id"),
+    pipelineStageId: text("pipeline_stage_id"),
+    status: text("status").notNull().default("open"),
+    monetaryValueCents: money("monetary_value_cents").notNull().default(0),
+    assignedTo: text("assigned_to"),
+    source: text("source"),
+    ghlCreatedAt: ts("ghl_created_at"),
+    ghlUpdatedAt: ts("ghl_updated_at"),
+    lastSyncedAt: ts("last_synced_at"),
+    /** What the dashboard last wrote (for sale opportunities) — lets a sync tell GHL-side edits from stale local data. */
+    lastPushed: jsonb("last_pushed").$type<{ status: string; stageId: string | null; valueCents: number; name: string }>(),
+    deletedAt: ts("deleted_at"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    unique("ghl_opportunities_business_opportunity_key").on(t.businessId, t.ghlOpportunityId),
+    uniqueIndex("ghl_opportunities_sale_key").on(t.businessId, t.saleId).where(sql`${t.saleId} is not null`),
+    index().on(t.businessId, t.status),
+    index().on(t.businessId, t.pipelineId, t.pipelineStageId),
+    check("ghl_opportunities_status_check", sql`${t.status} in ('open', 'won', 'lost', 'abandoned')`),
+    foreignKey({ columns: [t.businessId, t.leadId], foreignColumns: [leads.businessId, leads.id] }),
+    foreignKey({ columns: [t.businessId, t.customerId], foreignColumns: [customers.businessId, customers.id] }),
+    foreignKey({ columns: [t.businessId, t.saleId], foreignColumns: [sales.businessId, sales.id] }),
+  ],
+);
+
+/** GHL calendars and which branch + appointment type each one represents locally. */
+export const ghlCalendars = pgTable(
+  "ghl_calendars",
+  {
+    id: id(),
+    businessId: businessId(),
+    ghlCalendarId: text("ghl_calendar_id").notNull(),
+    name: text("name").notNull(),
+    branchId: uuid("branch_id"),
+    appointmentTypeId: uuid("appointment_type_id"),
+    isActive: boolean("is_active").notNull().default(true),
+    fetchedAt: ts("fetched_at").notNull().defaultNow(),
+  },
+  (t) => [
+    unique("ghl_calendars_business_calendar_key").on(t.businessId, t.ghlCalendarId),
+    foreignKey({ columns: [t.businessId, t.branchId], foreignColumns: [branches.businessId, branches.id] }),
+    foreignKey({ columns: [t.businessId, t.appointmentTypeId], foreignColumns: [appointmentTypes.businessId, appointmentTypes.id] }),
+  ],
+);
+
+/** GHL users <-> staff members (for appointment assignment and opportunity owners). */
+export const ghlUsers = pgTable(
+  "ghl_users",
+  {
+    id: id(),
+    businessId: businessId(),
+    ghlUserId: text("ghl_user_id").notNull(),
+    name: text("name").notNull(),
+    email: text("email"),
+    membershipId: uuid("membership_id"),
+    fetchedAt: ts("fetched_at").notNull().defaultNow(),
+  },
+  (t) => [
+    unique("ghl_users_business_user_key").on(t.businessId, t.ghlUserId),
+    uniqueIndex("ghl_users_membership_key").on(t.businessId, t.membershipId).where(sql`${t.membershipId} is not null`),
+    foreignKey({ columns: [t.businessId, t.membershipId], foreignColumns: [businessMemberships.businessId, businessMemberships.id] }),
+  ],
+);
+
+/** Dashboard variant <-> GHL product + price. The dashboard is the source of truth for both. */
+export const ghlProductLinks = pgTable(
+  "ghl_product_links",
+  {
+    id: id(),
+    businessId: businessId(),
+    productId: uuid("product_id").notNull(),
+    variantId: uuid("variant_id").notNull(),
+    ghlProductId: text("ghl_product_id"),
+    ghlPriceId: text("ghl_price_id"),
+    /** Hash of the product/price fields last confirmed by GHL, to skip no-op updates. */
+    lastPushedHash: text("last_pushed_hash"),
+    lastPushedQuantity: integer("last_pushed_quantity"),
+    lastSyncedAt: ts("last_synced_at"),
+    lastError: text("last_error"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    unique("ghl_product_links_variant_key").on(t.businessId, t.variantId),
+    uniqueIndex("ghl_product_links_price_key").on(t.businessId, t.ghlPriceId).where(sql`${t.ghlPriceId} is not null`),
+    index().on(t.businessId, t.ghlProductId),
+    foreignKey({ columns: [t.businessId, t.productId], foreignColumns: [products.businessId, products.id] }).onDelete("cascade"),
+    foreignKey({ columns: [t.businessId, t.variantId], foreignColumns: [productVariants.businessId, productVariants.id] }).onDelete("cascade"),
+  ],
+);
+
+/**
+ * Reconciliation findings (stock that differs from GHL, orders missing locally, duplicates, stale
+ * records). One open row per finding; resolving never changes local stock silently.
+ */
+export const integrationMismatches = pgTable(
+  "integration_mismatches",
+  {
+    id: id(),
+    businessId: businessId(),
+    provider: text("provider").notNull(),
+    kind: text("kind").notNull(),
+    dedupeKey: text("dedupe_key").notNull(),
+    entityType: text("entity_type"),
+    entityId: uuid("entity_id"),
+    externalId: text("external_id"),
+    message: text("message").notNull(),
+    localValue: jsonb("local_value").$type<unknown>(),
+    externalValue: jsonb("external_value").$type<unknown>(),
+    status: text("status").notNull().default("open"),
+    detectedAt: ts("detected_at").notNull().defaultNow(),
+    lastSeenAt: ts("last_seen_at").notNull().defaultNow(),
+    resolvedAt: ts("resolved_at"),
+    resolvedByMembershipId: uuid("resolved_by_membership_id"),
+    resolution: text("resolution"),
+  },
+  (t) => [
+    uniqueIndex("integration_mismatches_open_key").on(t.businessId, t.provider, t.kind, t.dedupeKey).where(sql`${t.status} = 'open'`),
+    index().on(t.businessId, t.status, t.detectedAt),
+    check("integration_mismatches_status_check", sql`${t.status} in ('open', 'resolved', 'ignored')`),
   ],
 );
 

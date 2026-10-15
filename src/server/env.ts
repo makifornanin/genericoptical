@@ -13,6 +13,18 @@ const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   /** Directory for uploaded expense attachments (local disk adapter). */
   UPLOAD_DIR: z.string().default(".data/uploads"),
+  /** GoHighLevel marketplace app (OAuth). Optional: without them only the Private Integration option is offered. */
+  GHL_CLIENT_ID: z.string().optional(),
+  GHL_CLIENT_SECRET: z.string().optional(),
+  /** Defaults to <APP_URL>/api/integrations/ghl/oauth/callback; must match the app's redirect URI exactly. */
+  GHL_REDIRECT_URI: z.string().url().optional(),
+  /** White-label agencies: https://marketplace.leadconnectorhq.com */
+  GHL_MARKETPLACE_URL: z.string().url().optional(),
+  /** Override the published webhook verification keys if HighLevel rotates them. */
+  GHL_WEBHOOK_ED25519_PUBLIC_KEY: z.string().optional(),
+  GHL_WEBHOOK_RSA_PUBLIC_KEY: z.string().optional(),
+  /** Number of trusted reverse proxies in front of the app (for client IPs from X-Forwarded-For). */
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
 });
 
 export type Env = z.infer<typeof schema>;

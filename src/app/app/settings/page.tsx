@@ -9,13 +9,14 @@ import { Table, TableWrap, TD, TH, THead, TR, type SearchParams } from "@/compon
 import { formatter } from "@/lib/format";
 import { requireSession } from "@/server/auth/session";
 import { getDb } from "@/server/db";
-import { env } from "@/server/env";
-import { getGhlStatus } from "@/server/integrations/ghl";
+import { ghlOverview, listMismatches, listSyncEvents } from "@/server/integrations/ghl";
 import { appointmentTypes } from "@/server/db/schema";
 import { asc, eq } from "drizzle-orm";
 import { can } from "@/server/services/core";
 import { listBranches } from "@/server/services/settings";
-import { AppointmentTypeDialog, BranchDialog, DemoPanel, GhlPanel, HoursForm, ProfileForm, TaxForm, WebsiteForm } from "./forms";
+import { Pagination } from "@/components/ui/table";
+import { AppointmentTypeDialog, BranchDialog, DemoPanel, HoursForm, ProfileForm, TaxForm, WebsiteForm } from "./forms";
+import { EventTable, GhlCalendarMapping, GhlConnectionCard, GhlEndpoints, GhlMismatches, GhlProblems, GhlSettingsForm, GhlSyncStatus, GhlUserMapping } from "./ghl-panel";
 
 const PATH = "/app/settings";
 
@@ -174,20 +175,64 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
   } else if (tab === "integrations") {
     if (!can(ctx, "integrations.manage")) body = <p className="text-[13.5px] text-text-2">You don&apos;t have permission to manage integrations.</p>;
     else {
-      const g = await getGhlStatus(ctx);
+      const view = typeof sp.ghl === "string" ? sp.ghl : "overview";
+      const overview = await ghlOverview(ctx);
+      const flash = sp.ghl === "connected" ? { kind: "connected" as const, message: `Connected to ${typeof sp.account === "string" ? sp.account : "GoHighLevel"}.` } : sp.ghl === "error" ? { kind: "error" as const, message: typeof sp.message === "string" ? sp.message : "Connecting GoHighLevel failed." } : null;
+      const toRow = (e: Awaited<ReturnType<typeof listSyncEvents>>["rows"][number]) => ({ id: e.id, category: e.category, eventType: e.eventType, status: e.status, direction: e.direction, lastError: e.lastError, attempts: e.attempts, createdAt: e.createdAt.toISOString(), externalId: e.externalId });
+      let section: React.ReactNode;
+      if (view === "mapping") {
+        section = (
+          <>
+            <GhlSettingsForm overview={overview} />
+            <GhlCalendarMapping overview={overview} />
+            <GhlUserMapping overview={overview} />
+          </>
+        );
+      } else if (view === "log") {
+        const page = await listSyncEvents(ctx, { status: typeof sp.status === "string" ? sp.status : null, category: typeof sp.category === "string" ? sp.category : null, page: Number(sp.page ?? 1) || 1 });
+        section = (
+          <Card>
+            <CardHeader title="Sync log" subtitle={`${page.total} event(s)${typeof sp.category === "string" ? ` · ${sp.category}` : ""}${typeof sp.status === "string" ? ` · ${sp.status}` : ""}`} />
+            <div className="flex flex-wrap gap-2 px-5 pb-3">
+              <Segmented pathname={PATH} params={sp} param="status" options={[{ value: "", label: "All" }, { value: "problems", label: "Needs attention" }, { value: "pending", label: "Queued" }, { value: "synced", label: "Synced" }, { value: "skipped", label: "Skipped" }]} />
+            </div>
+            <EventTable events={page.rows.map(toRow)} empty="No events." />
+            <Pagination pathname={PATH} params={sp} page={page.page} pageCount={page.pageCount} total={page.total} pageSize={page.pageSize} />
+          </Card>
+        );
+      } else if (view === "endpoints") {
+        section = <GhlEndpoints overview={overview} />;
+      } else {
+        const problems = await listSyncEvents(ctx, { status: "problems", page: 1 });
+        const mismatches = await listMismatches(ctx, "open");
+        section = (
+          <>
+            <GhlConnectionCard overview={overview} flash={flash} />
+            {overview.connection && overview.connection.status !== "disabled" && overview.connection.status !== "not_configured" ? (
+              <>
+                <GhlSyncStatus overview={overview} />
+                <GhlProblems events={problems.rows.map(toRow)} />
+                <GhlMismatches rows={mismatches.map((m) => ({ id: m.id, kind: m.kind, message: m.message, detectedAt: m.detectedAt.toISOString(), lastSeenAt: m.lastSeenAt.toISOString() }))} />
+              </>
+            ) : null}
+          </>
+        );
+      }
       body = (
-        <GhlPanel
-          status={g.status}
-          locationId={g.locationId}
-          hasToken={g.hasToken}
-          webhookUrl={`${env().APP_URL}/api/integrations/ghl/webhook/${b.slug}`}
-          webhookSecret={g.webhookSecret}
-          settings={g.settings}
-          lastTestedAt={g.lastTestedAt ? g.lastTestedAt.toISOString() : null}
-          lastError={g.lastError}
-          counts={g.counts}
-          recent={g.recent.map((r) => ({ id: r.id, direction: r.direction, eventType: r.eventType, status: r.status, lastError: r.lastError, createdAt: r.createdAt.toISOString() }))}
-        />
+        <div className="flex flex-col gap-4">
+          <Segmented
+            pathname={PATH}
+            params={{ tab: "integrations", ghl: view }}
+            param="ghl"
+            options={[
+              { value: "overview", label: "Overview" },
+              { value: "mapping", label: "Sync settings & mapping" },
+              { value: "log", label: "Sync log" },
+              { value: "endpoints", label: "Endpoints" },
+            ]}
+          />
+          {section}
+        </div>
       );
     }
   } else if (tab === "demo" && demo) {

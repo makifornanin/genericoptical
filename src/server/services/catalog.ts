@@ -1,3 +1,4 @@
+import { onProductChanged } from "@/server/integrations/ghl/triggers";
 import { and, asc, desc, eq, inArray, isNotNull, isNull, ne, sql, type SQL } from "drizzle-orm";
 import { productInput, CATEGORY_KINDS, type ProductInput } from "@/lib/schemas";
 import { getDb, type Executor } from "@/server/db";
@@ -250,6 +251,7 @@ export async function createProduct(ctx: Ctx, raw: ProductInput, opening: Openin
           referenceId: product.id,
         });
       }
+      await onProductChanged(tx, ctx.businessId, product.id);
       await audit(tx, ctx, {
         action: "product.created",
         entityType: "product",
@@ -354,6 +356,7 @@ export async function updateProduct(ctx: Ctx, productId: string, raw: ProductInp
         if (Number(units) > 0) throw conflict(`Variant ${v.sku} still has ${units} unit(s) in stock. Adjust it to zero before removing it.`);
         await tx.update(productVariants).set({ archivedAt: at, isActive: false, updatedAt: at }).where(eq(productVariants.id, v.id));
       }
+      await onProductChanged(tx, ctx.businessId, productId);
       await audit(tx, ctx, {
         action: "product.updated",
         entityType: "product",
@@ -389,6 +392,7 @@ export async function setProductArchived(ctx: Ctx, productId: string, archived: 
       }
       const at = now(ctx);
       await tx.update(products).set({ archivedAt: archived ? at : null, isActive: !archived, updatedAt: at }).where(eq(products.id, productId));
+      await onProductChanged(tx, ctx.businessId, productId);
       await audit(tx, ctx, {
         action: archived ? "product.archived" : "product.restored",
         entityType: "product",

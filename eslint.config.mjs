@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Archived website source kept for reference only (see customer-website-reference/README.md).
+    "customer-website-reference/**",
   ]),
 ]);
 

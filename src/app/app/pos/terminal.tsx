@@ -230,7 +230,7 @@ export function PosTerminal({
         {visible.length === 0 ? (
           <div className="flex flex-1 items-center justify-center rounded-[14px] border border-dashed border-line-strong p-10 text-center text-[13px] text-text-3">No products match “{q}”.</div>
         ) : (
-          <ul className="scroll-thin grid min-h-0 flex-1 auto-rows-max grid-cols-2 gap-3 overflow-y-auto pr-1 md:grid-cols-3 xl:grid-cols-4">
+          <ul className="scroll-thin grid min-h-0 flex-1 auto-rows-max grid-cols-2 gap-3 overflow-y-auto pr-1 max-lg:max-h-[58vh] md:grid-cols-3 xl:grid-cols-4">
             {visible.map((item) => {
               const inCart = qtyInCart(item.variantId);
               const out = item.productType === "stock" && item.available - inCart <= 0;
@@ -282,7 +282,19 @@ export function PosTerminal({
       </section>
 
       {/* Transaction panel */}
-      <aside aria-label="Current sale" className="flex min-h-0 flex-col rounded-[16px] border border-line bg-surface-2">
+      {/* Phones/tablets: the cart sits below the catalogue, so keep a shortcut to it in view. */}
+      {lines.length ? (
+        <a
+          href="#current-sale"
+          className="sticky bottom-3 z-20 flex items-center justify-between gap-3 rounded-full bg-ink px-5 py-3 text-[13.5px] font-medium text-white shadow-[var(--shadow-pop)] lg:hidden"
+        >
+          <span>
+            Current sale · {lines.reduce((n, l) => n + l.qty, 0)} item{lines.reduce((n, l) => n + l.qty, 0) === 1 ? "" : "s"}
+          </span>
+          <span className="tabular">{fmt(total)} · Review</span>
+        </a>
+      ) : null}
+      <aside id="current-sale" aria-label="Current sale" className="flex min-h-0 scroll-mt-4 flex-col rounded-[16px] border border-line bg-surface-2">
         <div className="flex items-center justify-between px-4 pt-4 pb-3">
           <h2 className="text-[15px] font-semibold">Current sale</h2>
           {lines.length ? (

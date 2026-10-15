@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact us · Lensmere Optical</title>
+  <meta name="description" content="Questions about eye exams, glasses, contact lenses or an order? Send us a message.">
+  <!-- Demo business (fictional): the original sets robots noindex,nofollow when the business is a demo.
+       Remove this line for a real business. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:site_name" content="Lensmere Optical">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#18191b">
+  <link rel="icon" href="../assets/favicon.ico">
+  <!-- Same font families as the original (next/font/google): Inter Tight (body, variable weight)
+       and Instrument Sans 500/600/700 (display headings). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&amp;family=Instrument+Sans:wght@500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- DEMO BANNER — shown only because Lensmere is a demo business (biz.isDemo). Delete for a real business.
+       GHL: a native Section + Text element (or drop it). -->
+  <div class="demo-banner">
+    <strong>Demo website.</strong> Lensmere Optical is a fictional business — names, prices and branches are sample data.
+    <!-- Original links to /login (staff dashboard), which is not part of the GHL site. -->
+    <a href="#">Open the staff demo</a>
+  </div>
+
+  <!-- HEADER — sticky, translucent canvas background with blur. Original: site-header.tsx.
+       GHL: native Header/Navigation menu element. Business name, tagline and logo come from Settings
+       (DYNAMIC: biz.name, biz.tagline, biz.logoUrl → the round initial mark is used when there is no logo). -->
+  <header class="site-header">
+    <div class="site-header__bar">
+      <a class="brand-link" href="index.html" aria-label="Lensmere Optical home">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-text">
+          <span class="brand-name truncate">Lensmere Optical</span>
+          <span class="brand-tagline truncate">Eye care &amp; eyewear</span>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <a href="products.html">Eyewear</a>
+        <a href="services.html">Services</a>
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html" aria-current="page">Contact</a>
+      </nav>
+      <a class="btn btn--brand header-cta" href="booking.html">Book an exam</a>
+      <button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="site-mobile-nav" aria-label="Open menu">
+        <svg class="icon icon-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+        <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <!-- Mobile menu (< 768px): toggled by site.js. GHL's native nav element provides its own hamburger menu. -->
+    <nav id="site-mobile-nav" class="mobile-nav" aria-label="Main" hidden>
+      <ul>
+        <li><a href="products.html">Eyewear</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="contact.html" aria-current="page">Contact</a></li>
+      </ul>
+      <a class="btn btn--brand btn--lg" href="booking.html">Book an exam</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- PAGE INTRO — static copy (hard-coded in the page file). Original: PageIntro in site-ui.tsx.
+         GHL: native Section with Text (eyebrow), Headline (H1) and Paragraph elements. -->
+    <section class="page-intro">
+      <div class="container page-intro__inner">
+        <p class="eyebrow">Contact</p>
+        <h1>Ask us anything.</h1>
+        <p class="page-intro__body">Questions about an exam, a frame you saw, an order in progress or your contact lenses — send a message and we'll reply within one business day.</p>
+      </div>
+    </section>
+
+    <div class="container contact-layout">
+        <!-- INQUIRY FORM — original: inquiry-form.tsx → submitInquiryAction (actions.ts) → capturePublicLead()
+             creates/updates a Lead (source "website") in our database. Validation: name required; email OR mobile required.
+             GHL: replace this whole card with a GHL Form (Sites → Forms) using the fields listed in
+             ghl-migration-guide.md §3 (custom fields for interest, preferred branch and the two consents). -->
+        <form class="form-card" action="#" method="post" novalidate data-static-form aria-label="Contact form">
+          <div class="field">
+            <label for="ct-name">Full name<span class="req"> *</span></label>
+            <input class="control" id="ct-name" name="fullName" autocomplete="name" required>
+          </div>
+          <div class="form-row form-row--2">
+            <div class="field">
+              <label for="ct-email">Email</label>
+              <input class="control" id="ct-email" name="email" type="email" autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="ct-phone">Mobile number</label>
+              <input class="control" id="ct-phone" name="phone" type="tel" autocomplete="tel" aria-describedby="ct-phone-hint">
+              <p class="field__hint" id="ct-phone-hint">Email or mobile — whichever you prefer.</p>
+            </div>
+          </div>
+          <div class="form-row form-row--2">
+            <div class="field">
+              <label for="ct-interest">I'm interested in</label>
+              <select class="control" id="ct-interest" name="interest">
+            <option value="eye_exam">Eye examination</option>
+            <option value="prescription_glasses">Prescription glasses</option>
+            <option value="contact_lenses">Contact lenses</option>
+            <option value="sunglasses">Sunglasses</option>
+            <option value="frames">Frames only</option>
+            <option value="repair">Repair / adjustment</option>
+            <option value="other" selected>Other</option>
+              </select>
+            </div>
+            <!-- DYNAMIC: one option per active branch (only shown when there is more than one branch). -->
+            <div class="field">
+              <label for="ct-branch">Preferred branch</label>
+              <select class="control" id="ct-branch" name="preferredBranchId">
+                <option value="" selected>No preference</option>
+                <option value="makati">Makati</option>
+                <option value="quezon-city">Quezon City</option>
+                <option value="pasig">Pasig</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="ct-message">Message</label>
+            <textarea class="control" id="ct-message" name="message" rows="4"></textarea>
+          </div>
+          <!-- Honeypot (spam trap): hidden from people and assistive tech. GHL forms have their own spam protection. -->
+          <div class="honeypot" aria-hidden="true">
+            <label>Website <input name="website" tabindex="-1" autocomplete="off"></label>
+          </div>
+          <div class="checks">
+            <label class="check"><input type="checkbox" name="smsConsent"> <span>You may text me about this enquiry</span></label>
+            <label class="check"><input type="checkbox" name="marketingConsent"> <span>Send me occasional offers and eye-care reminders</span></label>
+          </div>
+          <p class="mock-label" data-static-note hidden role="status"><span><strong>Static reference.</strong> Nothing was sent. In GHL this card is a GHL form; the original shows “Thanks, &lt;first name&gt;.” and a “Send another message” link after submitting.</span></p>
+          <div class="form-foot">
+            <p class="form-foot__note">We use your details only to reply to you. See our <a href="privacy.html">privacy notice</a>.</p>
+            <button type="submit" class="btn btn--brand btn--lg">Send message</button>
+          </div>
+        </form>
+
+      <!-- REACH US DIRECTLY + BRANCHES — DYNAMIC: business phone/email and every active branch (address, phone).
+           GHL: native Text elements with icons (or Icon + Text rows). -->
+      <aside>
+        <div class="contact-direct">
+          <p class="eyebrow">Reach us directly</p>
+          <p><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg><a href="tel:+63280000100">+63 2 8000 0100</a></p>
+          <p><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg><a href="mailto:hello@lensmere.example">hello@lensmere.example</a></p>
+        </div>
+        <div class="contact-branch">
+          <p class="contact-branch__name">Makati</p>
+          <p class="contact-branch__line"><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><span>2F Linden Arcade, 118 Lumen Street, Makati City</span></p>
+          <p class="contact-branch__line contact-branch__line--phone"><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg><a href="tel:+63280000101">+63 2 8000 0101</a></p>
+        </div>
+        <div class="contact-branch">
+          <p class="contact-branch__name">Quezon City</p>
+          <p class="contact-branch__line"><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><span>Unit 4, 52 Verde Avenue, Quezon City</span></p>
+          <p class="contact-branch__line contact-branch__line--phone"><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg><a href="tel:+63280000102">+63 2 8000 0102</a></p>
+        </div>
+        <div class="contact-branch">
+          <p class="contact-branch__name">Pasig</p>
+          <p class="contact-branch__line"><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><span>G/F Alder Place, 9 Alder Road, Pasig City</span></p>
+          <p class="contact-branch__line contact-branch__line--phone"><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg><a href="tel:+63280000103">+63 2 8000 0103</a></p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- FOOTER — brand-coloured. Original: SiteFrame in layout.tsx.
+       DYNAMIC: business name/tagline/phone/email/address (Settings) and the first 3 active branches with their
+       opening hours (branches table; branch hours fall back to the business hours).
+       GHL: native Footer section with Text/Button elements; branch hours are typed in by hand (update them
+       whenever hours change — GHL does not read our branch table). -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-name">Lensmere Optical</p>
+          <p class="footer-tagline">Eye care &amp; eyewear</p>
+          <div class="footer-contact">
+            <p><a href="tel:+63280000100">+63 2 8000 0100</a></p>
+            <p><a href="mailto:hello@lensmere.example">hello@lensmere.example</a></p>
+            <p>2F Linden Arcade, 118 Lumen Street, Makati City</p>
+          </div>
+          <a class="footer-cta" href="booking.html">Book an eye exam <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+        </div>
+        <div class="footer-branches">
+          <div>
+            <p class="eyebrow eyebrow--inherit">Makati</p>
+            <p class="footer-branch__address">2F Linden Arcade, 118 Lumen Street<br>Makati City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Quezon City</p>
+            <p class="footer-branch__address">Unit 4, 52 Verde Avenue<br>Quezon City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Pasig</p>
+            <p class="footer-branch__address">G/F Alder Place, 9 Alder Road<br>Pasig City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="products.html">Eyewear</a>
+          <a href="services.html">Services</a>
+          <a href="about.html">About</a>
+          <a href="faq.html">FAQ</a>
+          <a href="contact.html">Contact</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
+        <!-- DYNAMIC: year (new Date().getFullYear()) and biz.legalName. "Staff sign in" links to the Next.js
+             dashboard (/login) — not part of the GHL site; remove or point it at the app URL. -->
+        <p class="footer-copy">© 2026 Lensmere Optical Co. (demo). <a href="#">Staff sign in</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>

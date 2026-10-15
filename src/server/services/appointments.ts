@@ -17,7 +17,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { audit, can, conflict, db, forbidden, invalid, mapDbError, nextNumber, notFound, now, requirePermission, systemCtx, type Ctx } from "./core";
-import { enqueueOutbound } from "./outbox";
+import { onAppointmentChanged } from "@/server/integrations/ghl/triggers";
 
 type Status = (typeof appointments.$inferSelect)["status"];
 const ACTIVE: Status[] = ["scheduled", "confirmed", "completed"];
@@ -301,7 +301,7 @@ export async function createAppointment(ctx: Ctx, raw: unknown) {
         entityId: appt.id,
         summary: `Booked ${type.name} at ${branch.name} for ${formatInZone(startsAt, biz.timezone, "MMM d, yyyy h:mm a")}${practitionerName ? ` with ${practitionerName}` : ""}`,
       });
-      await enqueueOutbound(tx, ctx, { eventType: "appointment.upsert", entityType: "appointment", entityId: appt.id });
+      await onAppointmentChanged(tx, ctx.businessId, appt.id);
       return appt;
     });
   } catch (error) {
@@ -378,7 +378,7 @@ export async function updateAppointment(ctx: Ctx, id: string, raw: unknown) {
           ? `Rescheduled ${type.name} from ${fmt(existing.startsAt)} to ${fmt(startsAt)}${practitionerName ? ` with ${practitionerName}` : ""}`
           : `Updated ${type.name} on ${fmt(startsAt)}`,
       });
-      await enqueueOutbound(tx, ctx, { eventType: "appointment.upsert", entityType: "appointment", entityId: id });
+      await onAppointmentChanged(tx, ctx.businessId, id);
       return row;
     });
   } catch (error) {
@@ -427,7 +427,7 @@ export async function setAppointmentStatus(ctx: Ctx, id: string, status: Status,
         entityId: id,
         summary: `${info?.typeName ?? "Appointment"}${info?.person ? ` for ${info.person}` : ""} (${formatInZone(existing.startsAt, info?.timezone ?? "Asia/Manila", "MMM d, h:mm a")}): ${APPOINTMENT_STATUS_LABELS[existing.status]} → ${APPOINTMENT_STATUS_LABELS[status]}${reason?.trim() ? ` · ${reason.trim()}` : ""}`,
       });
-      await enqueueOutbound(tx, ctx, { eventType: "appointment.upsert", entityType: "appointment", entityId: id });
+      await onAppointmentChanged(tx, ctx.businessId, id);
       return row;
     });
   } catch (error) {
@@ -527,7 +527,7 @@ export async function requestPublicAppointment(businessId: string, raw: unknown,
         entityId: appt.id,
         summary: `Online booking: ${type.name} at ${branch.name} for ${formatInZone(startsAt, biz.timezone, "MMM d, yyyy h:mm a")} (${input.fullName})`,
       });
-      await enqueueOutbound(tx, ctx, { eventType: "appointment.upsert", entityType: "appointment", entityId: appt.id });
+      await onAppointmentChanged(tx, ctx.businessId, appt.id);
       return { ok: true as const, appointmentId: appt.id, startsAt, typeName: type.name, branchName: branch.name };
     });
   } catch (error) {

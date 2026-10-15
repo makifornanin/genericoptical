@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, gte, inArray, lt, sql, type SQL } from "drizzle-orm";
 import { adjustmentInput, transferInput } from "@/lib/schemas";
 import type { Executor, Tx } from "@/server/db";
+import { onStockChanged } from "@/server/integrations/ghl/triggers";
 import {
   inventoryBalances,
   inventoryLocations,
@@ -85,12 +86,8 @@ export async function applyMovement(tx: Tx, ctx: Ctx, balances: Map<string, Bala
   const bal = balances.get(m.variantId);
   if (!bal || bal.locationId !== m.locationId) throw new Error("Balance row must be locked before applying a movement.");
   if (m.quantity === 0) return bal;
-  const reservedDelta = m.reservedDelta ?? 0;
-  const onHand = bal.onHand + m.quantity;
-  const reserved = bal.reserved + reservedDelta;
-  if (onHand < 0 || reserved < 0 || reserved > onHand) {
-    throw new AppError("Not enough stock available for this change.", "conflict");
-  }
+  // Idempotency first: a retried movement that already applied must be a no-op, even if the stock
+  // check would now fail because the first attempt already took the units.
   if (m.idempotencyKey) {
     const [existing] = await tx
       .select({ id: stockMovements.id })
@@ -98,6 +95,12 @@ export async function applyMovement(tx: Tx, ctx: Ctx, balances: Map<string, Bala
       .where(and(eq(stockMovements.businessId, ctx.businessId), eq(stockMovements.idempotencyKey, m.idempotencyKey)))
       .limit(1);
     if (existing) return bal; // Already applied — retried request; never deduct twice.
+  }
+  const reservedDelta = m.reservedDelta ?? 0;
+  const onHand = bal.onHand + m.quantity;
+  const reserved = bal.reserved + reservedDelta;
+  if (onHand < 0 || reserved < 0 || reserved > onHand) {
+    throw new AppError("Not enough stock available for this change.", "conflict");
   }
   await tx
     .update(inventoryBalances)
@@ -121,6 +124,7 @@ export async function applyMovement(tx: Tx, ctx: Ctx, balances: Map<string, Bala
   });
   bal.onHand = onHand;
   bal.reserved = reserved;
+  await onStockChanged(tx, ctx.businessId, m.variantId, m.locationId);
   return bal;
 }
 
@@ -135,6 +139,7 @@ export async function applyReservationDelta(tx: Tx, ctx: Ctx, balances: Map<stri
     .set({ reserved, updatedAt: now(ctx) })
     .where(and(eq(inventoryBalances.variantId, variantId), eq(inventoryBalances.locationId, bal.locationId)));
   bal.reserved = reserved;
+  await onStockChanged(tx, ctx.businessId, variantId, bal.locationId); // available quantity changed
 }
 
 /**

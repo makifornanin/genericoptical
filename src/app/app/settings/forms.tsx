@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Plus, RefreshCw, Trash2, Unplug } from "lucide-react";
+import { Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/components/app/use-action";
@@ -8,21 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDialog, DialogContent, DialogRoot, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox, Field, FormError, Input, MoneyInput, SelectField, Textarea, TextareaField, TextField } from "@/components/ui/form";
-import { Pill } from "@/components/ui/pill";
 import { contrast } from "@/lib/color";
 import { WEEKDAYS, type WeekHours } from "@/lib/types";
 import {
-  disconnectGhlAction,
   resetDemoAction,
   saveAppointmentTypeAction,
   saveBranchAction,
-  saveGhlAction,
   saveHoursAction,
   saveProfileAction,
   saveTaxAction,
   saveWebsiteAction,
-  syncGhlNowAction,
-  testGhlAction,
 } from "./actions";
 
 function SaveBar({ pending, error, onSave, label = "Save changes" }: { pending: boolean; error: string | null; onSave: () => void; label?: string }) {
@@ -337,120 +332,6 @@ export function WebsiteForm({ initial }: { initial: WebsiteValues }) {
 }
 
 // ─── Integrations ────────────────────────────────────────────────────────────
-
-export function GhlPanel({
-  status,
-  locationId,
-  hasToken,
-  webhookUrl,
-  webhookSecret,
-  settings,
-  lastTestedAt,
-  lastError,
-  counts,
-  recent,
-}: {
-  status: string;
-  locationId: string | null;
-  hasToken: boolean;
-  webhookUrl: string;
-  webhookSecret: string | null;
-  settings: { tagPrefix: string; stageTags: boolean; orderReadyTag: string; appointmentsAuthority: "platform" | "ghl" };
-  lastTestedAt: string | null;
-  lastError: string | null;
-  counts: Record<string, number>;
-  recent: { id: string; direction: string; eventType: string; status: string; lastError: string | null; createdAt: string }[];
-}) {
-  const [loc, setLoc] = useState(locationId ?? "");
-  const [token, setToken] = useState("");
-  const [s, setS] = useState(settings);
-  const save = useAction(saveGhlAction);
-  const test = useAction(testGhlAction);
-  const sync = useAction(syncGhlNowAction, { success: (r) => ("reason" in r && r.reason ? "Not connected — nothing sent." : `Sent ${r.processed}, skipped ${r.skipped}, failed ${r.failed}`) });
-  const disconnect = useAction(disconnectGhlAction);
-  const tone = status === "connected" ? "positive" : status === "error" ? "negative" : "neutral";
-  const label = { connected: "Connected", error: "Connection error", not_configured: "Not configured", disabled: "Disconnected" }[status] ?? status;
-  return (
-    <Card>
-      <CardHeader
-        title="GoHighLevel"
-        subtitle="Sync website leads and customers to a GHL sub-account as contacts with stage tags; receive contacts from GHL workflows as leads."
-        actions={<Pill tone={tone} dot>{label}</Pill>}
-      />
-      <CardBody className="flex flex-col gap-5">
-        {status !== "connected" ? (
-          <p className="rounded-[10px] bg-muted-soft px-3 py-2.5 text-[12.5px] text-text-2">
-            Nothing is sent to GoHighLevel until a Private Integration token is saved and the connection test passes. {lastError ? <span className="text-neg">Last error: {lastError}</span> : null}
-          </p>
-        ) : null}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <TextField label="Sub-account (location) ID" value={loc} onChange={(e) => setLoc(e.target.value)} error={save.fe("locationId")} />
-          <TextField label="Private Integration token" type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder={hasToken ? "•••••••• (saved — enter to replace)" : "pit-…"} hint="Needs contacts read/write scope. Stored encrypted; never sent to the browser." error={save.fe("token")} autoComplete="off" />
-          <TextField label="Tag prefix" value={s.tagPrefix} onChange={(e) => setS({ ...s, tagPrefix: e.target.value })} hint={`Stage tags look like “${s.tagPrefix}-stage-qualified”.`} />
-          <TextField label="Order-ready trigger tag" value={s.orderReadyTag} onChange={(e) => setS({ ...s, orderReadyTag: e.target.value })} hint="Added when an order is ready for pickup (customers with SMS consent). Use it to trigger an SMS workflow." />
-          <Checkbox label="Push lead stage tags" checked={s.stageTags} onChange={(e) => setS({ ...s, stageTags: e.target.checked })} />
-          <SelectField label="Appointments system of record" value={s.appointmentsAuthority} onChange={(e) => setS({ ...s, appointmentsAuthority: e.target.value as "platform" | "ghl" })} hint="Calendar sync isn't implemented in this version; this records which system owns bookings.">
-            <option value="platform">This platform</option>
-            <option value="ghl">GoHighLevel calendars</option>
-          </SelectField>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="primary" loading={save.pending} onClick={() => save.run({ locationId: loc, token: token || undefined, settings: s })}>
-            Save
-          </Button>
-          <Button loading={test.pending} onClick={() => test.run()} disabled={!hasToken && !token}>
-            Test connection
-          </Button>
-          <Button loading={sync.pending} onClick={() => sync.run()} disabled={status !== "connected"}>
-            <RefreshCw /> Sync now
-          </Button>
-          {hasToken ? (
-            <ConfirmDialog trigger={<Button variant="danger"><Unplug /> Disconnect</Button>} title="Disconnect GoHighLevel?" description="The token is deleted. Pending sync events stay queued until you reconnect." confirmLabel="Disconnect" onConfirm={async () => (await disconnect.run()).ok} />
-          ) : null}
-        </div>
-        {webhookSecret ? (
-          <div className="rounded-[12px] border border-line p-4">
-            <p className="text-[13px] font-semibold">Inbound webhook (GHL → platform)</p>
-            <p className="mt-1 text-[12.5px] text-text-2">In a GHL workflow, add a Webhook action with this URL and a custom header <code className="font-mono">x-webhook-secret</code>.</p>
-            <div className="mt-3 grid gap-2">
-              {[
-                ["URL", webhookUrl],
-                ["x-webhook-secret", webhookSecret],
-              ].map(([k, val]) => (
-                <div key={k} className="flex items-center gap-2">
-                  <span className="w-32 shrink-0 text-[12px] text-text-3">{k}</span>
-                  <code className="min-w-0 flex-1 truncate rounded-[8px] bg-surface-2 px-2 py-1.5 font-mono text-[12px]">{val}</code>
-                  <Button size="icon-sm" variant="ghost" aria-label={`Copy ${k}`} onClick={() => navigator.clipboard.writeText(val).then(() => toast.success("Copied"))}>
-                    <Copy />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-        <div>
-          <p className="mb-2 text-[12.5px] font-medium text-text-2">
-            Sync activity {Object.keys(counts).length ? `· ${Object.entries(counts).map(([k, n]) => `${n} ${k}`).join(" · ")}` : "· none yet"}
-            {lastTestedAt ? ` · last tested ${new Date(lastTestedAt).toLocaleString()}` : ""}
-          </p>
-          {recent.length ? (
-            <ul className="divide-y divide-line rounded-[12px] border border-line text-[12.5px]">
-              {recent.map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-3 px-3 py-2">
-                  <span>
-                    <span className="font-medium">{r.direction === "inbound" ? "←" : "→"} {r.eventType}</span>
-                    {r.lastError ? <span className="ml-2 text-text-3">{r.lastError}</span> : null}
-                  </span>
-                  <Pill tone={r.status === "processed" ? "positive" : r.status === "failed" ? "negative" : "neutral"}>{r.status}</Pill>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      </CardBody>
-    </Card>
-  );
-}
 
 export function DemoPanel() {
   const [pending, setPending] = useState(false);

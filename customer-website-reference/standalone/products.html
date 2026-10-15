@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eyewear · Lensmere Optical</title>
+  <meta name="description" content="Prescription frames, sunglasses, contact lenses and eye-care essentials.">
+  <!-- Demo business (fictional): the original sets robots noindex,nofollow when the business is a demo.
+       Remove this line for a real business. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:site_name" content="Lensmere Optical">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#18191b">
+  <link rel="icon" href="../assets/favicon.ico">
+  <!-- Same font families as the original (next/font/google): Inter Tight (body, variable weight)
+       and Instrument Sans 500/600/700 (display headings). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&amp;family=Instrument+Sans:wght@500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- DEMO BANNER — shown only because Lensmere is a demo business (biz.isDemo). Delete for a real business.
+       GHL: a native Section + Text element (or drop it). -->
+  <div class="demo-banner">
+    <strong>Demo website.</strong> Lensmere Optical is a fictional business — names, prices and branches are sample data.
+    <!-- Original links to /login (staff dashboard), which is not part of the GHL site. -->
+    <a href="#">Open the staff demo</a>
+  </div>
+
+  <!-- HEADER — sticky, translucent canvas background with blur. Original: site-header.tsx.
+       GHL: native Header/Navigation menu element. Business name, tagline and logo come from Settings
+       (DYNAMIC: biz.name, biz.tagline, biz.logoUrl → the round initial mark is used when there is no logo). -->
+  <header class="site-header">
+    <div class="site-header__bar">
+      <a class="brand-link" href="index.html" aria-label="Lensmere Optical home">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-text">
+          <span class="brand-name truncate">Lensmere Optical</span>
+          <span class="brand-tagline truncate">Eye care &amp; eyewear</span>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <a href="products.html" aria-current="page">Eyewear</a>
+        <a href="services.html">Services</a>
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <a class="btn btn--brand header-cta" href="booking.html">Book an exam</a>
+      <button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="site-mobile-nav" aria-label="Open menu">
+        <svg class="icon icon-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+        <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <!-- Mobile menu (< 768px): toggled by site.js. GHL's native nav element provides its own hamburger menu. -->
+    <nav id="site-mobile-nav" class="mobile-nav" aria-label="Main" hidden>
+      <ul>
+        <li><a href="products.html" aria-current="page">Eyewear</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <a class="btn btn--brand btn--lg" href="booking.html">Book an exam</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- PAGE INTRO — static copy (hard-coded in the page file). Original: PageIntro in site-ui.tsx.
+         GHL: native Section with Text (eyebrow), Headline (H1) and Paragraph elements. -->
+    <section class="page-intro">
+      <div class="container page-intro__inner">
+        <p class="eyebrow">Eyewear</p>
+        <h1>Frames, sunglasses and lenses.</h1>
+        <p class="page-intro__body">Browse what we carry, then try it on in branch. Every pair is fitted and adjusted by our opticians.</p>
+      </div>
+    </section>
+
+    <div class="container catalogue">
+      <!-- CATEGORY FILTER — DYNAMIC: one pill per product category that has products shown online, with counts.
+           Original: links to /eyewear?category=<name>, filtered on the server. Here: site.js filters by ?category=.
+           GHL: GHL Store collections/categories, or separate static pages per category. -->
+      <nav class="category-nav" aria-label="Categories" data-category-nav>
+        <a href="products.html" aria-current="page">Everything<span class="category-nav__count">32</span></a>
+        <a href="products.html?category=Frames" data-filter="Frames">Frames<span class="category-nav__count">20</span></a>
+        <a href="products.html?category=Sunglasses" data-filter="Sunglasses">Sunglasses<span class="category-nav__count">7</span></a>
+        <a href="products.html?category=Contact%20lenses" data-filter="Contact lenses">Contact lenses<span class="category-nav__count">5</span></a>
+      </nav>
+
+      <!-- PRODUCT GRID — DYNAMIC: every active product with "show on website" ticked (products + variants tables):
+           image, name, brand · category, lowest variant price ("from" + "N options" when several variants).
+           Each card links to /eyewear/<product id>; here all cards link to the single product-detail.html sample.
+           GHL: GHL Store product list (if the catalogue is moved into GHL Products) or a hand-built Image/Text grid.
+           32 products in the demo: 20 frames, 7 sunglasses, 5 contact lenses. -->
+      <ul class="product-grid product-grid--catalogue">
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-rectangle-black.svg" alt="Arden 101" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Arden 101</p>
+                  <p class="product-card__meta truncate">Arden · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱2,950.00</p>
+              </div>
+              <p class="product-card__options">4 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-square-black.svg" alt="Arden 204" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Arden 204</p>
+                  <p class="product-card__meta truncate">Arden · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱3,450.00</p>
+              </div>
+              <p class="product-card__options">3 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-rectangle-black.svg" alt="Arden Everyday" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Arden Everyday</p>
+                  <p class="product-card__meta truncate">Arden · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱1,990.00</p>
+              </div>
+              <p class="product-card__options">4 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-round-tortoise.svg" alt="Arden Round 33" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Arden Round 33</p>
+                  <p class="product-card__meta truncate">Arden · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱3,250.00</p>
+              </div>
+              <p class="product-card__options">4 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-round-crystal.svg" alt="Brio Flex Kids" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Brio Flex Kids</p>
+                  <p class="product-card__meta truncate">Brio · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱1,950.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-rectangle-crystal.svg" alt="Brio Junior" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Brio Junior</p>
+                  <p class="product-card__meta truncate">Brio · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱1,850.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-aviator-gold.svg" alt="Halden Aviator RX" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Halden Aviator RX</p>
+                  <p class="product-card__meta truncate">Halden · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱4,250.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-oval-gold.svg" alt="Halden Oval" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Halden Oval</p>
+                  <p class="product-card__meta truncate">Halden · Frames</p>
+                </div>
+                <p class="product-card__price tabular">₱3,650.00</p>
+              </div>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-oval-tortoise.svg" alt="Halden Sable" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Halden Sable</p>
+                  <p class="product-card__meta truncate">Halden · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱2,850.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-round-gold.svg" alt="Halden Wire" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Halden Wire</p>
+                  <p class="product-card__meta truncate">Halden · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱3,950.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-hexagon-gold.svg" alt="Kiyo Hex" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Kiyo Hex</p>
+                  <p class="product-card__meta truncate">Kiyo · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱3,150.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-rectangle-black.svg" alt="Kiyo Slim" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Kiyo Slim</p>
+                  <p class="product-card__meta truncate">Kiyo · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱2,450.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-rectangle-black.svg" alt="Kiyo Titan" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Kiyo Titan</p>
+                  <p class="product-card__meta truncate">Kiyo · Frames</p>
+                </div>
+                <p class="product-card__price tabular">₱6,450.00</p>
+              </div>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-cateye-black.svg" alt="Mesa Cat 9" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Mesa Cat 9</p>
+                  <p class="product-card__meta truncate">Mesa · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱3,550.00</p>
+              </div>
+              <p class="product-card__options">3 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-browline-black.svg" alt="Mesa Classic" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Mesa Classic</p>
+                  <p class="product-card__meta truncate">Mesa · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱3,850.00</p>
+              </div>
+              <p class="product-card__options">4 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-square-black.svg" alt="Mesa Studio" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Mesa Studio</p>
+                  <p class="product-card__meta truncate">Mesa · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱3,350.00</p>
+              </div>
+              <p class="product-card__options">6 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-round-tortoise.svg" alt="Solenne Atelier" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Solenne Atelier</p>
+                  <p class="product-card__meta truncate">Solenne · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱5,950.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-cateye-gold.svg" alt="Solenne Muse" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Solenne Muse</p>
+                  <p class="product-card__meta truncate">Solenne · Frames</p>
+                </div>
+                <p class="product-card__price tabular">₱5,450.00</p>
+              </div>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-oval-crystal.svg" alt="Vela Air" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Vela Air</p>
+                  <p class="product-card__meta truncate">Vela · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱2,650.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Frames">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-square-black.svg" alt="Vela Square Pro" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Vela Square Pro</p>
+                  <p class="product-card__meta truncate">Vela · Frames</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱4,650.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Sunglasses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/sun-round-smoke.svg" alt="Brio Kids Sun" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Brio Kids Sun</p>
+                  <p class="product-card__meta truncate">Brio · Sunglasses</p>
+                </div>
+                <p class="product-card__price tabular">₱1,450.00</p>
+              </div>
+            </a>
+          </li>
+          <li data-category="Sunglasses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/sun-aviator-brown.svg" alt="Halden Pilot" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Halden Pilot</p>
+                  <p class="product-card__meta truncate">Halden · Sunglasses</p>
+                </div>
+                <p class="product-card__price tabular">₱4,450.00</p>
+              </div>
+            </a>
+          </li>
+          <li data-category="Sunglasses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/sun-square-smoke.svg" alt="Kiyo Sport Polarised" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Kiyo Sport Polarised</p>
+                  <p class="product-card__meta truncate">Kiyo · Sunglasses</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱3,850.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Sunglasses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/sun-cateye-smoke.svg" alt="Mesa Cat Sun" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Mesa Cat Sun</p>
+                  <p class="product-card__meta truncate">Mesa · Sunglasses</p>
+                </div>
+                <p class="product-card__price tabular">₱3,250.00</p>
+              </div>
+            </a>
+          </li>
+          <li data-category="Sunglasses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/sun-square-smoke.svg" alt="Mesa Coast" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Mesa Coast</p>
+                  <p class="product-card__meta truncate">Mesa · Sunglasses</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱2,950.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Sunglasses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/sun-aviator-green.svg" alt="Solenne Riviera" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Solenne Riviera</p>
+                  <p class="product-card__meta truncate">Solenne · Sunglasses</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱4,950.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Sunglasses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/sun-round-brown.svg" alt="Vela Drift" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">Vela Drift</p>
+                  <p class="product-card__meta truncate">Vela · Sunglasses</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱2,650.00</p>
+              </div>
+              <p class="product-card__options">2 options</p>
+            </a>
+          </li>
+          <li data-category="Contact lenses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/contact-box.svg" alt="AquaSoft Daily (30 pack)" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">AquaSoft Daily (30 pack)</p>
+                  <p class="product-card__meta truncate">AquaSoft · Contact lenses</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱1,650.00</p>
+              </div>
+              <p class="product-card__options">4 options</p>
+            </a>
+          </li>
+          <li data-category="Contact lenses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/contact-box.svg" alt="AquaSoft Monthly (6 pack)" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">AquaSoft Monthly (6 pack)</p>
+                  <p class="product-card__meta truncate">AquaSoft · Contact lenses</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱1,450.00</p>
+              </div>
+              <p class="product-card__options">4 options</p>
+            </a>
+          </li>
+          <li data-category="Contact lenses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/contact-box.svg" alt="AquaSoft Toric Monthly (6 pack)" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">AquaSoft Toric Monthly (6 pack)</p>
+                  <p class="product-card__meta truncate">AquaSoft · Contact lenses</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱2,350.00</p>
+              </div>
+              <p class="product-card__options">4 options</p>
+            </a>
+          </li>
+          <li data-category="Contact lenses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/contact-box.svg" alt="ClearDay Bi-weekly (6 pack)" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">ClearDay Bi-weekly (6 pack)</p>
+                  <p class="product-card__meta truncate">ClearDay · Contact lenses</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱990.00</p>
+              </div>
+              <p class="product-card__options">4 options</p>
+            </a>
+          </li>
+          <li data-category="Contact lenses">
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/contact-box.svg" alt="ClearDay Silicone Daily (30 pack)" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name product-card__name--hover truncate">ClearDay Silicone Daily (30 pack)</p>
+                  <p class="product-card__meta truncate">ClearDay · Contact lenses</p>
+                </div>
+                <p class="product-card__price tabular"><span class="product-card__from">from </span>₱2,150.00</p>
+              </div>
+              <p class="product-card__options">4 options</p>
+            </a>
+          </li>
+      </ul>
+
+      <!-- DYNAMIC: tax name (biz.taxName = "VAT"). -->
+      <p class="catalogue__note">Prices include VAT where applicable. Prescription lenses are priced separately based on your prescription and lens options; availability varies by branch.</p>
+    </div>
+  </main>
+
+  <!-- FOOTER — brand-coloured. Original: SiteFrame in layout.tsx.
+       DYNAMIC: business name/tagline/phone/email/address (Settings) and the first 3 active branches with their
+       opening hours (branches table; branch hours fall back to the business hours).
+       GHL: native Footer section with Text/Button elements; branch hours are typed in by hand (update them
+       whenever hours change — GHL does not read our branch table). -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-name">Lensmere Optical</p>
+          <p class="footer-tagline">Eye care &amp; eyewear</p>
+          <div class="footer-contact">
+            <p><a href="tel:+63280000100">+63 2 8000 0100</a></p>
+            <p><a href="mailto:hello@lensmere.example">hello@lensmere.example</a></p>
+            <p>2F Linden Arcade, 118 Lumen Street, Makati City</p>
+          </div>
+          <a class="footer-cta" href="booking.html">Book an eye exam <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+        </div>
+        <div class="footer-branches">
+          <div>
+            <p class="eyebrow eyebrow--inherit">Makati</p>
+            <p class="footer-branch__address">2F Linden Arcade, 118 Lumen Street<br>Makati City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Quezon City</p>
+            <p class="footer-branch__address">Unit 4, 52 Verde Avenue<br>Quezon City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Pasig</p>
+            <p class="footer-branch__address">G/F Alder Place, 9 Alder Road<br>Pasig City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="products.html">Eyewear</a>
+          <a href="services.html">Services</a>
+          <a href="about.html">About</a>
+          <a href="faq.html">FAQ</a>
+          <a href="contact.html">Contact</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
+        <!-- DYNAMIC: year (new Date().getFullYear()) and biz.legalName. "Staff sign in" links to the Next.js
+             dashboard (/login) — not part of the GHL site; remove or point it at the app URL. -->
+        <p class="footer-copy">© 2026 Lensmere Optical Co. (demo). <a href="#">Staff sign in</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>

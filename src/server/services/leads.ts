@@ -20,7 +20,7 @@ import {
   systemCtx,
   type Ctx,
 } from "./core";
-import { enqueueOutbound } from "./outbox";
+import { onLeadChanged } from "@/server/integrations/ghl/triggers";
 
 type LeadRow = typeof leads.$inferSelect;
 
@@ -232,7 +232,7 @@ export async function createLead(ctx: Ctx, raw: unknown) {
         .returning();
       await activity(tx, ctx, lead.id, { type: "created", body: input.message, toStage: "new", metadata: { source: input.source } });
       await audit(tx, ctx, { action: "lead.created", entityType: "lead", entityId: lead.id, summary: `Added lead ${lead.firstName} ${lead.lastName} (${lead.code})` });
-      await enqueueOutbound(tx, ctx, { eventType: "contact.upsert", entityType: "lead", entityId: lead.id, idempotencyKey: `lead-created:${lead.id}` });
+      await onLeadChanged(tx, ctx.businessId, lead.id);
       return lead;
     });
   } catch (error) {
@@ -259,7 +259,7 @@ export async function updateLead(ctx: Ctx, id: string, raw: unknown) {
       }
       if (changes.followUpAt && input.followUpAt) await activity(tx, ctx, id, { type: "follow_up", body: `Follow-up set for ${input.followUpAt.toISOString()}`, metadata: { at: input.followUpAt.toISOString() } });
       await audit(tx, ctx, { action: "lead.updated", entityType: "lead", entityId: id, summary: `Updated lead ${row.firstName} ${row.lastName}`, changes });
-      await enqueueOutbound(tx, ctx, { eventType: "contact.upsert", entityType: "lead", entityId: id });
+      await onLeadChanged(tx, ctx.businessId, id);
       return row;
     });
   } catch (error) {
@@ -295,7 +295,7 @@ export async function changeLeadStage(ctx: Ctx, id: string, to: LeadStage, note?
         entityId: id,
         summary: `${lead.code}: ${LEAD_STAGE_LABELS[lead.stage]} → ${LEAD_STAGE_LABELS[to]}`,
       });
-      await enqueueOutbound(tx, ctx, { eventType: "opportunity.stage", entityType: "lead", entityId: id, payload: { stage: to } });
+      await onLeadChanged(tx, ctx.businessId, id);
       return row;
     });
   } catch (error) {
@@ -387,7 +387,7 @@ export async function convertLead(ctx: Ctx, id: string, opts: { customerId?: str
         .where(and(eq(appointments.businessId, ctx.businessId), eq(appointments.leadId, id), isNull(appointments.customerId)));
       await activity(tx, ctx, id, { type: "conversion", body: created ? "Converted to a new customer" : "Linked to an existing customer", fromStage: lead.stage, toStage: "converted", metadata: { customerId } });
       await audit(tx, ctx, { action: "lead.converted", entityType: "lead", entityId: id, summary: `Converted lead ${lead.code} to a customer` });
-      await enqueueOutbound(tx, ctx, { eventType: "opportunity.stage", entityType: "lead", entityId: id, payload: { stage: "converted" } });
+      await onLeadChanged(tx, ctx.businessId, id);
       return { customerId, created, alreadyConverted: false };
     });
   } catch (error) {
@@ -506,7 +506,7 @@ export async function capturePublicLead(businessId: string, raw: unknown, meta: 
         metadata: { source: "website", kind: input.kind, interest: LEAD_INTEREST_LABELS[input.interest] },
       });
       await audit(tx, ctx, { action: "lead.created", entityType: "lead", entityId: lead.id, summary: `Website ${input.kind.replace("_", " ")} from ${input.fullName} (${code})` });
-      await enqueueOutbound(tx, ctx, { eventType: "contact.upsert", entityType: "lead", entityId: lead.id, idempotencyKey: `lead-created:${lead.id}` });
+      await onLeadChanged(tx, ctx.businessId, lead.id);
       return { ok: true as const, leadId: lead.id };
     });
   } catch (error) {

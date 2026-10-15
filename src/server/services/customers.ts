@@ -1,3 +1,4 @@
+import { onCustomerChanged } from "@/server/integrations/ghl/triggers";
 import { and, asc, desc, eq, isNotNull, isNull, or, sql, type SQL } from "drizzle-orm";
 import { customerInput, prescriptionInput } from "@/lib/schemas";
 import { getDb, type Executor } from "@/server/db";
@@ -235,6 +236,7 @@ export async function createCustomer(ctx: Ctx, raw: unknown, ex?: Executor) {
       .values({ ...input, businessId: ctx.businessId, code, createdByMembershipId: ctx.membershipId, createdAt: at, updatedAt: at })
       .returning();
     await audit(tx, ctx, { action: "customer.created", entityType: "customer", entityId: row.id, summary: `Added customer ${row.firstName} ${row.lastName} (${row.code})` });
+    await onCustomerChanged(tx, ctx.businessId, row.id);
     return row;
   };
   try {
@@ -253,6 +255,7 @@ export async function updateCustomer(ctx: Ctx, id: string, raw: unknown) {
       if (!existing) throw notFound("Customer");
       await assertBranch(tx, ctx, input.homeBranchId);
       const [row] = await tx.update(customers).set({ ...input, updatedAt: now(ctx) }).where(eq(customers.id, id)).returning();
+      await onCustomerChanged(tx, ctx.businessId, id);
       await audit(tx, ctx, {
         action: "customer.updated",
         entityType: "customer",

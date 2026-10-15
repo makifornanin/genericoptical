@@ -1,12 +1,11 @@
-import { timingSafeEqual, createHash } from "node:crypto";
-import { eq } from "drizzle-orm";
-import { getDb } from "@/server/db";
-import { integrationConnections } from "@/server/db/schema";
-import { processGhlOutbox } from "@/server/integrations/ghl";
+import { createHash, timingSafeEqual } from "node:crypto";
+import { processAllDue } from "@/server/integrations/ghl";
+import { log } from "@/server/log";
 
 /**
- * Drains the GoHighLevel outbox for every connected business. Call from a scheduler
- * (e.g. Vercel Cron every 5 minutes) with `Authorization: Bearer $CRON_SECRET`.
+ * Durable sync worker. Call from a scheduler every few minutes (e.g. Vercel Cron) with
+ * `Authorization: Bearer $CRON_SECRET`. Add `?reconcile=1` (e.g. hourly) to also run reconciliation.
+ * Each business is processed in isolation; one failing business never blocks the others.
  */
 export async function POST(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -14,10 +13,11 @@ export async function POST(request: Request) {
   const provided = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
   const ok = timingSafeEqual(createHash("sha256").update(provided).digest(), createHash("sha256").update(secret).digest());
   if (!ok) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  const rows = await getDb().select({ businessId: integrationConnections.businessId }).from(integrationConnections).where(eq(integrationConnections.status, "connected"));
-  const results = [];
-  for (const r of rows) results.push({ businessId: r.businessId, ...(await processGhlOutbox(r.businessId)) });
-  return Response.json({ results });
+  const reconcile = new URL(request.url).searchParams.get("reconcile") === "1";
+  const started = Date.now();
+  const result = await processAllDue({ reconcile });
+  log.info("ghl.worker_run", { businesses: Object.keys(result.results).length, recovered: result.recovered, reconcile, ms: Date.now() - started });
+  return Response.json(result);
 }
 
 export const GET = POST;

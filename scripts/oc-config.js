@@ -212,6 +212,9 @@ window.OC_CONFIG = {
   },
 
   hero: {
+    // Optional: override the home-page headline and intro without editing the HTML block.
+    title: "",
+    body: "",
     // Product ids from the catalogue (scripts/oc-catalogue.js) shown beside the hero text.
     products: ["arden-101", "arden-round-33", "brio-kids-sun"],
     stats: true, // Branches · Frames & eyewear · Eye exam duration (computed from this file)

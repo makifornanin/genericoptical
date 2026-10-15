@@ -385,7 +385,8 @@
       '<div class="oc-product-card__row"><div class="oc-product-card__text">' +
       '<p class="oc-product-card__name oc-truncate">' + esc(p.name) + "</p>" +
       '<p class="oc-product-card__meta oc-truncate">' + esc(p.brand) + " · " + esc(categoryLabel(p.category)) + "</p></div>" +
-      '<p class="oc-product-card__price">' + priceHtml(p) + "</p></div>" +
+      // Compact cards (home, related) show the plain lowest price, as the original design did.
+      '<p class="oc-product-card__price">' + (opts.compact ? (val("catalogue.showPrices", true) === false || typeof p.price !== "number" ? "" : esc(money(p.price))) : priceHtml(p)) + "</p></div>" +
       (opts.compact || (variants < 2 && !p.storeUrl) ? "" : '<p class="oc-product-card__foot">' + (variants > 1 ? "<span>" + variants + " options</span>" : "") + (p.storeUrl ? '<span class="oc-tag oc-tag--pos">Online</span>' : "") + "</p>") +
       "</a>"
     );

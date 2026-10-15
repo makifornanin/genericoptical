@@ -143,6 +143,7 @@
   background: var(--oc-accent);
   color: var(--oc-accent-ink);
 }
+.oc[hidden],
 .oc [hidden] {
   display: none !important;
 }
@@ -817,14 +818,13 @@
   }
 }
 @media (min-width: 768px) {
-  .oc .oc-product-grid--4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
   .oc .oc-product-grid--catalogue {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 @media (min-width: 1024px) {
+  /* 4 across only from 1024px: at tablet width names and prices were truncated. */
+  .oc .oc-product-grid--4,
   .oc .oc-product-grid--catalogue {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }

@@ -1325,6 +1325,8 @@ export const ghlCalendars = pgTable(
     name: text("name").notNull(),
     branchId: uuid("branch_id"),
     appointmentTypeId: uuid("appointment_type_id"),
+    /** Personal calendars: the staff member it books (used when GHL sends no assigned user). */
+    practitionerMembershipId: uuid("practitioner_membership_id"),
     isActive: boolean("is_active").notNull().default(true),
     fetchedAt: ts("fetched_at").notNull().defaultNow(),
   },

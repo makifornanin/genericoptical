@@ -481,19 +481,20 @@ export function GhlSettingsForm({ overview }: { overview: GhlOverview }) {
 
 export function GhlCalendarMapping({ overview }: { overview: GhlOverview }) {
   const act = useAction(mapGhlCalendarAction);
-  const { calendars, branches, appointmentTypes } = overview.mapping;
+  const { calendars, branches, appointmentTypes, staff } = overview.mapping;
   return (
     <Card>
-      <CardHeader title="Calendars" subtitle="Map each GHL calendar to the branch and appointment type it books. Unmapped calendars' bookings are held for review." />
+      <CardHeader title="Calendars" subtitle="Map each GHL calendar to the branch and appointment type it books (and, for a personal calendar, the practitioner). Unmapped calendars' bookings are held for review." />
       <TableWrap>
         <Table>
           <THead>
             <TH>GHL calendar</TH>
             <TH>Branch</TH>
             <TH>Appointment type</TH>
+            <TH>Practitioner</TH>
           </THead>
           <tbody>
-            {calendars.length === 0 ? <EmptyRow colSpan={3}>No calendars loaded yet — use “Refresh GHL data”.</EmptyRow> : null}
+            {calendars.length === 0 ? <EmptyRow colSpan={4}>No calendars loaded yet — use “Refresh GHL data”.</EmptyRow> : null}
             {calendars.map((c) => (
               <TR key={c.id}>
                 <TD className="font-medium">
@@ -501,7 +502,7 @@ export function GhlCalendarMapping({ overview }: { overview: GhlOverview }) {
                   {!c.isActive ? <span className="ml-2 text-[11.5px] text-text-3">inactive</span> : null}
                 </TD>
                 <TD>
-                  <Select aria-label={`Branch for ${c.name}`} value={c.branchId ?? ""} onChange={(e) => act.run(c.id, e.target.value || null, c.appointmentTypeId)} className="h-8 text-[12.5px]">
+                  <Select aria-label={`Branch for ${c.name}`} value={c.branchId ?? ""} onChange={(e) => act.run(c.id, e.target.value || null, c.appointmentTypeId, c.practitionerMembershipId)} className="h-8 text-[12.5px]">
                     <option value="">Not mapped</option>
                     {branches.map((b) => (
                       <option key={b.id} value={b.id}>{b.name}</option>
@@ -509,10 +510,18 @@ export function GhlCalendarMapping({ overview }: { overview: GhlOverview }) {
                   </Select>
                 </TD>
                 <TD>
-                  <Select aria-label={`Appointment type for ${c.name}`} value={c.appointmentTypeId ?? ""} onChange={(e) => act.run(c.id, c.branchId, e.target.value || null)} className="h-8 text-[12.5px]">
+                  <Select aria-label={`Appointment type for ${c.name}`} value={c.appointmentTypeId ?? ""} onChange={(e) => act.run(c.id, c.branchId, e.target.value || null, c.practitionerMembershipId)} className="h-8 text-[12.5px]">
                     <option value="">Not mapped</option>
                     {appointmentTypes.map((t) => (
                       <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </Select>
+                </TD>
+                <TD>
+                  <Select aria-label={`Practitioner for ${c.name}`} value={c.practitionerMembershipId ?? ""} onChange={(e) => act.run(c.id, c.branchId, c.appointmentTypeId, e.target.value || null)} className="h-8 text-[12.5px]">
+                    <option value="">From the GHL booking</option>
+                    {staff.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
                   </Select>
                 </TD>

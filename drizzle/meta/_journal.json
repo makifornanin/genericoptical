@@ -85,6 +85,13 @@
       "when": 1792140234938,
       "tag": "0011_ghl_lead_opportunities",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792157520280,
+      "tag": "0012_ghl_calendar_practitioner",
+      "breakpoints": true
     }
   ]
 }

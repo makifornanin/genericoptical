@@ -131,8 +131,8 @@ export async function saveGhlSettingsAction(input: unknown) {
   return run((ctx) => updateSettings(ctx, ghlSettingsSchema.partial().parse(input)), "GoHighLevel sync settings saved");
 }
 
-export async function mapGhlCalendarAction(calendarId: string, branchId: string | null, appointmentTypeId: string | null) {
-  return run((ctx) => mapCalendar(ctx, z.string().min(1).max(80).parse(calendarId), branchId || null, appointmentTypeId || null), "Calendar mapping saved", ["site"]);
+export async function mapGhlCalendarAction(calendarId: string, branchId: string | null, appointmentTypeId: string | null, practitionerMembershipId: string | null = null) {
+  return run((ctx) => mapCalendar(ctx, z.string().min(1).max(80).parse(calendarId), branchId || null, appointmentTypeId || null, practitionerMembershipId || null), "Calendar mapping saved", ["site"]);
 }
 
 export async function mapGhlUserAction(ghlUserId: string, membershipId: string | null) {

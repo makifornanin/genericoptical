@@ -155,7 +155,7 @@ export async function ghlOverview(ctx: Ctx) {
     counts: productCounts.rows[0] ?? { linked: 0, contacts: 0, opportunities: 0 },
     mapping: {
       pipelines: pipelines.map((p) => ({ id: p.ghlPipelineId, name: p.name, stages: p.stages })),
-      calendars: calendars.map((c) => ({ id: c.ghlCalendarId, name: c.name, branchId: c.branchId, appointmentTypeId: c.appointmentTypeId, isActive: c.isActive })),
+      calendars: calendars.map((c) => ({ id: c.ghlCalendarId, name: c.name, branchId: c.branchId, appointmentTypeId: c.appointmentTypeId, practitionerMembershipId: c.practitionerMembershipId, isActive: c.isActive })),
       users: ghlUserRows.map((u) => ({ id: u.ghlUserId, name: u.name, email: u.email, membershipId: u.membershipId })),
       staff,
       branches: branchRows,
@@ -185,7 +185,7 @@ export async function listSyncEvents(ctx: Ctx, f: { status?: string | null; cate
 
 // ─── Mappings ────────────────────────────────────────────────────────────────
 
-export async function mapCalendar(ctx: Ctx, ghlCalendarId: string, branchId: string | null, appointmentTypeId: string | null) {
+export async function mapCalendar(ctx: Ctx, ghlCalendarId: string, branchId: string | null, appointmentTypeId: string | null, practitionerMembershipId: string | null = null) {
   requirePermission(ctx, "integrations.manage");
   const db = getDb();
   if (branchId) {
@@ -196,9 +196,17 @@ export async function mapCalendar(ctx: Ctx, ghlCalendarId: string, branchId: str
     const [t] = await db.select({ id: appointmentTypes.id }).from(appointmentTypes).where(and(eq(appointmentTypes.businessId, ctx.businessId), eq(appointmentTypes.id, appointmentTypeId))).limit(1);
     if (!t) throw invalid("Unknown appointment type.");
   }
+  if (practitionerMembershipId) {
+    const [m] = await db
+      .select({ id: businessMemberships.id })
+      .from(businessMemberships)
+      .where(and(eq(businessMemberships.businessId, ctx.businessId), eq(businessMemberships.id, practitionerMembershipId), eq(businessMemberships.isActive, true)))
+      .limit(1);
+    if (!m) throw invalid("Unknown staff member.");
+  }
   const res = await db
     .update(ghlCalendars)
-    .set({ branchId, appointmentTypeId })
+    .set({ branchId, appointmentTypeId, practitionerMembershipId })
     .where(and(eq(ghlCalendars.businessId, ctx.businessId), eq(ghlCalendars.ghlCalendarId, ghlCalendarId)))
     .returning({ name: ghlCalendars.name });
   if (!res.length) throw notFound("Calendar");

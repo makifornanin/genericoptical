@@ -70,7 +70,8 @@ export const inboundAppointment: Handler = async (event, env) => {
     customerId,
     leadId,
     guestName: customerId || leadId ? null : guestName,
-    practitionerMembershipId: user?.membershipId ?? null,
+    // The GHL user it's assigned to; otherwise the calendar's own practitioner (personal calendars).
+    practitionerMembershipId: user?.membershipId ?? calendar.practitionerMembershipId ?? null,
     startsAt: new Date(appt.startTime),
     endsAt: new Date(appt.endTime),
     status,

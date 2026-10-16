@@ -19,7 +19,7 @@ import {
   sales as salesTable,
   stockMovements,
 } from "@/server/db/schema";
-import { changeOpportunity, handleMarketplaceWebhook, pipelineSummary, processGhl, reconcileAll, resolveMismatch } from "@/server/integrations/ghl";
+import { changeOpportunity, handleMarketplaceWebhook, mapCalendar, pipelineSummary, processGhl, reconcileAll, resolveMismatch } from "@/server/integrations/ghl";
 import { setGhlFetch } from "@/server/integrations/ghl/connection";
 import * as appts from "@/server/services/appointments";
 import * as leadsSvc from "@/server/services/leads";
@@ -373,6 +373,16 @@ describe("appointments (GHL calendars authoritative)", () => {
     await deliver("AppointmentDelete", { appointment: { id: "ap_g1" } });
     [row] = await getDb().select().from(appointments).where(eq(appointments.id, row.id));
     expect(row.status).toBe("cancelled");
+  });
+
+  it("assigns a booking with no GHL user to the calendar's mapped practitioner", async () => {
+    await connect(f, fake, { sync: ALL_ON, appointmentsAuthority: "ghl" });
+    await mapCalendar(f.ctx.owner, "cal_exam", f.main.id, f.examTypeId, f.membership.practitioner);
+    await expect(mapCalendar(f.ctx.owner, "cal_exam", f.main.id, f.examTypeId, "00000000-0000-4000-8000-000000000000")).rejects.toThrow(/Unknown staff/);
+    const start = new Date(`${futureDay(5)}T02:00:00.000Z`);
+    await deliver("AppointmentCreate", { appointment: { id: "ap_cal_pr", calendarId: "cal_exam", appointmentStatus: "confirmed", title: "Walk-in booking", startTime: start.toISOString(), endTime: new Date(start.getTime() + 45 * 60_000).toISOString() } });
+    const [row] = await getDb().select().from(appointments).where(eq(appointments.externalGhlAppointmentId, "ap_cal_pr"));
+    expect(row.practitionerMembershipId).toBe(f.membership.practitioner);
   });
 
   it("holds bookings from unmapped calendars for review", async () => {

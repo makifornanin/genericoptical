@@ -258,6 +258,23 @@ export async function posInsights(ctx: Ctx, branchId: string) {
   };
 }
 
+/** Variants sold most at this branch over the last 30 days (refunds excluded), for the POS "Popular" tab. */
+export async function popularVariantIds(ctx: Ctx, branchId: string, limit = 24): Promise<string[]> {
+  requirePermission(ctx, "pos.use");
+  const since = new Date(now(ctx).getTime() - 30 * 86_400_000);
+  const sold = sql<number>`sum(${saleItems.quantity} - ${saleItems.refundedQuantity})`;
+  const rows = await db()
+    .select({ variantId: saleItems.variantId })
+    .from(saleItems)
+    .innerJoin(sales, eq(sales.id, saleItems.saleId))
+    .where(and(eq(sales.businessId, ctx.businessId), eq(sales.branchId, branchId), eq(sales.status, "completed"), gte(sales.completedAt, since)))
+    .groupBy(saleItems.variantId)
+    .having(sql`${sold} > 0`)
+    .orderBy(desc(sold))
+    .limit(limit);
+  return rows.map((r) => r.variantId);
+}
+
 // ─── Linked customer ─────────────────────────────────────────────────────────
 
 /** What the cashier should know about the linked customer: balances owed and recent purchases. */

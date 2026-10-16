@@ -39,6 +39,7 @@ async function Content({ searchParams }: { searchParams: Promise<Record<string, 
         key={branchId}
         items={items.map((i) => ({
           variantId: i.variantId,
+          productId: i.productId,
           productName: i.productName,
           brand: i.brand,
           label: i.label,

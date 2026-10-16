@@ -5,6 +5,7 @@ import type { PosItem } from "./terminal";
 export function toPosItem(i: Awaited<ReturnType<typeof sellableVariants>>[number]): PosItem {
   return {
     variantId: i.variantId,
+    productId: i.productId,
     productName: i.productName,
     brand: i.brand,
     label: i.label,

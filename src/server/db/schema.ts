@@ -1453,7 +1453,7 @@ export const apiRateLimits = pgTable(
 
 /** A cart saved at the counter. Stored as entered, re-priced and re-checked when resumed. */
 export type HeldCartContent = {
-  lines: { variantId: string; qty: number; customPriceCents: number | null }[];
+  lines: { variantId: string; qty: number; customPriceCents: number | null; discount?: { type: "amount"; cents: number } | { type: "percent"; bps: number } | null }[];
   discount: { type: "none" | "percent" | "amount"; value: string };
   notes: string;
 };

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizePhPhone } from "./phone";
 
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
@@ -29,7 +30,8 @@ export const optPhone = z
   .max(40)
   .transform((v) => (v === "" ? null : v))
   .nullish()
-  .refine((v) => !v || (/^[+()0-9\s.-]{6,40}$/.test(v) && v.replace(/\D/g, "").length >= 7), "Enter a valid phone number (at least 7 digits).");
+  .refine((v) => !v || (/^[+()0-9\s.-]{6,40}$/.test(v) && v.replace(/\D/g, "").length >= 7), "Enter a valid phone number (at least 7 digits).")
+  .transform((v) => (v ? normalizePhPhone(v) : v));
 
 export const uuid = z.uuid("Invalid reference.");
 export const optUuid = z
@@ -345,7 +347,17 @@ export const heldCartInput = z.object({
   label: z.string().trim().max(60).default(""),
   customerId: optUuid,
   lines: z
-    .array(z.object({ variantId: uuid, qty: z.number().int().min(1).max(999), customPriceCents: cents.nullable().default(null) }))
+    .array(
+      z.object({
+        variantId: uuid,
+        qty: z.number().int().min(1).max(999),
+        customPriceCents: cents.nullable().default(null),
+        discount: z
+          .union([z.object({ type: z.literal("amount"), cents }), z.object({ type: z.literal("percent"), bps: z.number().int().min(1).max(10000) })])
+          .nullable()
+          .default(null),
+      }),
+    )
     .min(1, "The cart is empty.")
     .max(100),
   discount: z.object({ type: z.enum(["none", "percent", "amount"]), value: z.string().trim().max(20) }).default({ type: "none", value: "" }),

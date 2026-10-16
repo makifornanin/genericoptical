@@ -1,13 +1,17 @@
 "use client";
 
-import { AlertTriangle, BarChart3, Clock3, PauseCircle, Play, Trash2, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, BarChart3, Check, Clock3, Download, PauseCircle, Play, Printer, Trash2, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useAction } from "@/components/app/use-action";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink, buttonClass } from "@/components/ui/button";
 import { DialogContent, DialogRoot, DialogTrigger } from "@/components/ui/dialog";
 import { TextField } from "@/components/ui/form";
+import type { PickedCustomer } from "@/components/app/customer-picker";
 import { cn } from "@/lib/cn";
+import { MANUAL_PAYMENT_NOTE, NON_CASH_METHODS } from "@/lib/receipt";
+import { PAYMENT_METHOD_LABELS } from "@/lib/schemas";
+import type { PosItem, ProductGroup } from "./terminal";
 import { cancelHeldCartAction, holdCartAction, listHeldCartsAction, posInsightsAction, resumeHeldCartAction } from "./actions";
 
 type ActionData<F extends (...args: never[]) => Promise<unknown>> = Extract<Awaited<ReturnType<F>>, { ok: true }> extends { data: infer D } ? NonNullable<D> : never;
@@ -100,8 +104,9 @@ export function HeldCartsDialog({
       }}
     >
       <DialogTrigger asChild>
-        <Button className="h-10" aria-label={`Held carts (${count})`}>
-          <PauseCircle /> Held{count ? <span className="rounded-full bg-ink px-1.5 text-[11px] font-semibold text-white tabular">{count}</span> : null}
+        <Button className="h-9 max-sm:px-2.5" aria-label={`Held carts (${count})`}>
+          <PauseCircle /> <span className="max-sm:hidden">Held</span>
+          {count ? <span className="rounded-full bg-ink px-1.5 text-[11px] font-semibold text-white tabular">{count}</span> : null}
         </Button>
       </DialogTrigger>
       <DialogContent size="md" title="Held carts" description="Carts on hold at this branch. They don't reserve stock and expire after 7 days.">
@@ -163,8 +168,8 @@ export function InsightsDialog({ branchId, branchName, fmt, onAdd }: { branchId:
       }}
     >
       <DialogTrigger asChild>
-        <Button className="h-10">
-          <BarChart3 /> Insights
+        <Button className="h-9 max-sm:px-2.5" aria-label="Insights">
+          <BarChart3 /> <span className="max-sm:hidden">Insights</span>
         </Button>
       </DialogTrigger>
       <DialogContent size="lg" title={`${branchName}: counter insights`} description="From recorded sales and stock at this branch. Refunded units are excluded.">
@@ -266,6 +271,184 @@ export function InsightsDialog({ branchId, branchName, fmt, onAdd }: { branchId:
           </div>
         )}
       </DialogContent>
+    </DialogRoot>
+  );
+}
+
+// ─── Variant picker ──────────────────────────────────────────────────────────
+
+export function VariantPicker({ group, onClose, fmt, left, onPick }: { group: ProductGroup | null; onClose: () => void; fmt: (c: number) => string; left: (v: PosItem) => number; onPick: (v: PosItem) => void }) {
+  return (
+    <DialogRoot open={Boolean(group)} onOpenChange={(o) => !o && onClose()}>
+      {group ? (
+        <DialogContent size="md" title={group.name} description={`${group.variants.length} options${group.brand ? ` · ${group.brand}` : ""}. Stock shown is for this branch.`}>
+          <ul className="flex flex-col gap-1.5" aria-label="Options">
+            {group.variants.map((v, i) => {
+              const n = left(v);
+              const out = n <= 0;
+              const low = Number.isFinite(n) && !out && n <= Math.max(1, v.reorderPoint);
+              return (
+                <li key={v.variantId}>
+                  <button
+                    type="button"
+                    disabled={out}
+                    autoFocus={i === group.variants.findIndex((x) => left(x) > 0)}
+                    onClick={() => onPick(v)}
+                    className="flex w-full items-center gap-3 rounded-[12px] border border-line bg-surface px-3 py-2.5 text-left hover:border-line-strong focus-visible:outline-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-55"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[13.5px] font-medium">{v.label}</span>
+                      <span className="block truncate text-[11.5px] text-text-3">
+                        {v.sku}
+                        {v.barcode ? ` · ${v.barcode}` : ""}
+                      </span>
+                    </span>
+                    <span className={cn("shrink-0 text-[12px] font-medium tabular", out ? "text-neg" : low ? "text-warn" : "text-text-2")}>
+                      {!Number.isFinite(n) ? (v.productType === "service" ? "Service" : "Made to order") : out ? "Out of stock" : low ? `Low · ${n} left` : `${n} in stock`}
+                    </span>
+                    <span className="w-24 shrink-0 text-right text-[13.5px] font-semibold tabular">{fmt(v.priceCents)}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </DialogContent>
+      ) : null}
+    </DialogRoot>
+  );
+}
+
+// ─── Keyboard shortcuts ──────────────────────────────────────────────────────
+
+const SHORTCUTS: [string, string][] = [
+  ["/ or F2", "Search products (then ↓ to move into the results)"],
+  ["Arrow keys", "Move between product tiles"],
+  ["Enter", "Add the selected product, or the scanned barcode / SKU"],
+  ["Alt + C", "Find or add a customer"],
+  ["Ctrl + Enter", "Go to payment, then complete the sale"],
+  ["F8", "Hold the current sale"],
+  ["Esc", "Close a dialog, or go back from payment to the cart"],
+];
+
+export function ShortcutsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  return (
+    <DialogRoot open={open} onOpenChange={onOpenChange}>
+      {open ? (
+        <DialogContent size="sm" title="Keyboard shortcuts" description="Chosen so they don't clash with the browser's own keys.">
+          <dl className="flex flex-col divide-y divide-line text-[13px]">
+            {SHORTCUTS.map(([k, d]) => (
+              <div key={k} className="flex items-start justify-between gap-4 py-2">
+                <dt>
+                  <kbd className="rounded-[6px] border border-line-strong bg-surface-2 px-1.5 py-0.5 font-mono text-[11.5px]">{k}</kbd>
+                </dt>
+                <dd className="text-right text-text-2">{d}</dd>
+              </div>
+            ))}
+          </dl>
+        </DialogContent>
+      ) : null}
+    </DialogRoot>
+  );
+}
+
+// ─── Sale complete ───────────────────────────────────────────────────────────
+
+export type CompletedSale = {
+  saleId: string;
+  number: string;
+  totalCents: number;
+  balanceDueCents: number;
+  customer: PickedCustomer | null;
+  lines: { name: string; label: string; qty: number; lineTotalCents: number }[];
+  subtotalCents: number;
+  discountCents: number;
+  taxCents: number;
+  payments: { method: string; amountCents: number; reference: string | null; tenderedCents: number | null }[];
+};
+
+export function SaleCompleteDialog({ sale, fmt, onNewSale }: { sale: CompletedSale | null; fmt: (c: number) => string; onNewSale: () => void }) {
+  const paidNow = sale ? sale.payments.reduce((s, p) => s + p.amountCents, 0) : 0;
+  const change = sale ? sale.payments.reduce((s, p) => s + (p.tenderedCents !== null && p.tenderedCents > p.amountCents ? p.tenderedCents - p.amountCents : 0), 0) : 0;
+  return (
+    <DialogRoot open={Boolean(sale)} onOpenChange={(o) => !o && onNewSale()}>
+      {sale ? (
+        <DialogContent size="md" title={`Sale ${sale.number} completed`} description="Saved. Stock, payments and the customer's history are updated; CRM sync happens in the background.">
+          <div className="flex flex-col gap-4 text-[13px]">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-ink">
+                <Check className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-[24px] leading-tight font-semibold tabular">{fmt(sale.totalCents)}</p>
+                <p className="text-text-2">{sale.customer ? `${sale.customer.name} · ${sale.customer.code}` : "Walk-in customer"}</p>
+              </div>
+              <div className="text-right">
+                {change > 0 ? <p className="text-[15px] font-semibold">Change {fmt(change)}</p> : null}
+                <p className={cn(sale.balanceDueCents > 0 ? "font-medium text-warn" : "text-text-2")}>{sale.balanceDueCents > 0 ? `Balance due ${fmt(sale.balanceDueCents)}` : "Paid in full"}</p>
+              </div>
+            </div>
+            <ul className="divide-y divide-line rounded-[12px] border border-line bg-surface px-3" aria-label="Items sold">
+              {sale.lines.map((l, i) => (
+                <li key={i} className="flex justify-between gap-3 py-2">
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">
+                      {l.qty} × {l.name}
+                    </span>
+                    {l.label !== "Default" ? <span className="block truncate text-[11.5px] text-text-3">{l.label}</span> : null}
+                  </span>
+                  <span className="shrink-0 tabular">{fmt(l.lineTotalCents)}</span>
+                </li>
+              ))}
+            </ul>
+            <dl className="flex flex-col gap-1">
+              <div className="flex justify-between text-text-2">
+                <dt>Subtotal</dt>
+                <dd className="tabular">{fmt(sale.subtotalCents)}</dd>
+              </div>
+              {sale.discountCents ? (
+                <div className="flex justify-between text-neg">
+                  <dt>Discounts</dt>
+                  <dd className="tabular">−{fmt(sale.discountCents)}</dd>
+                </div>
+              ) : null}
+              <div className="flex justify-between text-text-2">
+                <dt>Tax</dt>
+                <dd className="tabular">{fmt(sale.taxCents)}</dd>
+              </div>
+              {sale.payments.map((p, i) => (
+                <div key={i} className="flex justify-between">
+                  <dt>
+                    {PAYMENT_METHOD_LABELS[p.method] ?? p.method}
+                    {p.reference ? ` · ${p.reference}` : ""}
+                    {NON_CASH_METHODS.has(p.method) ? " *" : ""}
+                  </dt>
+                  <dd className="tabular">{fmt(p.amountCents)}</dd>
+                </div>
+              ))}
+              {!sale.payments.length ? <p className="text-text-3">No payment taken now.</p> : null}
+              <div className="flex justify-between border-t border-line pt-1.5 font-semibold">
+                <dt>Received now</dt>
+                <dd className="tabular">{fmt(paidNow)}</dd>
+              </div>
+            </dl>
+            {sale.payments.some((p) => NON_CASH_METHODS.has(p.method)) ? <p className="text-[11.5px] text-text-3">* {MANUAL_PAYMENT_NOTE}</p> : null}
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <ButtonLink href={`/print/receipt/${sale.saleId}`} target="_blank" className="justify-center">
+              <Printer /> Print receipt
+            </ButtonLink>
+            <a href={`/api/sales/${sale.saleId}/receipt`} className={buttonClass("secondary", "md", "justify-center")} download>
+              <Download /> PDF
+            </a>
+            <Button variant="primary" className="col-span-2 justify-center sm:col-span-1" onClick={onNewSale} autoFocus>
+              New sale
+            </Button>
+          </div>
+          <Link href={`/app/sales/${sale.saleId}`} className="mt-3 block text-center text-[12.5px] text-text-2 hover:text-text">
+            View transaction details
+          </Link>
+        </DialogContent>
+      ) : null}
     </DialogRoot>
   );
 }

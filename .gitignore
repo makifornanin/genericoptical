@@ -1,5 +1,26 @@
-previews/node_modules/
-previews/test-results/
-previews/playwright-report/
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# environment (secrets never get committed; .env.example has placeholders only)
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel/
+
+# tests
+test-results/
+playwright-report/
+blob-report/
+tests/.tmp/
+
+# OS
 .DS_Store
 Thumbs.db

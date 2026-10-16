@@ -1,0 +1,216 @@
+/*
+ * Inquiry form (contact, product inquiry, appointment request) — src/components/InquiryForm.tsx.
+ * Recreates the original website's form (customer-website-reference: .form-card, .field, .control,
+ * .checks, .form-foot), scoped under .oc with the design-system tokens:
+ *   card 1px hairline, 20px radius, white, 24px padding (32px from 640px);
+ *   labels 13px/500 secondary text above each control, 6px gap; 16px between fields;
+ *   controls 10px radius, strong hairline, white, 14px text; textarea about four lines;
+ *   two-column rows from 640px; checkboxes with 14px labels; foot = privacy note + submit.
+ * Change from the original: controls are 40px tall (were 36px) to keep the 40px touch-target rule.
+ */
+.oc {
+  --oc-danger: #b42318;
+  --oc-danger-soft: #fdecea;
+}
+.oc .oc-form-card {
+  border: 1px solid var(--oc-line);
+  border-radius: var(--oc-radius-card);
+  background: var(--oc-surface);
+  padding: 24px;
+}
+.oc .oc-form {
+  position: relative;
+  display: grid;
+  gap: 16px;
+}
+.oc .oc-form-row {
+  display: grid;
+  gap: 16px;
+}
+.oc .oc-form-row > * {
+  min-width: 0;
+}
+.oc .oc-form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--oc-text-2);
+}
+.oc .oc-form-req {
+  margin-left: 2px;
+  color: var(--oc-danger);
+}
+.oc .oc-form-control {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--oc-line-strong);
+  border-radius: var(--oc-radius-control);
+  background: var(--oc-surface);
+  padding: 0 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--oc-text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.oc textarea.oc-form-control {
+  min-height: 104px;
+  padding: 10px 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.oc select.oc-form-control {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2366686d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+}
+.oc .oc-form-control::placeholder {
+  color: var(--oc-text-3);
+}
+.oc .oc-form-control:hover {
+  border-color: var(--oc-text-3);
+}
+.oc .oc-form-control:focus {
+  border-color: var(--oc-ink);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(24 25 27 / 0.12);
+}
+.oc .oc-form-control[aria-invalid="true"] {
+  border-color: var(--oc-danger);
+}
+.oc .oc-form-control[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgb(180 35 24 / 0.15);
+}
+.oc .oc-form-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--oc-text-3);
+}
+.oc .oc-form-error {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--oc-danger);
+}
+.oc .oc-form-checks {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+.oc .oc-form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--oc-text);
+  cursor: pointer;
+}
+.oc .oc-form-check input {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin: 2px 0 0;
+  accent-color: var(--oc-brand);
+  cursor: pointer;
+}
+.oc .oc-form-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-top: 4px;
+}
+.oc .oc-form-note {
+  max-width: 380px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--oc-text-3);
+}
+.oc .oc-form-note a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.oc .oc-form-alert {
+  border-radius: 12px;
+  background: var(--oc-danger-soft);
+  color: #8a1c12;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.oc .oc-form-alert a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.oc .oc-form-context {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--oc-text-2);
+}
+.oc .oc-form-context strong {
+  font-weight: 600;
+  color: var(--oc-text);
+}
+.oc .oc-btn[disabled],
+.oc .oc-btn[aria-disabled="true"] {
+  cursor: progress;
+  opacity: 0.7;
+}
+/* Honeypot: off-screen for people, still present for naive bots. */
+.oc .oc-form-hp {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+/* Sent */
+.oc .oc-form-done {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+.oc .oc-form-done:focus {
+  outline: none;
+}
+.oc .oc-form-done .oc-confirm__icon {
+  width: 40px;
+  height: 40px;
+}
+.oc .oc-form-done__title {
+  margin-top: 4px;
+  font-family: var(--oc-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--oc-text);
+}
+.oc .oc-form-done__body {
+  font-size: 15px;
+  line-height: 1.625;
+  color: var(--oc-text-2);
+}
+.oc .oc-form-done .oc-text-link {
+  font-size: 14px;
+  font-weight: 500;
+}
+@media (min-width: 640px) {
+  .oc .oc-form-card {
+    padding: 32px;
+  }
+  .oc .oc-form-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

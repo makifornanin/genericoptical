@@ -1,0 +1,311 @@
+{
+  "business": {
+    "name": "Lensmere Optical",
+    "legalName": "Lensmere Optical Co. (demo)",
+    "tagline": "Eye care & eyewear",
+    "description": "Comprehensive eye examinations, prescription eyewear and contact lens fittings across three branches.",
+    "logoUrl": null,
+    "phone": "+63 2 8000 0100",
+    "email": "hello@lensmere.example",
+    "address": "2F Linden Arcade, 118 Lumen Street, Makati City",
+    "website": null,
+    "timezone": "Asia/Manila",
+    "currency": "PHP",
+    "locale": "en-PH",
+    "taxName": "VAT",
+    "pricesIncludeTax": true,
+    "brandColor": "#1F2B22",
+    "accentColor": "#B5E14A",
+    "isDemo": true
+  },
+  "content": {
+    "heroEyebrow": null,
+    "heroTitle": "Clear vision, unhurried care, and frames that feel like you.",
+    "heroBody": "Comprehensive eye examinations, prescription eyewear and contact lens fittings across three branches — with optometrists who take the time to explain your options.",
+    "aboutTitle": "It starts with listening.",
+    "aboutBody": "Choosing eyewear is about more than picking a frame. We begin with a thorough examination, explain what we find in plain language, and help you weigh lens and frame options against how you actually live — screens, sport, driving, reading.\n\nFrom the first check to the final fitting, every visit is meant to feel considered and never rushed.",
+    "values": [
+      {
+        "title": "Thorough eye exams",
+        "body": "Refraction, eye-health screening and a clear explanation of your prescription."
+      },
+      {
+        "title": "Honest guidance",
+        "body": "Lens and frame recommendations that fit your needs and budget."
+      },
+      {
+        "title": "Made-to-measure lenses",
+        "body": "Single vision, progressives and specialty lenses from our partner laboratory."
+      },
+      {
+        "title": "Aftercare included",
+        "body": "Free adjustments and fit checks for the life of your frames."
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Do I need an appointment for an eye exam?",
+        "answer": "Walk-ins are welcome when an optometrist is free, but booking guarantees your slot. Comprehensive exams take about 45 minutes."
+      },
+      {
+        "question": "How long do prescription glasses take?",
+        "answer": "Most single-vision orders are ready in 3–5 days. Progressive and specialty lenses take 5–7 days because they're made to measure at our partner laboratory."
+      },
+      {
+        "question": "Can I bring a prescription from another clinic?",
+        "answer": "Yes. Bring your written prescription (ideally less than a year old) and we'll fit lenses to it. We may recommend a quick check if it's older."
+      },
+      {
+        "question": "Which payment methods do you accept?",
+        "answer": "Cash, credit and debit cards, bank transfer, GCash and Maya. Orders can be reserved with a deposit and settled at pickup."
+      },
+      {
+        "question": "Do you fit contact lenses for first-time wearers?",
+        "answer": "Yes. A contact lens consultation includes measurements, trial lenses and a lesson on safe handling and care."
+      },
+      {
+        "question": "Is there a warranty on frames?",
+        "answer": "Frames carry a 6-month warranty against manufacturing defects, and adjustments are always free."
+      }
+    ],
+    "privacyContactEmail": "privacy@lensmere.example"
+  },
+  "branches": [
+    {
+      "id": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+      "code": "MKT",
+      "name": "Makati",
+      "address": [
+        "2F Linden Arcade, 118 Lumen Street",
+        "Makati City"
+      ],
+      "phone": "+63 2 8000 0101",
+      "email": "makati@lensmere.example",
+      "mapUrl": null,
+      "imageUrl": null,
+      "hours": {
+        "mon": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "tue": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "wed": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "thu": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "fri": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "sat": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "sun": {
+          "open": "11:00",
+          "close": "17:00"
+        }
+      }
+    },
+    {
+      "id": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+      "code": "QC",
+      "name": "Quezon City",
+      "address": [
+        "Unit 4, 52 Verde Avenue",
+        "Quezon City"
+      ],
+      "phone": "+63 2 8000 0102",
+      "email": "quezon-city@lensmere.example",
+      "mapUrl": null,
+      "imageUrl": null,
+      "hours": {
+        "mon": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "tue": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "wed": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "thu": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "fri": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "sat": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "sun": {
+          "open": "11:00",
+          "close": "17:00"
+        }
+      }
+    },
+    {
+      "id": "0370b397-165e-4773-97cd-110864aea832",
+      "code": "PSG",
+      "name": "Pasig",
+      "address": [
+        "G/F Alder Place, 9 Alder Road",
+        "Pasig City"
+      ],
+      "phone": "+63 2 8000 0103",
+      "email": "pasig@lensmere.example",
+      "mapUrl": null,
+      "imageUrl": null,
+      "hours": {
+        "mon": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "tue": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "wed": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "thu": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "fri": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "sat": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "sun": {
+          "open": "11:00",
+          "close": "17:00"
+        }
+      }
+    }
+  ],
+  "services": [
+    {
+      "id": "0f9e7348-b123-472c-a7ad-e64bd1f9fb5d",
+      "code": "eye_exam",
+      "name": "Comprehensive eye exam",
+      "description": "Refraction, eye-health screening and a clear explanation of your prescription.",
+      "durationMinutes": 45,
+      "priceCents": 50000,
+      "calendars": [
+        {
+          "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+          "calendarId": "FixtureEyeExamMKT01"
+        }
+      ]
+    },
+    {
+      "id": "313f0b8d-c8ef-473b-b514-6a4dd053e38f",
+      "code": "contact_lens_consultation",
+      "name": "Contact lens consultation",
+      "description": "Measurements, trial lenses and a handling lesson — for first-time and experienced wearers.",
+      "durationMinutes": 30,
+      "priceCents": 80000,
+      "calendars": []
+    },
+    {
+      "id": "ab0254f8-148f-4f78-b63d-4ce286c3c2d7",
+      "code": "frame_lens_consultation",
+      "name": "Frame & lens consultation",
+      "description": "Help choosing frames and lens options for how you work, drive and read.",
+      "durationMinutes": 30,
+      "priceCents": 0,
+      "calendars": []
+    }
+  ],
+  "inBranchServices": [
+    {
+      "id": "91bb51d3-cde4-4afc-9e91-e1827c168ade",
+      "name": "Single-vision prescription lenses",
+      "description": "Made to your prescription by our partner laboratory. Ready in 3–5 days.",
+      "priceCents": 150000,
+      "fromPrice": true
+    },
+    {
+      "id": "dae5ce5c-e7e2-455f-a0d0-3018cdc5a464",
+      "name": "Progressive lenses",
+      "description": "Near, intermediate and distance in one lens, measured and fitted in branch. Ready in 5–7 days.",
+      "priceCents": 450000,
+      "fromPrice": true
+    },
+    {
+      "id": "77b98505-388e-48cc-9432-994015494369",
+      "name": "Lens replacement",
+      "description": "New lenses in the frame you already love. Bring your frame and prescription; we check the frame's condition first.",
+      "priceCents": 120000,
+      "fromPrice": true
+    },
+    {
+      "id": "d0becedb-6f8d-4e8a-81b4-643845661564",
+      "name": "Frame adjustment & repairs",
+      "description": "Free adjustments for any frame bought from us; screws, nose pads and hinge repairs while you wait where possible.",
+      "priceCents": null,
+      "fromPrice": false
+    }
+  ],
+  "categories": [
+    {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames",
+      "productCount": 20
+    },
+    {
+      "slug": "sunglasses",
+      "name": "Sunglasses",
+      "kind": "sunglasses",
+      "productCount": 7
+    },
+    {
+      "slug": "contact-lenses",
+      "name": "Contact lenses",
+      "kind": "contact_lenses",
+      "productCount": 5
+    },
+    {
+      "slug": "cleaning-care",
+      "name": "Cleaning & care",
+      "kind": "accessories",
+      "productCount": 3
+    },
+    {
+      "slug": "cases",
+      "name": "Cases",
+      "kind": "accessories",
+      "productCount": 1
+    },
+    {
+      "slug": "accessories",
+      "name": "Accessories",
+      "kind": "accessories",
+      "productCount": 1
+    }
+  ],
+  "booking": {
+    "widgetBase": "https://api.leadconnectorhq.com/widget/booking/",
+    "ghlConnected": true
+  },
+  "generatedAt": "2026-10-15T09:00:00.000Z"
+}

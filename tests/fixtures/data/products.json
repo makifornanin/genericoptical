@@ -1,0 +1,3277 @@
+[
+  {
+    "id": "d09b77f4-fb49-47ff-8b82-f1efc0202385",
+    "slug": "arden-101",
+    "name": "Arden 101",
+    "brand": "Arden",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate rectangle frame. Available in black, tortoise.",
+    "imageUrl": "{{BASE}}/products/frame-rectangle-black.svg",
+    "priceFromCents": 295000,
+    "priceToCents": 315000,
+    "variantCount": 4,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "rectangle",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "cb014c4d-a7d7-4f10-8ce6-4ab26d3d2a41",
+        "label": "52 · Black",
+        "options": {
+          "size": "52",
+          "colour": "Black"
+        },
+        "priceCents": 295000,
+        "sku": "ARDEN-101-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "6cfa3fec-a85a-4e2a-aabb-88409fbc1111",
+        "label": "54 · Black",
+        "options": {
+          "size": "54",
+          "colour": "Black"
+        },
+        "priceCents": 315000,
+        "sku": "ARDEN-101-2",
+        "availability": "low_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "275b4885-b9f2-4a01-96b9-d64084b07c10",
+        "label": "52 · Tortoise",
+        "options": {
+          "size": "52",
+          "colour": "Tortoise"
+        },
+        "priceCents": 295000,
+        "sku": "ARDEN-101-3",
+        "availability": "out_of_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "62f09db6-1c9a-4a75-a657-b96c1551c4c3",
+        "label": "54 · Tortoise",
+        "options": {
+          "size": "54",
+          "colour": "Tortoise"
+        },
+        "priceCents": 315000,
+        "sku": "ARDEN-101-4",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "5d0bed6e-b011-4a02-8d7d-fa34ea25da0e",
+    "slug": "arden-204",
+    "name": "Arden 204",
+    "brand": "Arden",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate square frame. Available in black, crystal, tortoise.",
+    "imageUrl": "{{BASE}}/products/frame-square-black.svg",
+    "priceFromCents": 345000,
+    "priceToCents": 345000,
+    "variantCount": 3,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "square",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "02b669bc-890b-4c8e-9b2a-2f98c23c5715",
+        "label": "51 · Black",
+        "options": {
+          "size": "51",
+          "colour": "Black"
+        },
+        "priceCents": 345000,
+        "sku": "ARDEN-204-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "1ac93b69-3c59-4cb2-87ba-b7336be7d6a8",
+        "label": "51 · Crystal",
+        "options": {
+          "size": "51",
+          "colour": "Crystal"
+        },
+        "priceCents": 345000,
+        "sku": "ARDEN-204-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      },
+      {
+        "id": "8d474ca2-5db8-4266-b9df-5b4e98f93a52",
+        "label": "51 · Tortoise",
+        "options": {
+          "size": "51",
+          "colour": "Tortoise"
+        },
+        "priceCents": 345000,
+        "sku": "ARDEN-204-3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "b46a31e1-ffd4-442a-88ca-c3093b4f10f9",
+    "slug": "arden-everyday",
+    "name": "Arden Everyday",
+    "brand": "Arden",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate rectangle frame. Available in black, crystal.",
+    "imageUrl": "{{BASE}}/products/frame-rectangle-black.svg",
+    "priceFromCents": 199000,
+    "priceToCents": 219000,
+    "variantCount": 4,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "rectangle",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "ec80a9ab-53c6-4d1e-8f8a-052870492475",
+        "label": "51 · Black",
+        "options": {
+          "size": "51",
+          "colour": "Black"
+        },
+        "priceCents": 199000,
+        "sku": "ARDEN-EVERYD-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "a33de730-d1fb-44a1-876b-ab4a06b4bf8e",
+        "label": "53 · Black",
+        "options": {
+          "size": "53",
+          "colour": "Black"
+        },
+        "priceCents": 219000,
+        "sku": "ARDEN-EVERYD-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "ce8f4aaf-9be2-4e8d-87d3-215aae8033d1",
+        "label": "51 · Crystal",
+        "options": {
+          "size": "51",
+          "colour": "Crystal"
+        },
+        "priceCents": 199000,
+        "sku": "ARDEN-EVERYD-3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      },
+      {
+        "id": "c1a414a1-04b5-41ec-bed3-03dde8d794ec",
+        "label": "53 · Crystal",
+        "options": {
+          "size": "53",
+          "colour": "Crystal"
+        },
+        "priceCents": 219000,
+        "sku": "ARDEN-EVERYD-4",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "8d12b14a-777e-4e78-9e2e-1af607631940",
+    "slug": "arden-round-33",
+    "name": "Arden Round 33",
+    "brand": "Arden",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate round frame. Available in tortoise, black.",
+    "imageUrl": "{{BASE}}/products/frame-round-tortoise.svg",
+    "priceFromCents": 325000,
+    "priceToCents": 345000,
+    "variantCount": 4,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "round",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "d691d7a9-ebe8-475f-8383-399e58a1c6a2",
+        "label": "47 · Tortoise",
+        "options": {
+          "size": "47",
+          "colour": "Tortoise"
+        },
+        "priceCents": 325000,
+        "sku": "ARDEN-ROUND--1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "3bc3fe70-cc97-4115-a248-b6345e55edfd",
+        "label": "49 · Tortoise",
+        "options": {
+          "size": "49",
+          "colour": "Tortoise"
+        },
+        "priceCents": 345000,
+        "sku": "ARDEN-ROUND--2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "bed9336f-7de2-4028-a126-bfdab8683961",
+        "label": "47 · Black",
+        "options": {
+          "size": "47",
+          "colour": "Black"
+        },
+        "priceCents": 325000,
+        "sku": "ARDEN-ROUND--3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "3e5ff61c-aa77-4de3-813c-8b5f96b991df",
+        "label": "49 · Black",
+        "options": {
+          "size": "49",
+          "colour": "Black"
+        },
+        "priceCents": 345000,
+        "sku": "ARDEN-ROUND--4",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "49bfda1a-778a-430c-a575-3d43f3284467",
+    "slug": "brio-flex-kids",
+    "name": "Brio Flex Kids",
+    "brand": "Brio",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate round frame. Available in crystal, tortoise.",
+    "imageUrl": "{{BASE}}/products/frame-round-crystal.svg",
+    "priceFromCents": 195000,
+    "priceToCents": 195000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "round",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "cfb830f7-bd19-471d-819d-9df41e3f91dc",
+        "label": "44 · Crystal",
+        "options": {
+          "size": "44",
+          "colour": "Crystal"
+        },
+        "priceCents": 195000,
+        "sku": "BRIO-FLEX-KI-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "73e02697-3a93-4a5c-af9e-e3c0d2b0b2f5",
+        "label": "44 · Tortoise",
+        "options": {
+          "size": "44",
+          "colour": "Tortoise"
+        },
+        "priceCents": 195000,
+        "sku": "BRIO-FLEX-KI-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "35b7449c-9cc7-4616-9cef-d72181cff1ef",
+    "slug": "brio-junior",
+    "name": "Brio Junior",
+    "brand": "Brio",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate rectangle frame. Available in crystal, black.",
+    "imageUrl": "{{BASE}}/products/frame-rectangle-crystal.svg",
+    "priceFromCents": 185000,
+    "priceToCents": 185000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "rectangle",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "5a1d8c7a-262d-49a8-ad7b-3a238337fadb",
+        "label": "46 · Crystal",
+        "options": {
+          "size": "46",
+          "colour": "Crystal"
+        },
+        "priceCents": 185000,
+        "sku": "BRIO-JUNIOR-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      },
+      {
+        "id": "0e9c60ff-ffb1-40ab-b16c-5e66a32ca8c8",
+        "label": "46 · Black",
+        "options": {
+          "size": "46",
+          "colour": "Black"
+        },
+        "priceCents": 185000,
+        "sku": "BRIO-JUNIOR-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "4eb53fb3-2b8d-44c9-8044-aabfba15b2b0",
+    "slug": "halden-aviator-rx",
+    "name": "Halden Aviator RX",
+    "brand": "Halden",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Lightweight metal aviator frame. Available in gold, black.",
+    "imageUrl": "{{BASE}}/products/frame-aviator-gold.svg",
+    "priceFromCents": 425000,
+    "priceToCents": 425000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "aviator",
+      "material": "metal"
+    },
+    "variants": [
+      {
+        "id": "e31f32eb-ea3b-4010-9bbf-0838a0ac26f0",
+        "label": "55 · Gold",
+        "options": {
+          "size": "55",
+          "colour": "Gold"
+        },
+        "priceCents": 425000,
+        "sku": "HALDEN-AVIAT-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "0ddd36db-13d8-4876-bdaa-ce623ec1c07b",
+        "label": "55 · Black",
+        "options": {
+          "size": "55",
+          "colour": "Black"
+        },
+        "priceCents": 425000,
+        "sku": "HALDEN-AVIAT-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "5b616582-d7ae-4316-8b91-de446e35936b",
+    "slug": "halden-oval",
+    "name": "Halden Oval",
+    "brand": "Halden",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Lightweight metal oval frame. Available in gold.",
+    "imageUrl": "{{BASE}}/products/frame-oval-gold.svg",
+    "priceFromCents": 365000,
+    "priceToCents": 365000,
+    "variantCount": 1,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "oval",
+      "material": "metal"
+    },
+    "variants": [
+      {
+        "id": "2a52e6bf-3bdf-456e-b1f0-d41bebed8b83",
+        "label": "50 · Gold",
+        "options": {
+          "size": "50",
+          "colour": "Gold"
+        },
+        "priceCents": 365000,
+        "sku": "HALDEN-OVAL-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "9ec834f0-d74f-466d-aa35-2d3e2a5d5f45",
+    "slug": "halden-sable",
+    "name": "Halden Sable",
+    "brand": "Halden",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate oval frame. Available in tortoise, black.",
+    "imageUrl": "{{BASE}}/products/frame-oval-tortoise.svg",
+    "priceFromCents": 285000,
+    "priceToCents": 285000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "oval",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "e861dddc-55e7-4623-b3d6-c107b88d1deb",
+        "label": "49 · Tortoise",
+        "options": {
+          "size": "49",
+          "colour": "Tortoise"
+        },
+        "priceCents": 285000,
+        "sku": "HALDEN-SABLE-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "9fe38f59-6bcd-40e0-a1d2-e34389ac9527",
+        "label": "49 · Black",
+        "options": {
+          "size": "49",
+          "colour": "Black"
+        },
+        "priceCents": 285000,
+        "sku": "HALDEN-SABLE-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "08dae343-76aa-418f-82d7-3987c42b96a4",
+    "slug": "halden-wire",
+    "name": "Halden Wire",
+    "brand": "Halden",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Lightweight metal round frame. Available in gold.",
+    "imageUrl": "{{BASE}}/products/frame-round-gold.svg",
+    "priceFromCents": 395000,
+    "priceToCents": 415000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "round",
+      "material": "metal"
+    },
+    "variants": [
+      {
+        "id": "25ccfbdd-de83-45b7-bdd7-ceb106a8bc23",
+        "label": "48 · Gold",
+        "options": {
+          "size": "48",
+          "colour": "Gold"
+        },
+        "priceCents": 395000,
+        "sku": "HALDEN-WIRE-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "8005e6cc-83a4-4a11-bcb7-d8271f99bc2c",
+        "label": "50 · Gold",
+        "options": {
+          "size": "50",
+          "colour": "Gold"
+        },
+        "priceCents": 415000,
+        "sku": "HALDEN-WIRE-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "3edf942b-0a7a-48fb-8950-95e845fc1901",
+    "slug": "kiyo-hex",
+    "name": "Kiyo Hex",
+    "brand": "Kiyo",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Lightweight metal hexagon frame. Available in gold, black.",
+    "imageUrl": "{{BASE}}/products/frame-hexagon-gold.svg",
+    "priceFromCents": 315000,
+    "priceToCents": 315000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "hexagon",
+      "material": "metal"
+    },
+    "variants": [
+      {
+        "id": "ecbd19c6-8e79-437b-aad1-3d95bf17a568",
+        "label": "50 · Gold",
+        "options": {
+          "size": "50",
+          "colour": "Gold"
+        },
+        "priceCents": 315000,
+        "sku": "KIYO-HEX-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "de0cd350-1d87-458f-99bb-0e3207a7cf13",
+        "label": "50 · Black",
+        "options": {
+          "size": "50",
+          "colour": "Black"
+        },
+        "priceCents": 315000,
+        "sku": "KIYO-HEX-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "75e887c1-b712-4b0f-85e5-2a4eb2f5e458",
+    "slug": "kiyo-slim",
+    "name": "Kiyo Slim",
+    "brand": "Kiyo",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Lightweight metal rectangle frame. Available in black, gold.",
+    "imageUrl": "{{BASE}}/products/frame-rectangle-black.svg",
+    "priceFromCents": 245000,
+    "priceToCents": 245000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "rectangle",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "b80e0c2a-606e-4b71-8cd8-b9369562dd38",
+        "label": "53 · Black",
+        "options": {
+          "size": "53",
+          "colour": "Black"
+        },
+        "priceCents": 245000,
+        "sku": "KIYO-SLIM-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "a3362b87-9734-44d1-ada4-b70f8b54b793",
+        "label": "53 · Gold",
+        "options": {
+          "size": "53",
+          "colour": "Gold"
+        },
+        "priceCents": 245000,
+        "sku": "KIYO-SLIM-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "51ab5685-7e69-4002-b53c-c4bb2bfb1d25",
+    "slug": "kiyo-titan",
+    "name": "Kiyo Titan",
+    "brand": "Kiyo",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Lightweight metal rectangle frame. Available in black.",
+    "imageUrl": "{{BASE}}/products/frame-rectangle-black.svg",
+    "priceFromCents": 645000,
+    "priceToCents": 645000,
+    "variantCount": 1,
+    "availability": "low_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "rectangle",
+      "material": "metal"
+    },
+    "variants": [
+      {
+        "id": "80817cee-8834-415b-82bf-657292ee1ab7",
+        "label": "54 · Black",
+        "options": {
+          "size": "54",
+          "colour": "Black"
+        },
+        "priceCents": 645000,
+        "sku": "KIYO-TITAN-1",
+        "availability": "low_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "831fed10-1db5-4254-979d-8df4bfa4f549",
+    "slug": "mesa-cat-9",
+    "name": "Mesa Cat 9",
+    "brand": "Mesa",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate cateye frame. Available in black, tortoise, crystal.",
+    "imageUrl": "{{BASE}}/products/frame-cateye-black.svg",
+    "priceFromCents": 355000,
+    "priceToCents": 355000,
+    "variantCount": 3,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "cateye",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "f4a21268-adc5-4fcb-bc70-5e38d4c52af9",
+        "label": "52 · Black",
+        "options": {
+          "size": "52",
+          "colour": "Black"
+        },
+        "priceCents": 355000,
+        "sku": "MESA-CAT-9-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      },
+      {
+        "id": "ed342a39-3fdc-4901-9765-2194fae46e6e",
+        "label": "52 · Tortoise",
+        "options": {
+          "size": "52",
+          "colour": "Tortoise"
+        },
+        "priceCents": 355000,
+        "sku": "MESA-CAT-9-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "dba1671c-fc91-48c1-b475-ff2b2d31bcda",
+        "label": "52 · Crystal",
+        "options": {
+          "size": "52",
+          "colour": "Crystal"
+        },
+        "priceCents": 355000,
+        "sku": "MESA-CAT-9-3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "5e69e312-7f8b-482e-a278-8eb074758e1e",
+    "slug": "mesa-classic",
+    "name": "Mesa Classic",
+    "brand": "Mesa",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate browline frame. Available in black, tortoise.",
+    "imageUrl": "{{BASE}}/products/frame-browline-black.svg",
+    "priceFromCents": 385000,
+    "priceToCents": 405000,
+    "variantCount": 4,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "browline",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "6b5c7c5e-2887-4a04-8643-ca619b98c0c3",
+        "label": "51 · Black",
+        "options": {
+          "size": "51",
+          "colour": "Black"
+        },
+        "priceCents": 385000,
+        "sku": "MESA-CLASSIC-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "cfdbf98f-b95a-4741-86bf-82a630f68c91",
+        "label": "53 · Black",
+        "options": {
+          "size": "53",
+          "colour": "Black"
+        },
+        "priceCents": 405000,
+        "sku": "MESA-CLASSIC-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "fee8092f-b7f9-42d5-a998-9dc8db6e964f",
+        "label": "51 · Tortoise",
+        "options": {
+          "size": "51",
+          "colour": "Tortoise"
+        },
+        "priceCents": 385000,
+        "sku": "MESA-CLASSIC-3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "f5707cc9-71bf-4f4d-8c9c-741bcb9c8124",
+        "label": "53 · Tortoise",
+        "options": {
+          "size": "53",
+          "colour": "Tortoise"
+        },
+        "priceCents": 405000,
+        "sku": "MESA-CLASSIC-4",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ee95394d-1e17-489a-9d1e-8496165d95c0",
+    "slug": "mesa-studio",
+    "name": "Mesa Studio",
+    "brand": "Mesa",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate square frame. Available in black, tortoise, crystal.",
+    "imageUrl": "{{BASE}}/products/frame-square-black.svg",
+    "priceFromCents": 335000,
+    "priceToCents": 355000,
+    "variantCount": 6,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "square",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "9fe48bc3-9080-467d-b56c-dd999410f59d",
+        "label": "50 · Black",
+        "options": {
+          "size": "50",
+          "colour": "Black"
+        },
+        "priceCents": 335000,
+        "sku": "MESA-STUDIO-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "4a1e16bc-c369-475d-a119-f046204da30b",
+        "label": "52 · Black",
+        "options": {
+          "size": "52",
+          "colour": "Black"
+        },
+        "priceCents": 355000,
+        "sku": "MESA-STUDIO-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "7007f34f-45e6-45eb-a9a3-167119272351",
+        "label": "50 · Tortoise",
+        "options": {
+          "size": "50",
+          "colour": "Tortoise"
+        },
+        "priceCents": 335000,
+        "sku": "MESA-STUDIO-3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "86a0ce42-7610-4478-9135-a2acde68adae",
+        "label": "52 · Tortoise",
+        "options": {
+          "size": "52",
+          "colour": "Tortoise"
+        },
+        "priceCents": 355000,
+        "sku": "MESA-STUDIO-4",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "5a5f735c-644f-4407-8c6b-1e345f4ca83c",
+        "label": "50 · Crystal",
+        "options": {
+          "size": "50",
+          "colour": "Crystal"
+        },
+        "priceCents": 335000,
+        "sku": "MESA-STUDIO-5",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "c04aa374-64e3-43f1-a93d-472837606a52",
+        "label": "52 · Crystal",
+        "options": {
+          "size": "52",
+          "colour": "Crystal"
+        },
+        "priceCents": 355000,
+        "sku": "MESA-STUDIO-6",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "29b1a7aa-f3c6-4c4c-baed-3dd1dfa25a22",
+    "slug": "solenne-atelier",
+    "name": "Solenne Atelier",
+    "brand": "Solenne",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate round frame. Available in tortoise, black.",
+    "imageUrl": "{{BASE}}/products/frame-round-tortoise.svg",
+    "priceFromCents": 595000,
+    "priceToCents": 595000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "round",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "263c41da-1c06-40e7-9272-ca81afac5b3b",
+        "label": "49 · Tortoise",
+        "options": {
+          "size": "49",
+          "colour": "Tortoise"
+        },
+        "priceCents": 595000,
+        "sku": "SOLENNE-ATEL-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "e9ae2097-9d07-4afd-9c73-5ea137207128",
+        "label": "49 · Black",
+        "options": {
+          "size": "49",
+          "colour": "Black"
+        },
+        "priceCents": 595000,
+        "sku": "SOLENNE-ATEL-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2462a73a-88cc-4931-8407-a073d035263d",
+    "slug": "solenne-muse",
+    "name": "Solenne Muse",
+    "brand": "Solenne",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Lightweight metal cateye frame. Available in gold.",
+    "imageUrl": "{{BASE}}/products/frame-cateye-gold.svg",
+    "priceFromCents": 545000,
+    "priceToCents": 545000,
+    "variantCount": 1,
+    "availability": "out_of_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "cateye",
+      "material": "metal"
+    },
+    "variants": [
+      {
+        "id": "95ba7f88-26bd-4ee7-ae5c-34883bd794dd",
+        "label": "53 · Gold",
+        "options": {
+          "size": "53",
+          "colour": "Gold"
+        },
+        "priceCents": 545000,
+        "sku": "SOLENNE-MUSE-1",
+        "availability": "out_of_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "37b7b60e-3d0d-4b2e-836f-75839a0a4cc4",
+    "slug": "vela-air",
+    "name": "Vela Air",
+    "brand": "Vela",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate oval frame. Available in crystal, black.",
+    "imageUrl": "{{BASE}}/products/frame-oval-crystal.svg",
+    "priceFromCents": 265000,
+    "priceToCents": 265000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "oval",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "02664fe1-967b-4a78-8af2-fee93f688589",
+        "label": "51 · Crystal",
+        "options": {
+          "size": "51",
+          "colour": "Crystal"
+        },
+        "priceCents": 265000,
+        "sku": "VELA-AIR-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "32d064a3-9bd3-4649-9746-2ec352195552",
+        "label": "51 · Black",
+        "options": {
+          "size": "51",
+          "colour": "Black"
+        },
+        "priceCents": 265000,
+        "sku": "VELA-AIR-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "34d1ca45-eaab-4953-9365-0cfe64dbf3f6",
+    "slug": "vela-square-pro",
+    "name": "Vela Square Pro",
+    "brand": "Vela",
+    "category": {
+      "slug": "frames",
+      "name": "Frames",
+      "kind": "frames"
+    },
+    "description": "Hand-polished acetate square frame. Available in black, tortoise.",
+    "imageUrl": "{{BASE}}/products/frame-square-black.svg",
+    "priceFromCents": 465000,
+    "priceToCents": 465000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "square",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "6721262a-e2b7-4688-97eb-d9b5881e0e5b",
+        "label": "53 · Black",
+        "options": {
+          "size": "53",
+          "colour": "Black"
+        },
+        "priceCents": 465000,
+        "sku": "VELA-SQUARE--1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "4c482049-5492-48aa-9593-b5d953a5f164",
+        "label": "53 · Tortoise",
+        "options": {
+          "size": "53",
+          "colour": "Tortoise"
+        },
+        "priceCents": 465000,
+        "sku": "VELA-SQUARE--2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ffdfcfbb-08d1-4179-8bf5-698ee6a45245",
+    "slug": "brio-kids-sun",
+    "name": "Brio Kids Sun",
+    "brand": "Brio",
+    "category": {
+      "slug": "sunglasses",
+      "name": "Sunglasses",
+      "kind": "sunglasses"
+    },
+    "description": "UV400 round sunglasses.",
+    "imageUrl": "{{BASE}}/products/sun-round-smoke.svg",
+    "priceFromCents": 145000,
+    "priceToCents": 145000,
+    "variantCount": 1,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "round",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "8de31b02-0bc8-477a-9e37-adadfc13f13d",
+        "label": "Smoke lens",
+        "options": {
+          "lens": "Smoke"
+        },
+        "priceCents": 145000,
+        "sku": "BRIO-KIDS-SU-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "48c5577f-23af-44d5-ad1a-51aa15af850f",
+    "slug": "halden-pilot",
+    "name": "Halden Pilot",
+    "brand": "Halden",
+    "category": {
+      "slug": "sunglasses",
+      "name": "Sunglasses",
+      "kind": "sunglasses"
+    },
+    "description": "UV400 aviator sunglasses.",
+    "imageUrl": "{{BASE}}/products/sun-aviator-brown.svg",
+    "priceFromCents": 445000,
+    "priceToCents": 445000,
+    "variantCount": 1,
+    "availability": "low_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "aviator",
+      "material": "metal"
+    },
+    "variants": [
+      {
+        "id": "84d6ee18-83c0-43d1-aeda-8f882db6a5f9",
+        "label": "Brown lens",
+        "options": {
+          "lens": "Brown"
+        },
+        "priceCents": 445000,
+        "sku": "HALDEN-PILOT-1",
+        "availability": "low_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "810de9dd-eb73-4bb4-a198-199ea886caa2",
+    "slug": "kiyo-sport-polarised",
+    "name": "Kiyo Sport Polarised",
+    "brand": "Kiyo",
+    "category": {
+      "slug": "sunglasses",
+      "name": "Sunglasses",
+      "kind": "sunglasses"
+    },
+    "description": "UV400 square sunglasses.",
+    "imageUrl": "{{BASE}}/products/sun-square-smoke.svg",
+    "priceFromCents": 385000,
+    "priceToCents": 385000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "square",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "1856e2bd-da2e-4927-8861-f926d74b6539",
+        "label": "Smoke lens",
+        "options": {
+          "lens": "Smoke"
+        },
+        "priceCents": 385000,
+        "sku": "KIYO-SPORT-P-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "51dbf105-82d0-4bdc-8425-cc8e7fe90bc0",
+        "label": "Green lens",
+        "options": {
+          "lens": "Green"
+        },
+        "priceCents": 385000,
+        "sku": "KIYO-SPORT-P-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "43895c77-22ac-484f-a78b-0e363a6c835f",
+    "slug": "mesa-cat-sun",
+    "name": "Mesa Cat Sun",
+    "brand": "Mesa",
+    "category": {
+      "slug": "sunglasses",
+      "name": "Sunglasses",
+      "kind": "sunglasses"
+    },
+    "description": "UV400 cateye sunglasses.",
+    "imageUrl": "{{BASE}}/products/sun-cateye-smoke.svg",
+    "priceFromCents": 325000,
+    "priceToCents": 325000,
+    "variantCount": 1,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "cateye",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "1bbe36e0-d087-4abf-8e41-1697989c22bf",
+        "label": "Smoke lens",
+        "options": {
+          "lens": "Smoke"
+        },
+        "priceCents": 325000,
+        "sku": "MESA-CAT-SUN-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "eea939f5-2754-416f-a9f4-26f5b45dfe13",
+    "slug": "mesa-coast",
+    "name": "Mesa Coast",
+    "brand": "Mesa",
+    "category": {
+      "slug": "sunglasses",
+      "name": "Sunglasses",
+      "kind": "sunglasses"
+    },
+    "description": "UV400 square sunglasses.",
+    "imageUrl": "{{BASE}}/products/sun-square-smoke.svg",
+    "priceFromCents": 295000,
+    "priceToCents": 295000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "square",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "04f1c57b-31f9-4790-8acc-bb22ac9304e5",
+        "label": "Smoke lens",
+        "options": {
+          "lens": "Smoke"
+        },
+        "priceCents": 295000,
+        "sku": "MESA-COAST-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      },
+      {
+        "id": "42e2ce37-7fe7-4d8f-bbff-96bc4845ba39",
+        "label": "Brown lens",
+        "options": {
+          "lens": "Brown"
+        },
+        "priceCents": 295000,
+        "sku": "MESA-COAST-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "f97883b7-4d40-4d92-a6d9-a556fffac203",
+    "slug": "solenne-riviera",
+    "name": "Solenne Riviera",
+    "brand": "Solenne",
+    "category": {
+      "slug": "sunglasses",
+      "name": "Sunglasses",
+      "kind": "sunglasses"
+    },
+    "description": "UV400 aviator sunglasses.",
+    "imageUrl": "{{BASE}}/products/sun-aviator-green.svg",
+    "priceFromCents": 495000,
+    "priceToCents": 495000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "aviator",
+      "material": "metal"
+    },
+    "variants": [
+      {
+        "id": "bc946e21-4a55-45aa-9a05-4296ac56caa8",
+        "label": "Green lens",
+        "options": {
+          "lens": "Green"
+        },
+        "priceCents": 495000,
+        "sku": "SOLENNE-RIVI-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "19ccab55-dc93-4c2f-bd8b-089dafbc5062",
+        "label": "Smoke lens",
+        "options": {
+          "lens": "Smoke"
+        },
+        "priceCents": 495000,
+        "sku": "SOLENNE-RIVI-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "24695f81-98ba-4c3f-b705-b31b38830bab",
+    "slug": "vela-drift",
+    "name": "Vela Drift",
+    "brand": "Vela",
+    "category": {
+      "slug": "sunglasses",
+      "name": "Sunglasses",
+      "kind": "sunglasses"
+    },
+    "description": "UV400 round sunglasses.",
+    "imageUrl": "{{BASE}}/products/sun-round-brown.svg",
+    "priceFromCents": 265000,
+    "priceToCents": 265000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {
+      "shape": "round",
+      "material": "acetate"
+    },
+    "variants": [
+      {
+        "id": "6080fae6-1d37-4993-b2c2-e0e1afc13276",
+        "label": "Brown lens",
+        "options": {
+          "lens": "Brown"
+        },
+        "priceCents": 265000,
+        "sku": "VELA-DRIFT-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "1cee87bb-ba1f-4ba4-9b58-42e031c5e2f0",
+        "label": "Green lens",
+        "options": {
+          "lens": "Green"
+        },
+        "priceCents": 265000,
+        "sku": "VELA-DRIFT-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "5061beeb-8514-4799-92f0-9dbf46c3c5df",
+    "slug": "aquasoft-daily-30-pack",
+    "name": "AquaSoft Daily (30 pack)",
+    "brand": "AquaSoft",
+    "category": {
+      "slug": "contact-lenses",
+      "name": "Contact lenses",
+      "kind": "contact_lenses"
+    },
+    "description": "Soft contact lenses. Requires a valid contact lens prescription. Requires a valid contact lens prescription. Ask us about a fitting if you're new to contact lenses.",
+    "imageUrl": "{{BASE}}/products/contact-box.svg",
+    "priceFromCents": 165000,
+    "priceToCents": 165000,
+    "variantCount": 4,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "2f912106-23e1-4fa2-8f6a-4a3fc94c3ebc",
+        "label": "Power -1.00",
+        "options": {
+          "power": "-1.00"
+        },
+        "priceCents": 165000,
+        "sku": "AQUASOFT-DAI-1",
+        "availability": "low_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      },
+      {
+        "id": "1b88fa9b-bb42-48e2-8c17-14b8d980e94e",
+        "label": "Power -2.00",
+        "options": {
+          "power": "-2.00"
+        },
+        "priceCents": 165000,
+        "sku": "AQUASOFT-DAI-2",
+        "availability": "low_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "3028352b-9cd4-40ea-b092-06cf115e2a0b",
+        "label": "Power -3.00",
+        "options": {
+          "power": "-3.00"
+        },
+        "priceCents": 165000,
+        "sku": "AQUASOFT-DAI-3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "5936dfad-1389-427b-987d-a3e361a7b203",
+        "label": "Power -4.50",
+        "options": {
+          "power": "-4.50"
+        },
+        "priceCents": 165000,
+        "sku": "AQUASOFT-DAI-4",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "e449d090-adf5-44d8-a652-5794e43126b7",
+    "slug": "aquasoft-monthly-6-pack",
+    "name": "AquaSoft Monthly (6 pack)",
+    "brand": "AquaSoft",
+    "category": {
+      "slug": "contact-lenses",
+      "name": "Contact lenses",
+      "kind": "contact_lenses"
+    },
+    "description": "Soft contact lenses. Requires a valid contact lens prescription. Requires a valid contact lens prescription. Ask us about a fitting if you're new to contact lenses.",
+    "imageUrl": "{{BASE}}/products/contact-box.svg",
+    "priceFromCents": 145000,
+    "priceToCents": 145000,
+    "variantCount": 4,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "519f562e-aeec-4b0f-995f-acce3313da9a",
+        "label": "Power -1.00",
+        "options": {
+          "power": "-1.00"
+        },
+        "priceCents": 145000,
+        "sku": "AQUASOFT-MON-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "73d13857-903d-4676-a095-948c9208285a",
+        "label": "Power -2.00",
+        "options": {
+          "power": "-2.00"
+        },
+        "priceCents": 145000,
+        "sku": "AQUASOFT-MON-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "3c1df0df-1a6d-461a-9854-b57eefe040e6",
+        "label": "Power -3.00",
+        "options": {
+          "power": "-3.00"
+        },
+        "priceCents": 145000,
+        "sku": "AQUASOFT-MON-3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "c0abe604-3866-454b-a4c3-c37b3c49fb3f",
+        "label": "Power -4.50",
+        "options": {
+          "power": "-4.50"
+        },
+        "priceCents": 145000,
+        "sku": "AQUASOFT-MON-4",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "1a470132-c9ea-44d0-8738-58bf36a8526c",
+    "slug": "aquasoft-toric-monthly-6-pack",
+    "name": "AquaSoft Toric Monthly (6 pack)",
+    "brand": "AquaSoft",
+    "category": {
+      "slug": "contact-lenses",
+      "name": "Contact lenses",
+      "kind": "contact_lenses"
+    },
+    "description": "Soft contact lenses. Requires a valid contact lens prescription. Requires a valid contact lens prescription. Ask us about a fitting if you're new to contact lenses.",
+    "imageUrl": "{{BASE}}/products/contact-box.svg",
+    "priceFromCents": 235000,
+    "priceToCents": 235000,
+    "variantCount": 4,
+    "availability": "made_to_order",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "d560777b-b857-4e1a-97c3-b81e91f76ab0",
+        "label": "Power -1.00",
+        "options": {
+          "power": "-1.00"
+        },
+        "priceCents": 235000,
+        "sku": "AQUASOFT-TOR-1",
+        "availability": "made_to_order",
+        "branches": []
+      },
+      {
+        "id": "a77b9957-81d4-46f1-bbcc-dab1eef64359",
+        "label": "Power -2.00",
+        "options": {
+          "power": "-2.00"
+        },
+        "priceCents": 235000,
+        "sku": "AQUASOFT-TOR-2",
+        "availability": "made_to_order",
+        "branches": []
+      },
+      {
+        "id": "6554068e-b0dd-4826-82b0-6dd639916e60",
+        "label": "Power -3.00",
+        "options": {
+          "power": "-3.00"
+        },
+        "priceCents": 235000,
+        "sku": "AQUASOFT-TOR-3",
+        "availability": "made_to_order",
+        "branches": []
+      },
+      {
+        "id": "aa48d002-02aa-4121-8199-7aee4799ed93",
+        "label": "Power -4.50",
+        "options": {
+          "power": "-4.50"
+        },
+        "priceCents": 235000,
+        "sku": "AQUASOFT-TOR-4",
+        "availability": "made_to_order",
+        "branches": []
+      }
+    ]
+  },
+  {
+    "id": "18a7ba42-b8d3-4847-b402-dad811a7674f",
+    "slug": "clearday-bi-weekly-6-pack",
+    "name": "ClearDay Bi-weekly (6 pack)",
+    "brand": "ClearDay",
+    "category": {
+      "slug": "contact-lenses",
+      "name": "Contact lenses",
+      "kind": "contact_lenses"
+    },
+    "description": "Soft contact lenses. Requires a valid contact lens prescription. Requires a valid contact lens prescription. Ask us about a fitting if you're new to contact lenses.",
+    "imageUrl": "{{BASE}}/products/contact-box.svg",
+    "priceFromCents": 99000,
+    "priceToCents": 99000,
+    "variantCount": 4,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "8066b95d-6555-43be-8ae4-e301b6cba61c",
+        "label": "Power -1.00",
+        "options": {
+          "power": "-1.00"
+        },
+        "priceCents": 99000,
+        "sku": "CLEARDAY-BI--1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "48772d6e-7899-4b2b-b7d4-727fa44a5c3a",
+        "label": "Power -2.00",
+        "options": {
+          "power": "-2.00"
+        },
+        "priceCents": 99000,
+        "sku": "CLEARDAY-BI--2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "f3d845cd-208e-4cb9-bbee-8a1ec089780e",
+        "label": "Power -3.00",
+        "options": {
+          "power": "-3.00"
+        },
+        "priceCents": 99000,
+        "sku": "CLEARDAY-BI--3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "212a3a3c-e786-4f98-befd-409b7b65d7c9",
+        "label": "Power -4.50",
+        "options": {
+          "power": "-4.50"
+        },
+        "priceCents": 99000,
+        "sku": "CLEARDAY-BI--4",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "a2db9f59-2c55-4489-8c99-677f7530bd18",
+    "slug": "clearday-silicone-daily-30-pack",
+    "name": "ClearDay Silicone Daily (30 pack)",
+    "brand": "ClearDay",
+    "category": {
+      "slug": "contact-lenses",
+      "name": "Contact lenses",
+      "kind": "contact_lenses"
+    },
+    "description": "Soft contact lenses. Requires a valid contact lens prescription. Requires a valid contact lens prescription. Ask us about a fitting if you're new to contact lenses.",
+    "imageUrl": "{{BASE}}/products/contact-box.svg",
+    "priceFromCents": 215000,
+    "priceToCents": 215000,
+    "variantCount": 4,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "a6227567-d987-4d7d-b2b8-7f149ae945b2",
+        "label": "Power -1.00",
+        "options": {
+          "power": "-1.00"
+        },
+        "priceCents": 215000,
+        "sku": "CLEARDAY-SIL-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "7cf03281-9257-4c9d-901a-0b61962daace",
+        "label": "Power -2.00",
+        "options": {
+          "power": "-2.00"
+        },
+        "priceCents": 215000,
+        "sku": "CLEARDAY-SIL-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "88c5b913-07b7-47ac-aad5-5e72f34c55c4",
+        "label": "Power -3.00",
+        "options": {
+          "power": "-3.00"
+        },
+        "priceCents": 215000,
+        "sku": "CLEARDAY-SIL-3",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "de7f98f0-7d8f-4d6d-922a-9c97e628b001",
+        "label": "Power -4.50",
+        "options": {
+          "power": "-4.50"
+        },
+        "priceCents": 215000,
+        "sku": "CLEARDAY-SIL-4",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "f94eac4e-2f88-4476-9200-2ffa79c6cfb8",
+    "slug": "microfiber-lens-cloth",
+    "name": "Microfiber lens cloth",
+    "brand": "Lensmere",
+    "category": {
+      "slug": "cleaning-care",
+      "name": "Cleaning & care",
+      "kind": "accessories"
+    },
+    "description": "Soft, lint-free cloth that cleans lenses without scratching coatings.",
+    "imageUrl": "{{BASE}}/products/cloth.svg",
+    "priceFromCents": 15000,
+    "priceToCents": 15000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "1792f732-89c0-4027-96c2-bac453942313",
+        "label": "Grey",
+        "options": {
+          "option": "Grey"
+        },
+        "priceCents": 15000,
+        "sku": "MICROFIBER-L-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "9f7e1e47-fe28-433f-812b-2ea1170a3f3d",
+        "label": "Navy",
+        "options": {
+          "option": "Navy"
+        },
+        "priceCents": 15000,
+        "sku": "MICROFIBER-L-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "0cc8d425-3afd-428c-835b-0f6800138516",
+    "slug": "hard-shell-case",
+    "name": "Hard shell case",
+    "brand": "Lensmere",
+    "category": {
+      "slug": "cases",
+      "name": "Cases",
+      "kind": "accessories"
+    },
+    "description": "Crush-resistant case with a soft lining; fits most optical and sun frames.",
+    "imageUrl": "{{BASE}}/products/case-hard.svg",
+    "priceFromCents": 45000,
+    "priceToCents": 45000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "c7285a2e-83fe-4389-aba4-02d615d5d6c6",
+        "label": "Black",
+        "options": {
+          "option": "Black"
+        },
+        "priceCents": 45000,
+        "sku": "HARD-SHELL-C-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      },
+      {
+        "id": "a448cce0-d751-47f2-9b10-2fd1ab0354c8",
+        "label": "Tan",
+        "options": {
+          "option": "Tan"
+        },
+        "priceCents": 45000,
+        "sku": "HARD-SHELL-C-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "low_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "b5986d6d-a4fe-4259-8b0e-89a1f12f871a",
+    "slug": "lens-cleaning-spray-60-ml",
+    "name": "Lens cleaning spray (60 ml)",
+    "brand": "ClearDay",
+    "category": {
+      "slug": "cleaning-care",
+      "name": "Cleaning & care",
+      "kind": "accessories"
+    },
+    "description": "Alcohol-free spray, safe for anti-reflective and blue-light coatings.",
+    "imageUrl": "{{BASE}}/products/solution-bottle.svg",
+    "priceFromCents": 28000,
+    "priceToCents": 28000,
+    "variantCount": 1,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "a572e7ef-c11b-453e-9c4a-040fc12bd1cd",
+        "label": "60 ml",
+        "options": {
+          "option": "60 ml"
+        },
+        "priceCents": 28000,
+        "sku": "LENS-CLEANIN-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "742710af-ced4-4b6b-a889-124bdfc27bb1",
+    "slug": "multipurpose-solution-360-ml",
+    "name": "Multipurpose solution (360 ml)",
+    "brand": "AquaSoft",
+    "category": {
+      "slug": "cleaning-care",
+      "name": "Cleaning & care",
+      "kind": "accessories"
+    },
+    "description": "Cleans, rinses, disinfects and stores soft contact lenses. Includes a lens case.",
+    "imageUrl": "{{BASE}}/products/solution-bottle.svg",
+    "priceFromCents": 52000,
+    "priceToCents": 52000,
+    "variantCount": 1,
+    "availability": "low_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "93d7f349-1337-4b86-980a-8a3f00e7ee55",
+        "label": "360 ml",
+        "options": {
+          "option": "360 ml"
+        },
+        "priceCents": 52000,
+        "sku": "MULTIPURPOSE-1",
+        "availability": "low_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cc2d7eec-0ce1-4c94-b9b9-59f9005bc94c",
+    "slug": "eyewear-cord",
+    "name": "Eyewear cord",
+    "brand": "Lensmere",
+    "category": {
+      "slug": "accessories",
+      "name": "Accessories",
+      "kind": "accessories"
+    },
+    "description": "Adjustable cord that keeps glasses within reach.",
+    "imageUrl": "{{BASE}}/products/accessory.svg",
+    "priceFromCents": 35000,
+    "priceToCents": 35000,
+    "variantCount": 2,
+    "availability": "in_stock",
+    "updatedAt": "2026-10-15T09:00:00.000Z",
+    "attributes": {},
+    "variants": [
+      {
+        "id": "0dc9e73d-e250-47d7-bebb-59b4695820a3",
+        "label": "Black",
+        "options": {
+          "option": "Black"
+        },
+        "priceCents": 35000,
+        "sku": "EYEWEAR-CORD-1",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "low_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "out_of_stock"
+          }
+        ]
+      },
+      {
+        "id": "f45065e2-3794-4126-8b54-f3d33f1609c9",
+        "label": "Tortoise",
+        "options": {
+          "option": "Tortoise"
+        },
+        "priceCents": 35000,
+        "sku": "EYEWEAR-CORD-2",
+        "availability": "in_stock",
+        "branches": [
+          {
+            "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+            "branchName": "Makati",
+            "availability": "in_stock"
+          },
+          {
+            "branchId": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+            "branchName": "Quezon City",
+            "availability": "out_of_stock"
+          },
+          {
+            "branchId": "0370b397-165e-4773-97cd-110864aea832",
+            "branchName": "Pasig",
+            "availability": "in_stock"
+          }
+        ]
+      }
+    ]
+  }
+]

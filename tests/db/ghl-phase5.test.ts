@@ -147,6 +147,30 @@ describe("sales pipeline stages", () => {
     expect(fake.calls.some((x) => x.path.startsWith("/payments") && x.method !== "GET")).toBe(false);
   });
 
+  it("moves the opportunity to lost when a sale is fully refunded or cancelled", async () => {
+    const frame = await stockProduct(f, { price: 800, qty: 4 });
+    const c = await customer(f, "Refund Person");
+    const opp = async (saleId: string) => {
+      const [m] = await getDb().select().from(ghlOpportunities).where(eq(ghlOpportunities.saleId, saleId));
+      return fake.opportunities.get(m.ghlOpportunityId);
+    };
+
+    const paid = await sales.checkout(f.ctx.sales, { branchId: f.main.id, customerId: c.id, items: [{ variantId: frame.variantId, quantity: 1 }], payments: [{ method: "cash", amountCents: 80000 }], idempotencyKey: key() });
+    await processGhl(f.businessId);
+    expect(await opp(paid.saleId)).toMatchObject({ status: "won" });
+    await sales.refundSale(f.ctx.owner, { saleId: paid.saleId, items: [], amountCents: 80000, method: "cash", reason: "Changed mind", idempotencyKey: key() });
+    await processGhl(f.businessId);
+    expect(await opp(paid.saleId)).toMatchObject({ status: "lost", monetaryValue: 0 });
+
+    const unpaid = await sales.checkout(f.ctx.sales, { branchId: f.main.id, customerId: c.id, items: [{ variantId: frame.variantId, quantity: 1 }], payments: [], idempotencyKey: key() });
+    await processGhl(f.businessId);
+    expect(await opp(unpaid.saleId)).toMatchObject({ status: "open" });
+    await sales.cancelSale(f.ctx.owner, unpaid.saleId, "Customer cancelled");
+    await processGhl(f.businessId);
+    expect(await opp(unpaid.saleId)).toMatchObject({ status: "lost" });
+    expect(fake.calls.some((x) => x.path.startsWith("/payments") && x.method !== "GET")).toBe(false);
+  });
+
   it("keeps the local sale and retries when GHL is down", async () => {
     const frame = await stockProduct(f, { price: 500, qty: 2 });
     const c = await customer(f, "Outage Person");

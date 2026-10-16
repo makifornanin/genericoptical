@@ -64,7 +64,8 @@ What the GoHighLevel (HighLevel / LeadConnector) public API can and can't do for
 
 | Operation | Method and path | Scope | R/W | Confidence | Used | Notes and limits |
 |---|---|---|---|---|---|---|
-| Pipelines | `GET /opportunities/pipelines?locationId=` | `opportunities.readonly` | R | Docs | Used | Mirrored for the sales pipeline and stage mapping. |
+| Pipelines | `GET /opportunities/pipelines?locationId=` | `opportunities.readonly` | R | Docs | Used | Mirrored for the lead and sales pipelines and stage mapping. |
+| Create pipeline | `POST /opportunities/pipelines` | `opportunities.write` | W | **Live-tested 2026-10-16** | Used | Body `{ locationId, name, stages: [{ name, position, showInFunnel, showInPieChart }] }`. Stages sent as plain strings are rejected with 422. The response returns the new pipeline with stage IDs. Used only by *Create optical pipelines*, which never edits or deletes existing pipelines. |
 | Get | `GET /opportunities/{id}` | `opportunities.readonly` | R | Docs | Used | Re-read before applying a webhook (webhook payloads have no `updatedAt`). |
 | Create | `POST /opportunities/` | `opportunities.write` | W | Docs | Used | Requires `pipelineId`, `locationId`, `name`, `status`, `contactId`. |
 | Update | `PUT /opportunities/{id}` | `opportunities.write` | W | Docs | Used | **No ETag or version field.** A conflict is detected by comparing `updatedAt` after a fresh GET (best effort, not atomic). |

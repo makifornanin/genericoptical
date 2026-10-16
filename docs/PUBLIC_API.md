@@ -158,3 +158,18 @@ Response: `201 { "ok": true }`, or `400 { "error", "fieldErrors" }`, `401`, `429
 2. Consent is never escalated by an anonymous form.
 3. The GHL integration queues `lead.upsert`. GHL searches for an existing contact (email, then phone) before creating one, so contacts aren't duplicated, and tags the stage.
 4. The lead is shown in GHL with source "Website".
+
+## Public catalogue feed (anonymous, opt-in)
+
+For a website hosted outside the dashboard, such as the GoHighLevel site in `optical-ghl-website`, which can't hold a secret key.
+
+- `GET /api/public/v1/feed/<business-slug>/site`: same shape as `GET /site`, plus `services[].calendars` (`branchId`, `calendarId`) for calendars mapped in Settings → Integrations → GoHighLevel.
+- `GET /api/public/v1/feed/<business-slug>/products`: same as `GET /products`. Each summary also has `colours` (distinct variant colours) and `filters` (`shape`, `material`, `frameType`, `lensType`, `gender`, `ageGroup` when set).
+- `GET /api/public/v1/feed/<business-slug>/products/<slug>`: same as `GET /products/<slug>`.
+
+The feed is anonymous:
+- **Off by default.** The owner switches it on in Settings → Website → Public catalogue feed. A feed that is off and an unknown business both return `404`.
+- **CORS** only for the origins the owner lists (`https://` or `localhost`, up to 10). Other origins still get the JSON, but no `Access-Control-Allow-Origin`, so browsers on other sites can't read it. This limits embedding; it is not authorisation, because the data is public by design.
+- The same data limits as the keyed API apply: published products only, coarse availability, and never costs, quantities or customer data.
+- **Rate limit:** 240 requests per minute per IP and business, then `429` with `Retry-After`.
+- **Caching:** `Cache-Control: public, max-age=60, s-maxage=60`, `Vary: Origin`. There is no stale-while-revalidate, so switching the feed off reaches visitors within a minute (verified live: 61 s).

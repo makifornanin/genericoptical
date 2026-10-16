@@ -22,7 +22,7 @@ export function CatalogueFeedCard({ initial, baseUrl }: { initial: { enabled: bo
         subtitle="For a website hosted outside this dashboard (e.g. GoHighLevel custom code). Shares only what's already public: published products with coarse availability (never exact stock or costs), branches, hours and services. No key needed; off until you switch it on."
       />
       <CardBody className="flex flex-col gap-4 text-[13px]">
-        <Checkbox label="Publish the catalogue feed" description="Browsers on the origins below may read it; anyone can read public product data from the URL." checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+        <Checkbox label="Publish the catalogue feed" description="Browsers on the origins below may read it; anyone can read public product data from the URL. Responses are cached for a minute, so changes (including switching it off) take up to a minute to reach visitors." checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
         <TextareaField
           label="Website origins allowed to read it from a browser"
           value={origins}

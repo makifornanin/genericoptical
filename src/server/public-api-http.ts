@@ -66,7 +66,8 @@ export async function publicFeed(request: Request, slug: string, load: (business
     await rateLimit(`feed:ip:${feed.businessId}:${ip}`, 240, 60);
     const body = await load(feed.businessId);
     return Response.json(body, {
-      headers: { "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=300", Vary: "Origin", ...corsFor(request.headers.get("origin"), feed.origins) },
+      // No stale-while-revalidate: switching the feed off must reach visitors within a minute.
+      headers: { "Cache-Control": "public, max-age=60, s-maxage=60", Vary: "Origin", ...corsFor(request.headers.get("origin"), feed.origins) },
     });
   } catch (error) {
     return publicError(error);

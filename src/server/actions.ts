@@ -1,7 +1,9 @@
 import "server-only";
+import { after } from "next/server";
 import { ZodError } from "zod";
 import type { ActionResult } from "@/lib/types";
 import { getSession } from "@/server/auth/session";
+import { kickGhlIfDue } from "@/server/integrations/ghl/kick";
 import { AppError, type Ctx } from "@/server/services/core";
 
 /**
@@ -11,7 +13,14 @@ import { AppError, type Ctx } from "@/server/services/core";
 export async function runAction<T>(fn: (ctx: Ctx) => Promise<T>, successMessage?: string): Promise<ActionResult<T>> {
   const session = await getSession();
   if (!session) return { ok: false, error: "Your session has expired. Sign in again to continue." };
-  return toResult(() => fn(session.ctx), successMessage);
+  const result = await toResult(() => fn(session.ctx), successMessage);
+  if (result.ok) {
+    // Changes that queued CRM sync (a sale, payment, lead or customer) reach GoHighLevel right after the
+    // response instead of at the next scheduled run. Cheap when nothing is due.
+    const businessId = session.ctx.businessId;
+    after(() => kickGhlIfDue(businessId));
+  }
+  return result;
 }
 
 export async function toResult<T>(fn: () => Promise<T>, successMessage?: string): Promise<ActionResult<T>> {

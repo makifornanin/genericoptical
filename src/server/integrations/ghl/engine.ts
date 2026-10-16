@@ -112,8 +112,10 @@ function scheduleKick(businessId: string, delayMs = 0) {
       }
     });
     lastKick.set(businessId, now);
-  } catch {
-    // Not in a request scope: the scheduled worker handles it.
+  } catch (error) {
+    // Not in a request scope (scripts, tests): server actions kick after their response (runAction),
+    // and the scheduled worker handles the rest.
+    log.debug("ghl.kick_not_scheduled", { businessId, reason: error instanceof Error ? error.message.slice(0, 120) : String(error) });
   }
 }
 

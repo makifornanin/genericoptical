@@ -69,7 +69,7 @@ describe("held carts", () => {
     expect(await pos.listHeldCarts(f.ctx.sales, f.second.id)).toEqual([]);
 
     const resumed = await pos.resumeHeldCart(f.ctx.manager, held!.id);
-    expect(resumed!.cart.lines).toEqual([{ variantId: frame.variantId, qty: 1, customPriceCents: null }]);
+    expect(resumed!.cart.lines).toEqual([{ variantId: frame.variantId, qty: 1, customPriceCents: null, discount: null }]);
     expect(resumed!.customer?.id).toBe(c.id);
     // Checkout re-checks stock: the unit sold meanwhile.
     await expect(sales.quoteCart(f.ctx.sales, { branchId: f.main.id, items: [{ variantId: frame.variantId, quantity: 1 }] })).resolves.toMatchObject({ problems: [expect.stringMatching(/only 0 left/)] });

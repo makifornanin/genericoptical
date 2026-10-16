@@ -1,6 +1,16 @@
 # Deploying to Vercel
 
-This website is its **own Vercel project**, separate from the dashboard. Nothing here has been deployed from this repository yet; this is the procedure.
+This website is its **own Vercel project**, separate from the dashboard.
+
+**Staging (deployed 2026-10-16):**
+- **Project:** `optical-customer-website` in the "maki's projects" team, deployed from the CLI (no Git integration yet).
+- **URL:** https://optical-customer-website.vercel.app
+- **Region:** Singapore (`sin1`, in `vercel.json`).
+- **Environment set:** `DASHBOARD_API_URL` (https://optical-management-dashboard.vercel.app), `REVALIDATE_SECRET`, `SITE_URL`, `SITE_NOINDEX=1`.
+- **Missing:** `DASHBOARD_SITE_KEY`. It can only be created once the dashboard has a database. Until then every page shows the "Setup needed" state.
+- **Redeploy:** `vercel deploy --prod` from this folder.
+
+The steps below describe setting up a project from scratch, for reference.
 
 ## 1. Create the project
 
@@ -15,7 +25,7 @@ Settings → Environment Variables. Add them for **Production** and **Preview** 
 | Name | Value |
 |---|---|
 | `DASHBOARD_API_URL` | The dashboard's public URL, e.g. `https://dashboard.example.com` |
-| `DASHBOARD_SITE_KEY` | A site key created in the dashboard: `npm run site-key -- create --business <slug> --name "Customer website"` (printed once) |
+| `DASHBOARD_SITE_KEY` | A site key created in the dashboard: **Settings → Website → Website API keys → New key** (shown once), or `npm run site-key -- create --business <slug> --name "Customer website"` |
 | `REVALIDATE_SECRET` | A long random string (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`) — the same value goes into the dashboard's website settings |
 | `SITE_URL` | The site's public URL, e.g. `https://www.example-optical.com` |
 | `SITE_NOINDEX` | `1` for previews/staging (optional; automatic for a demo business) |

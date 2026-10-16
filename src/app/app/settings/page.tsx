@@ -18,6 +18,7 @@ import { listBranches } from "@/server/services/settings";
 import { env } from "@/server/env";
 import { Pagination } from "@/components/ui/table";
 import { AppointmentTypeDialog, BranchDialog, DemoPanel, HoursForm, ProfileForm, TaxForm, WebsiteForm } from "./forms";
+import { CatalogueFeedCard } from "./catalogue-feed";
 import { SiteKeysCard } from "./site-keys";
 import { EventTable, GhlAccessCheck, GhlCalendarMapping, GhlConnectionCard, GhlEndpoints, GhlMismatches, GhlOpticalPipelines, GhlProblems, GhlSettingsForm, GhlSyncStatus, GhlUserMapping } from "./ghl-panel";
 
@@ -176,6 +177,12 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
             faqs: w.faqs ?? [],
           }}
         />
+        {keys ? (
+          <CatalogueFeedCard
+            initial={{ enabled: b.settings.catalogueFeed?.enabled ?? false, origins: b.settings.catalogueFeed?.origins ?? [] }}
+            baseUrl={`${new URL(env().APP_URL).origin}/api/public/v1/feed/${b.slug}`}
+          />
+        ) : null}
         {keys ? (
           <SiteKeysCard
             apiUrl={new URL(env().APP_URL).origin}

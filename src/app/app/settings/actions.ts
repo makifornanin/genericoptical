@@ -225,3 +225,7 @@ export async function ensureGhlPipelinesAction() {
     return res;
   }, "Pipelines mapped");
 }
+
+export async function saveCatalogueFeedAction(input: unknown) {
+  return run((ctx) => settings.updateCatalogueFeed(ctx, input), "Catalogue feed saved");
+}

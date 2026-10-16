@@ -3,7 +3,8 @@ import { ZodError } from "zod";
 import type { ApiKeyScope } from "@/server/db/schema";
 import { errorFields, log } from "@/server/log";
 import { AppError } from "@/server/services/core";
-import { authenticateSiteKey, PublicApiError, rateLimit, type SiteKeyAuth } from "@/server/services/public-api";
+import { clientIp } from "@/server/http";
+import { authenticateSiteKey, feedBusiness, PublicApiError, rateLimit, type SiteKeyAuth } from "@/server/services/public-api";
 
 /** Shared request handling for /api/public/v1 (docs/PUBLIC_API.md). Server-to-server only: no CORS. */
 
@@ -48,4 +49,36 @@ export async function publicRead(request: Request, scope: ApiKeyScope, load: (au
 export function forwardedClientIp(request: Request): string | null {
   const raw = request.headers.get("x-client-ip")?.trim() ?? "";
   return raw && raw.length <= 45 && /^[0-9a-fA-F:.]+$/.test(raw) ? raw : null;
+}
+
+// ─── Public catalogue feed ───────────────────────────────────────────────────
+
+/** CORS for the feed: only origins the business listed. Public data, so this limits embedding, not access. */
+function corsFor(origin: string | null, allowed: string[]): Record<string, string> {
+  return origin && allowed.includes(origin) ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, OPTIONS", "Access-Control-Max-Age": "86400" } : {};
+}
+
+/** Anonymous, opt-in, rate-limited read of intentionally public catalogue data. */
+export async function publicFeed(request: Request, slug: string, load: (businessId: string) => Promise<unknown>): Promise<Response> {
+  try {
+    const feed = await feedBusiness(slug);
+    const ip = clientIp(request.headers.get("x-forwarded-for"), request.headers.get("x-real-ip")) ?? "unknown";
+    await rateLimit(`feed:ip:${feed.businessId}:${ip}`, 240, 60);
+    const body = await load(feed.businessId);
+    return Response.json(body, {
+      headers: { "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=300", Vary: "Origin", ...corsFor(request.headers.get("origin"), feed.origins) },
+    });
+  } catch (error) {
+    return publicError(error);
+  }
+}
+
+/** CORS preflight for the feed (browsers only send it for non-simple requests, but answer it properly). */
+export async function publicFeedPreflight(request: Request, slug: string): Promise<Response> {
+  try {
+    const feed = await feedBusiness(slug);
+    return new Response(null, { status: 204, headers: { Vary: "Origin", ...corsFor(request.headers.get("origin"), feed.origins) } });
+  } catch (error) {
+    return publicError(error);
+  }
 }

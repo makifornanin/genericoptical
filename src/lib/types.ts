@@ -26,6 +26,11 @@ export type BusinessSettings = {
   appointmentsAuthority?: "platform" | "ghl";
   enabledPaymentMethods?: string[];
   defaultAppointmentBufferMinutes?: number;
+  /**
+   * Public catalogue feed for a website hosted elsewhere (e.g. GoHighLevel custom code): published
+   * products, branches and services only, readable from browsers on the listed origins.
+   */
+  catalogueFeed?: { enabled: boolean; origins: string[] };
 };
 
 export type PermissionOverrides = { grant?: string[]; revoke?: string[] };

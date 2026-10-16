@@ -338,6 +338,28 @@ export const checkoutInput = z.object({
   idempotencyKey,
 });
 export type CheckoutInput = z.input<typeof checkoutInput>;
+/** Settings → Website: the public catalogue feed for an externally hosted website. */
+export const catalogueFeedInput = z.object({
+  enabled: z.boolean(),
+  origins: z
+    .array(
+      z
+        .string()
+        .trim()
+        .transform((v) => v.replace(/\/+$/, ""))
+        .refine((v) => {
+          try {
+            const u = new URL(v);
+            return (u.protocol === "https:" || u.hostname === "localhost" || u.hostname === "127.0.0.1") && u.origin === v;
+          } catch {
+            return false;
+          }
+        }, "Use a full origin such as https://www.example.com (no path)."),
+    )
+    .max(10, "Up to 10 origins.")
+    .default([]),
+});
+
 /** POS pre-checkout validation (no payments, nothing written). */
 export const quoteInput = checkoutInput.pick({ branchId: true, customerId: true, items: true, orderDiscount: true });
 

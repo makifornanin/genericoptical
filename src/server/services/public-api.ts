@@ -103,6 +103,19 @@ export async function revokeSiteKey(ctx: Ctx, id: string) {
   await audit(db(), ctx, { action: "api_key.revoked", entityType: "api_key", entityId: id, summary: `Revoked website API key ${row.prefix}…` });
 }
 
+// ─── Public catalogue feed (anonymous, opt-in) ───────────────────────────────
+
+/**
+ * The business behind a public feed URL, only if its owner switched the feed on (Settings → Website).
+ * Unknown and disabled businesses look the same (404), so the feed reveals nothing about either.
+ */
+export async function feedBusiness(slug: string) {
+  const [biz] = await db().select({ id: businesses.id, settings: businesses.settings }).from(businesses).where(eq(businesses.slug, slug.slice(0, 80))).limit(1);
+  const feed = biz?.settings?.catalogueFeed;
+  if (!biz || !feed?.enabled) throw new PublicApiError(404, "Not found");
+  return { businessId: biz.id, origins: feed.origins ?? [] };
+}
+
 // ─── Rate limiting (durable, fixed window) ──────────────────────────────────
 
 /** Counts one hit for `bucket`; throws 429 with Retry-After when over `limit` in the window. */

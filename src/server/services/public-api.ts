@@ -347,6 +347,26 @@ function variantAvailability(productType: string, v: VariantRow): Availability {
   return stockStatus(v.total, v.reorderPoint);
 }
 
+/** Distinct variant colours in display order, for catalogue swatches and filters. */
+function variantColours(variants: VariantRow[]) {
+  const seen = new Set<string>();
+  for (const v of variants) {
+    const colour = v.options.color ?? v.options.colour;
+    if (typeof colour === "string" && colour.trim()) seen.add(colour.trim());
+  }
+  return [...seen];
+}
+
+/** Only the descriptive attributes a storefront filters on (shape, material…), never internal fields. */
+function publicAttributes(attributes: Record<string, string>) {
+  const out: Record<string, string> = {};
+  for (const key of ["shape", "material", "frameType", "lensType", "gender", "ageGroup"]) {
+    const value = attributes[key];
+    if (typeof value === "string" && value.trim()) out[key] = value.trim();
+  }
+  return out;
+}
+
 function summary(p: CatalogueRow, variants: VariantRow[]) {
   const prices = variants.map((v) => v.priceCents);
   const statuses = variants.map((v) => variantAvailability(p.productType, v));
@@ -362,6 +382,8 @@ function summary(p: CatalogueRow, variants: VariantRow[]) {
     priceFromCents: prices.length ? Math.min(...prices) : null,
     priceToCents: prices.length ? Math.max(...prices) : null,
     variantCount: variants.length,
+    colours: variantColours(variants),
+    filters: publicAttributes(p.attributes ?? {}),
     availability: best as Availability,
     updatedAt: p.updatedAt.toISOString(),
   };

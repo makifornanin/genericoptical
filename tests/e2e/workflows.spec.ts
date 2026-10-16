@@ -34,6 +34,17 @@ async function addFirstInStock(page: Page, query: string) {
   const tile = page.getByRole("region", { name: "Products" }).getByRole("listitem").locator("button:not([disabled])").first();
   await expect(tile).toBeVisible();
   await tile.click();
+  // Products with several variants open the option picker first.
+  const options = page.getByRole("dialog").getByRole("list", { name: "Options" });
+  if (await options.isVisible().catch(() => false)) await options.locator("button:not([disabled])").first().click();
+}
+
+/** Cart → payment panel (the POS charges in two steps). */
+async function openPayment(page: Page) {
+  const sale = page.getByRole("complementary", { name: "Current sale" });
+  await sale.getByRole("button", { name: /^Charge/ }).click();
+  await expect(sale.getByRole("heading", { name: "Payment" })).toBeVisible();
+  return sale;
 }
 
 async function saleTotal(page: Page) {
@@ -157,7 +168,8 @@ test("Workflows B + E — new product → purchase order → receive → POS sal
   await expect(tile).toContainText("5 in stock");
   const customerName = await pickCustomer(page);
   await tile.click();
-  await page.getByRole("button", { name: /Complete sale · ₱1,500\.00/ }).click();
+  const sale = await openPayment(page);
+  await sale.getByRole("button", { name: /Complete sale · ₱1,500\.00/ }).click();
   const done = page.getByRole("dialog");
   const title = (await done.getByText(/Sale .* completed/).textContent()) ?? "";
   const saleNumber = title.replace(/^Sale\s+/, "").replace(/\s+completed$/, "");
@@ -223,12 +235,12 @@ test("Workflow D — payment tracking: partial → second payment → paid, refl
   await addFirstInStock(page, "Case");
   const total = await saleTotal(page);
   const first = Math.round(total / 3 / 100) * 100;
-  await page.getByLabel("Partial payment").check();
-  await page.getByLabel("Amount").first().fill(peso(first));
-  await page.getByRole("button", { name: /Complete sale/ }).click();
+  const sale = await openPayment(page);
+  await sale.getByLabel("Cash amount").fill(peso(first));
+  await sale.getByRole("button", { name: /^Complete with .* due$/ }).click();
   const done = page.getByRole("dialog");
   const balance = total - first;
-  await expect(done.getByText(`Balance due: ₱${(balance / 100).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`)).toBeVisible();
+  await expect(done.getByText(`Balance due ₱${(balance / 100).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`)).toBeVisible();
   await done.getByRole("link", { name: "View transaction details" }).click();
   await page.waitForURL(/\/app\/sales\/[0-9a-f-]{36}/);
   const saleUrl = page.url();

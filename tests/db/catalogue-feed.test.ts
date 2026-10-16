@@ -54,6 +54,8 @@ describe("public catalogue feed", () => {
     expect(list.map((p: { id: string }) => p.id)).toEqual([publishedId]);
     expect(list.some((p: { id: string }) => p.id === hiddenId)).toBe(false);
     expect(JSON.stringify(list)).not.toMatch(/costCents|onHand|99900/);
+    expect(Array.isArray(list[0].colours)).toBe(true); // swatches and filters for storefronts
+    expect(list[0].filters).toEqual(expect.any(Object));
 
     const other = await productsGET(req(`${slug}/products`, "https://evil.example.com"), params({ business: slug }));
     expect(other.status).toBe(200); // public data

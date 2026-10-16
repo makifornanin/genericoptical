@@ -3,7 +3,6 @@ import { cents, signIn } from "./helpers";
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** Stock count shown on a POS product tile, e.g. "12 in stock". */
 /** A product tile in the POS grid (not the "Recent" shortcut chips, which share the product name). */
 function productTile(page: Page, name: string) {
   return page.getByRole("region", { name: "Products" }).getByRole("listitem").getByRole("button", { name: new RegExp(escape(name)) }).first();
@@ -21,6 +20,23 @@ async function searchPos(page: Page, q: string) {
   await box.fill(q);
 }
 
+/** Adds a product from the grid; products with several variants open the option picker first. */
+async function addTile(page: Page, tile: ReturnType<Page["locator"]>) {
+  await tile.click();
+  const picker = page.getByRole("dialog").filter({ has: page.getByRole("list", { name: "Options" }) });
+  if (await picker.isVisible().catch(() => false)) await picker.getByRole("list", { name: "Options" }).locator("button:not([disabled])").first().click();
+}
+
+/** Cart → payment panel → complete. The payment panel's button reads "Complete sale · ₱…" or "Complete with ₱… due". */
+async function charge(page: Page) {
+  const sale = page.getByRole("complementary", { name: "Current sale" });
+  const go = sale.getByRole("button", { name: /^Charge/ });
+  await expect(go).toBeEnabled();
+  await go.click();
+  await expect(sale.getByRole("heading", { name: "Payment" })).toBeVisible();
+  return sale;
+}
+
 test.describe("point of sale and payments", () => {
   test("cash sale deducts stock once and is fully paid", async ({ page }) => {
     await signIn(page, "sales");
@@ -34,10 +50,9 @@ test.describe("point of sale and payments", () => {
     const before = await tileStock(page, name);
     expect(before).toBeGreaterThan(0);
 
-    await productTile(page, name).click();
-    const charge = page.getByRole("button", { name: /Complete sale/ });
-    await expect(charge).toBeEnabled();
-    await charge.click();
+    await addTile(page, productTile(page, name));
+    const sale = await charge(page);
+    await sale.getByRole("button", { name: /^Complete sale/ }).click();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByText(/Sale .* completed/)).toBeVisible();
@@ -61,17 +76,16 @@ test.describe("point of sale and payments", () => {
     await searchPos(page, "Case");
     const tile = page.getByRole("region", { name: "Products" }).getByRole("listitem").locator("button:not([disabled])").first();
     await expect(tile).toBeVisible();
-    await tile.click();
+    await addTile(page, tile);
 
-    const totalText = await page.getByRole("complementary", { name: "Current sale" }).locator("dd").last().textContent();
-    const total = cents(totalText);
+    const sale = await charge(page);
+    const total = cents(await sale.getByText(/^Total due/).textContent());
     const half = Math.round(total / 2);
-    await page.getByLabel("Partial payment").check();
-    await page.getByLabel("Amount").first().fill((half / 100).toFixed(2));
-    await page.getByRole("button", { name: /Complete sale/ }).click();
+    await sale.getByLabel("Cash amount").fill((half / 100).toFixed(2));
+    await sale.getByRole("button", { name: /^Complete with .* due$/ }).click();
 
     const dialog = page.getByRole("dialog");
-    await expect(dialog.getByText(/Balance due:/)).toBeVisible();
+    await expect(dialog.getByText(/^Balance due /)).toBeVisible();
     await dialog.getByRole("link", { name: "View transaction details" }).click();
     await page.waitForURL(/\/app\/sales\/[0-9a-f-]{36}/);
     await expect(page.getByText("Partially paid").first()).toBeVisible();

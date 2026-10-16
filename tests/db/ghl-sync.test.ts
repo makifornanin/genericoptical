@@ -149,7 +149,7 @@ describe("opportunities and POS sales", () => {
   });
 
   it("turns a POS sale into one won opportunity with a contact note; the payment stays a dashboard record", async () => {
-    await connect(f, fake, { salesPipelineId: "pl_sales", stageMap: { posCompleted: "st_won", orderOpen: null, orderReady: null, orderCompleted: null } });
+    await connect(f, fake, { salesPipelineId: "pl_sales", stageMap: { posCompleted: "st_won", orderOpen: null, orderReady: null, orderCompleted: null, paymentPending: null, processing: null } });
     const c = await customer(f, "Pos Buyer");
     await getDb().update(customersTable).set({ email: "pos@example.com" }).where(eq(customersTable.id, c.id));
     const p = await stockProduct(f, { price: 1500, qty: 5 });
@@ -169,7 +169,7 @@ describe("opportunities and POS sales", () => {
   });
 
   it("respects a stage moved by hand in GHL unless the sale's own stage changes", async () => {
-    await connect(f, fake, { salesPipelineId: "pl_sales", stageMap: { posCompleted: "st_won", orderOpen: null, orderReady: null, orderCompleted: null } });
+    await connect(f, fake, { salesPipelineId: "pl_sales", stageMap: { posCompleted: "st_won", orderOpen: null, orderReady: null, orderCompleted: null, paymentPending: null, processing: null } });
     const c = await customer(f, "Stage Keeper");
     await getDb().update(customersTable).set({ email: "keeper@example.com" }).where(eq(customersTable.id, c.id));
     const p = await stockProduct(f, { price: 1000, qty: 5 });

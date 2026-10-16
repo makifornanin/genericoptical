@@ -129,6 +129,8 @@ export function ghlApi(client: GhlClient, locationId: string) {
 
     // ── Opportunities (scope opportunities.*) ──
     listPipelines: () => r<{ pipelines: GhlPipeline[] }>("/opportunities/pipelines", { query: { locationId } }),
+    /** POST /opportunities/pipelines (documented; names are unique per location, at least one stage). */
+    createPipeline: (body: { name: string; stages: unknown[] }) => r<{ pipeline?: GhlPipeline } & Partial<GhlPipeline>>("/opportunities/pipelines", { method: "POST", body: { ...body, locationId } }),
     getOpportunity: (id: string) => r<{ opportunity: GhlOpportunity }>(`/opportunities/${encodeURIComponent(id)}`, { what: "Opportunity" }),
     createOpportunity: (body: Record<string, unknown>) => r<{ opportunity: GhlOpportunity }>("/opportunities/", { method: "POST", body: { ...body, locationId } }),
     updateOpportunity: (id: string, body: Record<string, unknown>) => r<{ opportunity: GhlOpportunity }>(`/opportunities/${encodeURIComponent(id)}`, { method: "PUT", body, what: "Opportunity" }),

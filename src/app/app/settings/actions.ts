@@ -11,6 +11,8 @@ import { removeDemoData, seedDemo } from "@/server/demo/seed";
 import {
   connectPrivateToken,
   disconnect,
+  ensureOpticalPipelines,
+  probeGhlAccess,
   dismissEvents,
   kickGhl,
   mapCalendar,
@@ -194,4 +196,18 @@ export async function revokeSiteKeyAction(id: string) {
 /** Hosted (Vercel) databases are never reset from the app unless ALLOW_DEMO_RESET=true is set deliberately. */
 function demoResetAllowedHere() {
   return !process.env.VERCEL || process.env.ALLOW_DEMO_RESET === "true";
+}
+
+/** Read-only check of what the stored GoHighLevel credential can access. */
+export async function checkGhlAccessAction() {
+  return runAction((ctx) => probeGhlAccess(ctx));
+}
+
+/** Finds or creates the "Optical — Lead Management" and "Optical — Sales & Orders" pipelines and maps their stages. */
+export async function ensureGhlPipelinesAction() {
+  return runAction(async (ctx) => {
+    const res = await ensureOpticalPipelines(ctx);
+    refresh();
+    return res;
+  }, "Pipelines mapped");
 }

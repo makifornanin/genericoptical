@@ -12,8 +12,10 @@ import { Pill, type Tone } from "@/components/ui/pill";
 import { Table, TableWrap, TD, TH, THead, TR, EmptyRow } from "@/components/ui/table";
 import type { GhlOverview } from "@/server/integrations/ghl";
 import {
+  checkGhlAccessAction,
   connectGhlTokenAction,
   disconnectGhlAction,
+  ensureGhlPipelinesAction,
   dismissGhlEventsAction,
   mapGhlCalendarAction,
   mapGhlUserAction,
@@ -384,6 +386,23 @@ export function GhlSettingsForm({ overview }: { overview: GhlOverview }) {
       ))}
     </>
   );
+  const leadPipeline = overview.mapping.pipelines.find((p) => p.id === s.leadPipelineId);
+  const leadStageOptions = (
+    <>
+      <option value="">Not mapped</option>
+      {leadPipeline?.stages.map((st) => (
+        <option key={st.id} value={st.id}>{st.name}</option>
+      ))}
+    </>
+  );
+  const leadStages: [keyof typeof s.leadStageMap, string][] = [
+    ["new", "New lead"],
+    ["contacted", "Contacted"],
+    ["qualified", "Qualified"],
+    ["appointment_scheduled", "Appointment scheduled"],
+    ["follow_up", "Follow-up"],
+    ["converted", "Converted"],
+  ];
   const toggles: [keyof typeof s.sync, string, string][] = [
     ["contacts", "Contacts & leads", "Leads/customers ↔ GHL contacts; stage tags; GHL form contacts become leads."],
     ["opportunities", "Opportunities", "Mirror GHL pipeline opportunities in the dashboard."],
@@ -417,6 +436,21 @@ export function GhlSettingsForm({ overview }: { overview: GhlOverview }) {
           <SelectField label="Stage: order placed" value={s.stageMap.orderOpen ?? ""} onChange={(e) => setS({ ...s, stageMap: { ...s.stageMap, orderOpen: e.target.value || null } })}>{stageOptions}</SelectField>
           <SelectField label="Stage: order ready for pickup" value={s.stageMap.orderReady ?? ""} onChange={(e) => setS({ ...s, stageMap: { ...s.stageMap, orderReady: e.target.value || null } })}>{stageOptions}</SelectField>
           <SelectField label="Stage: order handed over" value={s.stageMap.orderCompleted ?? ""} onChange={(e) => setS({ ...s, stageMap: { ...s.stageMap, orderCompleted: e.target.value || null } })}>{stageOptions}</SelectField>
+          <SelectField label="Stage: payment pending" value={s.stageMap.paymentPending ?? ""} onChange={(e) => setS({ ...s, stageMap: { ...s.stageMap, paymentPending: e.target.value || null } })} hint="Sold or handed over with a balance still due.">{stageOptions}</SelectField>
+          <SelectField label="Stage: order processing" value={s.stageMap.processing ?? ""} onChange={(e) => setS({ ...s, stageMap: { ...s.stageMap, processing: e.target.value || null } })} hint="In progress or at the lab.">{stageOptions}</SelectField>
+          <SelectField label="Lead pipeline" value={s.leadPipelineId ?? ""} onChange={(e) => setS({ ...s, leadPipelineId: e.target.value || null })} hint="Each lead gets one opportunity here; lost leads close as Lost.">
+            <option value="">Not used</option>
+            {overview.mapping.pipelines.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </SelectField>
+          {s.leadPipelineId
+            ? leadStages.map(([key, label]) => (
+                <SelectField key={key} label={`Lead stage: ${label}`} value={s.leadStageMap[key] ?? ""} onChange={(e) => setS({ ...s, leadStageMap: { ...s.leadStageMap, [key]: e.target.value || null } })}>
+                  {leadStageOptions}
+                </SelectField>
+              ))
+            : null}
           <SelectField label="Stockroom published to GHL" value={s.inventoryLocationId ?? ""} onChange={(e) => setS({ ...s, inventoryLocationId: e.target.value || null })} hint="GHL keeps one quantity per price, so one stockroom is published.">
             <option value="">First branch</option>
             {overview.mapping.locations.map((l) => (
@@ -546,6 +580,95 @@ export function GhlEndpoints({ overview }: { overview: GhlOverview }) {
             <CopyRow label="x-webhook-secret" value={overview.workflowWebhookSecret} />
           </div>
         ) : null}
+      </CardBody>
+    </Card>
+  );
+}
+
+// ─── Access check and pipelines ──────────────────────────────────────────────
+
+type AccessResult = { checkedAt: string; locationId: string; checks: { key: string; label: string; scope: string; ok: boolean; detail: string }[] };
+
+export function GhlAccessCheck() {
+  const [result, setResult] = useState<AccessResult | null>(null);
+  const act = useAction(checkGhlAccessAction, { silent: true, onSuccess: setResult });
+  return (
+    <Card>
+      <CardHeader
+        title="Access check"
+        subtitle="Read-only calls that confirm what the stored credential can actually see. Write access is confirmed by the first change that syncs (see the sync log)."
+        actions={
+          <Button loading={act.pending} onClick={() => act.run()}>
+            <RefreshCw /> Check access
+          </Button>
+        }
+      />
+      {act.error ? <CardBody className="text-[13px] text-neg">{act.error}</CardBody> : null}
+      {result ? (
+        <TableWrap>
+          <Table>
+            <THead>
+              <TH>Area</TH>
+              <TH>Scope</TH>
+              <TH>Result</TH>
+            </THead>
+            <tbody>
+              {result.checks.map((c) => (
+                <TR key={c.key}>
+                  <TD className="font-medium">{c.label}</TD>
+                  <TD className="font-mono text-[12px] text-text-2">{c.scope}</TD>
+                  <TD>
+                    <span className="flex items-start gap-2">
+                      <Pill tone={c.ok ? "positive" : "negative"} dot>
+                        {c.ok ? "OK" : "Failed"}
+                      </Pill>
+                      <span className="text-[12.5px] text-text-2">{c.detail}</span>
+                    </span>
+                  </TD>
+                </TR>
+              ))}
+            </tbody>
+          </Table>
+        </TableWrap>
+      ) : null}
+    </Card>
+  );
+}
+
+type PipelinesResult = { lead: { name: string; id: string; created: boolean; stages: { name: string; id: string }[]; missingStages: string[] }; sales: PipelinesResult["lead"] };
+
+export function GhlOpticalPipelines({ overview }: { overview: GhlOverview }) {
+  const [result, setResult] = useState<PipelinesResult | null>(null);
+  const act = useAction(ensureGhlPipelinesAction, { onSuccess: setResult });
+  const name = (id: string | null) => overview.mapping.pipelines.find((p) => p.id === id)?.name ?? null;
+  const leadName = name(overview.settings.leadPipelineId);
+  const salesName = name(overview.settings.salesPipelineId);
+  return (
+    <Card>
+      <CardHeader
+        title="Optical pipelines"
+        subtitle="“Optical — Lead Management” holds one opportunity per lead; “Optical — Sales & Orders” holds one per POS sale or order (CRM visibility only, never revenue). Existing pipelines with these names are reused; nothing else in GHL is changed."
+        actions={
+          <Button variant="primary" loading={act.pending} onClick={() => act.run()}>
+            Create or map pipelines
+          </Button>
+        }
+      />
+      <CardBody className="flex flex-col gap-3 text-[13px]">
+        <p className="text-text-2">
+          Lead pipeline: <span className="font-medium text-text">{leadName ?? "not mapped"}</span> · Sales pipeline: <span className="font-medium text-text">{salesName ?? "not mapped"}</span>
+        </p>
+        {result
+          ? [result.lead, result.sales].map((p) => (
+              <div key={p.id} className="rounded-[12px] border border-line bg-surface-2 px-3 py-2.5">
+                <p className="font-medium">
+                  {p.name} <span className="text-text-3">· {p.created ? "created now" : "already existed"} · {p.id}</span>
+                </p>
+                <p className="mt-1 text-[12.5px] text-text-2">{p.stages.map((s) => s.name).join(" → ")}</p>
+                {p.missingStages.length ? <p className="mt-1 text-[12.5px] text-warn">Missing stages (add them in GHL, then run this again): {p.missingStages.join(", ")}</p> : null}
+              </div>
+            ))
+          : null}
       </CardBody>
     </Card>
   );

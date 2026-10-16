@@ -13,6 +13,8 @@ export class FakeGhl {
   contacts = new Map<string, Json>();
   opportunities = new Map<string, Json>();
   pipelines: { id: string; name: string; stages: { id: string; name: string; position: number }[] }[] = [];
+  /** Which `stages` form POST /opportunities/pipelines accepts (the docs show both). */
+  pipelineStageFormat: "objects" | "strings" = "objects";
   calendars: { id: string; name: string; isActive: boolean }[] = [];
   users: { id: string; name: string; email: string }[] = [];
   appointments = new Map<string, Json>();
@@ -156,6 +158,17 @@ export class FakeGhl {
     // Opportunities
     if (seg[0] === "opportunities") {
       if (c.method === "GET" && p === "/opportunities/pipelines") return json({ pipelines: this.pipelines });
+      if (c.method === "POST" && p === "/opportunities/pipelines") {
+        // Documented: name, stages (≥ 1) and locationId required; names unique per location (case-insensitive).
+        const name = String(c.body?.name ?? "");
+        const stages = (c.body?.stages as unknown[]) ?? [];
+        if (!name || !stages.length || c.body?.locationId !== this.locationId) return json({ message: "name, stages and locationId are required" }, 422);
+        if (this.pipelines.some((x) => x.name.toLowerCase() === name.toLowerCase())) return json({ message: "Pipeline name already exists" }, 400);
+        if (this.pipelineStageFormat === "strings" && stages.some((st) => typeof st !== "string")) return json({ message: "stages must be strings" }, 422);
+        const pipeline = { id: `pl_${randomUUID().slice(0, 8)}`, name, stages: stages.map((st, i) => ({ id: `st_${randomUUID().slice(0, 8)}`, name: typeof st === "string" ? st : String((st as Json).name), position: i })) };
+        this.pipelines.push(pipeline);
+        return json({ pipeline }, 201);
+      }
       if (c.method === "POST" && p === "/opportunities/") {
         for (const k of ["pipelineId", "name", "status", "contactId"]) if (!c.body?.[k]) return json({ message: `${k} is required` }, 422);
         const id = `op_${randomUUID().slice(0, 8)}`;

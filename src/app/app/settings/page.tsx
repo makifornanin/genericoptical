@@ -19,7 +19,7 @@ import { env } from "@/server/env";
 import { Pagination } from "@/components/ui/table";
 import { AppointmentTypeDialog, BranchDialog, DemoPanel, HoursForm, ProfileForm, TaxForm, WebsiteForm } from "./forms";
 import { SiteKeysCard } from "./site-keys";
-import { EventTable, GhlCalendarMapping, GhlConnectionCard, GhlEndpoints, GhlMismatches, GhlProblems, GhlSettingsForm, GhlSyncStatus, GhlUserMapping } from "./ghl-panel";
+import { EventTable, GhlAccessCheck, GhlCalendarMapping, GhlConnectionCard, GhlEndpoints, GhlMismatches, GhlOpticalPipelines, GhlProblems, GhlSettingsForm, GhlSyncStatus, GhlUserMapping } from "./ghl-panel";
 
 const PATH = "/app/settings";
 
@@ -195,6 +195,7 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
       if (view === "mapping") {
         section = (
           <>
+            <GhlOpticalPipelines overview={overview} />
             <GhlSettingsForm overview={overview} />
             <GhlCalendarMapping overview={overview} />
             <GhlUserMapping overview={overview} />
@@ -222,6 +223,7 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
             <GhlConnectionCard overview={overview} flash={flash} />
             {overview.connection && overview.connection.status !== "disabled" && overview.connection.status !== "not_configured" ? (
               <>
+                <GhlAccessCheck />
                 <GhlSyncStatus overview={overview} />
                 <GhlProblems events={problems.rows.map(toRow)} />
                 <GhlMismatches rows={mismatches.map((m) => ({ id: m.id, kind: m.kind, message: m.message, detectedAt: m.detectedAt.toISOString(), lastSeenAt: m.lastSeenAt.toISOString() }))} />

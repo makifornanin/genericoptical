@@ -6,6 +6,7 @@ import type { GhlApi, GhlContact } from "../api";
 import { apiFor } from "../connection";
 import { GHL, type Handler, type HandlerOutcome } from "../engine";
 import { GhlNotFoundError } from "../errors";
+import { syncLeadOpportunity } from "./lead-opportunities";
 
 /**
  * Contacts and leads.
@@ -142,7 +143,9 @@ export const leadUpsert: Handler = async (event, env): Promise<HandlerOutcome> =
     const [mirror] = await getDb().select({ tags: ghlContacts.tags }).from(ghlContacts).where(and(eq(ghlContacts.businessId, env.businessId), eq(ghlContacts.ghlContactId, res.contactId))).limit(1);
     tag = await stageTag(api, res.contactId, settings.tagPrefix, lead.stage, mirror?.tags ?? []);
   }
-  return { status: "synced", externalId: res.contactId, result: { created: res.created, tag, identityPushed: !ghlOwned } };
+  // One opportunity per lead in the mapped lead pipeline (created once, then kept in step).
+  const opportunity = await syncLeadOpportunity(api, env.businessId, settings, person.id, res.contactId);
+  return { status: "synced", externalId: res.contactId, result: { created: res.created, tag, identityPushed: !ghlOwned, opportunity } };
 };
 
 export const customerUpsert: Handler = async (event, env) => {

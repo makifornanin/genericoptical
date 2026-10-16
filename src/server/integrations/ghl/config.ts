@@ -33,8 +33,25 @@ export const ghlSettingsSchema = z.object({
       orderOpen: z.string().trim().max(80).nullable().default(null),
       orderReady: z.string().trim().max(80).nullable().default(null),
       orderCompleted: z.string().trim().max(80).nullable().default(null),
+      /** Handed over / sold with money still owed. */
+      paymentPending: z.string().trim().max(80).nullable().default(null),
+      /** Order in progress (processing, at the lab). */
+      processing: z.string().trim().max(80).nullable().default(null),
     })
-    .default({ posCompleted: null, orderOpen: null, orderReady: null, orderCompleted: null }),
+    .default({ posCompleted: null, orderOpen: null, orderReady: null, orderCompleted: null, paymentPending: null, processing: null }),
+  /** Pipeline where every dashboard lead has one opportunity ("Optical — Lead Management"). */
+  leadPipelineId: z.string().trim().max(80).nullable().default(null),
+  /** Dashboard lead stage → GHL stage id. "Lost" is a status, not a stage. */
+  leadStageMap: z
+    .object({
+      new: z.string().trim().max(80).nullable().default(null),
+      contacted: z.string().trim().max(80).nullable().default(null),
+      qualified: z.string().trim().max(80).nullable().default(null),
+      appointment_scheduled: z.string().trim().max(80).nullable().default(null),
+      follow_up: z.string().trim().max(80).nullable().default(null),
+      converted: z.string().trim().max(80).nullable().default(null),
+    })
+    .default({ new: null, contacted: null, qualified: null, appointment_scheduled: null, follow_up: null, converted: null }),
   /** Local stockroom whose available quantity is published to GHL (GHL has one stock figure per price). */
   inventoryLocationId: z.string().uuid().nullable().default(null),
   /** Branch that imported GHL online orders are attributed to (its stockroom is deducted). */

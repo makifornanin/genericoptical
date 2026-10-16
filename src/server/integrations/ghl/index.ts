@@ -32,6 +32,8 @@ export { completeOAuth, connectPrivateToken, disconnect, oauthConfigured, startO
 export { dismissEvents, retryEvents } from "./engine";
 export { listMismatches, reconcileAll, resolveMismatch } from "./reconcile";
 export { handleMarketplaceWebhook, handleWorkflowWebhook } from "./webhooks";
+export { ensureOpticalPipelines, probeGhlAccess, LEAD_PIPELINE, SALES_PIPELINE } from "./setup";
+export { pollLeadOpportunities } from "./handlers/lead-opportunities";
 
 /** Processes due events for one business. */
 export function processGhl(businessId: string, opts: { limit?: number; onlyIds?: string[] } = {}): Promise<ProcessResult> {

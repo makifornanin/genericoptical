@@ -5,6 +5,7 @@ import { log } from "@/server/log";
 import { audit, notFound, requirePermission, type Ctx } from "@/server/services/core";
 import { apiFor } from "./connection";
 import { enqueue, GHL } from "./engine";
+import { pollLeadOpportunities } from "./handlers/lead-opportunities";
 import { availableAt, publishedLocationId } from "./handlers/products";
 
 /**
@@ -140,6 +141,7 @@ export async function reconcileAll(businessId: string, fetchImpl?: typeof fetch)
     ["inventory", () => reconcileInventory(businessId, fetchImpl)],
     ["orders", () => reconcileOrders(businessId, 14, fetchImpl)],
     ["duplicates", () => detectDuplicates(businessId)],
+    ["leadOpportunities", () => pollLeadOpportunities(businessId, 100, fetchImpl)],
   ] as const) {
     try {
       out[name] = await fn();

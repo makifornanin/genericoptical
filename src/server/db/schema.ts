@@ -1284,6 +1284,8 @@ export const ghlOpportunities = pgTable(
     customerId: uuid("customer_id"),
     /** The dashboard sale/order this opportunity represents, when it was created from one. */
     saleId: uuid("sale_id"),
+    /** The dashboard lead whose lead-pipeline opportunity this is (one per lead; created by the dashboard). */
+    ownerLeadId: uuid("owner_lead_id"),
     name: text("name").notNull(),
     pipelineId: text("pipeline_id"),
     pipelineStageId: text("pipeline_stage_id"),
@@ -1303,6 +1305,7 @@ export const ghlOpportunities = pgTable(
   (t) => [
     unique("ghl_opportunities_business_opportunity_key").on(t.businessId, t.ghlOpportunityId),
     uniqueIndex("ghl_opportunities_sale_key").on(t.businessId, t.saleId).where(sql`${t.saleId} is not null`),
+    uniqueIndex("ghl_opportunities_owner_lead_key").on(t.businessId, t.ownerLeadId).where(sql`${t.ownerLeadId} is not null`),
     index().on(t.businessId, t.status),
     index().on(t.businessId, t.pipelineId, t.pipelineStageId),
     check("ghl_opportunities_status_check", sql`${t.status} in ('open', 'won', 'lost', 'abandoned')`),

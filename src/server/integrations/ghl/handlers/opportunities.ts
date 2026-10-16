@@ -9,6 +9,7 @@ import type { GhlSettings } from "../config";
 import type { Handler } from "../engine";
 import { GhlNotFoundError } from "../errors";
 import { ensureContact, mirrorContactById } from "./contacts";
+import { applyLeadOpportunityFromGhl } from "./lead-opportunities";
 
 /**
  * Opportunities.
@@ -23,7 +24,7 @@ import { ensureContact, mirrorContactById } from "./contacts";
 
 type Mirror = typeof ghlOpportunities.$inferSelect;
 
-async function upsertMirror(businessId: string, opp: GhlOpportunity, extra: Partial<typeof ghlOpportunities.$inferInsert> = {}) {
+export async function upsertMirror(businessId: string, opp: GhlOpportunity, extra: Partial<typeof ghlOpportunities.$inferInsert> = {}) {
   const [contact] = opp.contactId
     ? await getDb().select().from(ghlContacts).where(and(eq(ghlContacts.businessId, businessId), eq(ghlContacts.ghlContactId, opp.contactId))).limit(1)
     : [];
@@ -62,7 +63,7 @@ export const inboundOpportunity: Handler = async (event, env) => {
     await getDb().update(ghlOpportunities).set({ deletedAt: new Date(), updatedAt: new Date() }).where(and(eq(ghlOpportunities.businessId, env.businessId), eq(ghlOpportunities.ghlOpportunityId, id)));
     return { status: "synced", externalId: id, note: "Marked deleted" };
   }
-  const { api } = await apiFor(env.businessId);
+  const { api, settings } = await apiFor(env.businessId);
   let opp: GhlOpportunity;
   try {
     opp = (await api.getOpportunity(id)).opportunity;
@@ -75,7 +76,8 @@ export const inboundOpportunity: Handler = async (event, env) => {
   }
   if (opp.contactId) await mirrorContactById(api, env.businessId, opp.contactId);
   const row = await upsertMirror(env.businessId, opp);
-  return { status: "synced", externalId: id, result: { status: row.status, stage: row.pipelineStageId, valueCents: row.monetaryValueCents } };
+  const leadChange = await applyLeadOpportunityFromGhl(env.businessId, settings, row, opp);
+  return { status: "synced", externalId: id, result: { status: row.status, stage: row.pipelineStageId, valueCents: row.monetaryValueCents, leadChange } };
 };
 
 /** What a dashboard sale should look like in the CRM pipeline. */
@@ -85,13 +87,18 @@ function desiredFor(sale: typeof sales.$inferSelect, settings: GhlSettings, curr
   const name = `${label} ${sale.number} · ${formatMoney(sale.totalCents, currency, locale)}`;
   let status: "open" | "won" | "lost" = "open";
   let stageId: string | null = null;
-  if (sale.status === "cancelled") status = "lost";
+  const done = sale.kind === "order" ? settings.stageMap.orderCompleted : settings.stageMap.posCompleted;
+  if (sale.status === "cancelled") status = "lost"; // cancelled: closed as lost, stage kept
   else if (sale.status === "completed") {
-    status = net > 0 ? "won" : "lost";
-    stageId = sale.kind === "order" ? settings.stageMap.orderCompleted : settings.stageMap.posCompleted;
-  } else {
-    stageId = sale.fulfillmentStatus === "ready_for_pickup" ? settings.stageMap.orderReady ?? settings.stageMap.orderOpen : settings.stageMap.orderOpen;
-  }
+    if (net <= 0) status = "lost"; // fully refunded: closed as lost, stage kept
+    else if (sale.balanceDueCents > 0) stageId = settings.stageMap.paymentPending ?? done; // handed over, money still owed
+    else {
+      status = "won";
+      stageId = done;
+    }
+  } else if (sale.fulfillmentStatus === "ready_for_pickup") stageId = settings.stageMap.orderReady ?? settings.stageMap.orderOpen;
+  else if (sale.fulfillmentStatus === "processing" || sale.fulfillmentStatus === "awaiting_lab") stageId = settings.stageMap.processing ?? settings.stageMap.orderOpen;
+  else stageId = settings.stageMap.orderOpen;
   return { name, status, stageId, valueCents: net };
 }
 

@@ -5,7 +5,9 @@ import { Suspense } from "react";
 import { CardsSkeleton, Forbidden, PageBody } from "@/components/app/page";
 import { AppointmentPill, LeadStagePill } from "@/components/app/status";
 import { ButtonLink } from "@/components/ui/button";
+import { GhlRecordCard } from "@/components/app/ghl-record";
 import { Card, CardBody, CardHeader, DetailList } from "@/components/ui/card";
+import { ghlRecordStatus } from "@/server/integrations/ghl/record-status";
 import { Pill } from "@/components/ui/pill";
 import { formatter } from "@/lib/format";
 import { LEAD_INTEREST_LABELS, LEAD_SOURCE_LABELS, LEAD_STAGE_LABELS, type LeadStage } from "@/lib/schemas";
@@ -30,7 +32,7 @@ async function Content({ params }: { params: Promise<{ id: string }> }) {
   }
   const f = formatter(session.business);
   const l = data.lead;
-  const [staff, { branches }] = await Promise.all([staffForAssignment(ctx), getBranchContext(session.business.id)]);
+  const [staff, { branches }, ghl] = await Promise.all([staffForAssignment(ctx), getBranchContext(session.business.id), ghlRecordStatus(ctx, "lead", id)]);
   const manage = can(ctx, "leads.manage");
   const closed = l.stage === "converted" || l.stage === "lost";
 
@@ -155,6 +157,7 @@ async function Content({ params }: { params: Promise<{ id: string }> }) {
                 {l.message ? <p className="mt-3 rounded-[10px] bg-surface-2 p-3 text-[13px] whitespace-pre-line text-text-2">{l.message}</p> : null}
               </CardBody>
             </Card>
+            {ghl ? <GhlRecordCard status={ghl} money={f.money} dateTime={f.dateTime} note="Contact and the lead's opportunity in the lead pipeline. Stage changes sync both ways." /> : null}
             {manage && !closed ? (
               <Card>
                 <CardHeader title="Follow-up" subtitle={l.followUpAt ? `Currently ${f.dateTime(l.followUpAt)}` : "No follow-up scheduled"} />

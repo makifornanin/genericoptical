@@ -1,6 +1,7 @@
 import { ArrowLeft, Download, Printer } from "lucide-react";
 import Link from "next/link";
 import { FulfillmentPill, PaymentPill, SaleStatusPill } from "@/components/app/status";
+import { GhlRecordCard } from "@/components/app/ghl-record";
 import { PageBody } from "@/components/app/page";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, DetailList } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { Table, TableWrap, TD, TH, THead, TR } from "@/components/ui/table";
 import { cn } from "@/lib/cn";
 import { formatter } from "@/lib/format";
 import { FULFILLMENT_LABELS, FULFILLMENT_STAGES, PAYMENT_METHOD_LABELS, type FulfillmentStage } from "@/lib/schemas";
+import type { GhlRecordStatus } from "@/server/integrations/ghl/record-status";
 import type { SessionInfo } from "@/server/services/auth";
 import { can } from "@/server/services/core";
 import type { getSale } from "@/server/services/sales";
@@ -19,7 +21,7 @@ type Sale = Awaited<ReturnType<typeof getSale>>;
 
 const FLOW: FulfillmentStage[] = FULFILLMENT_STAGES.filter((s) => s !== "cancelled");
 
-export function SaleDocument({ data, session }: { data: Sale; session: SessionInfo }) {
+export function SaleDocument({ data, session, ghl = null }: { data: Sale; session: SessionInfo; ghl?: GhlRecordStatus | null }) {
   const ctx = session.ctx;
   const f = formatter(session.business);
   const s = data.sale;
@@ -259,6 +261,7 @@ export function SaleDocument({ data, session }: { data: Sale; session: SessionIn
                 )}
               </CardBody>
             </Card>
+            {ghl ? <GhlRecordCard status={ghl} money={f.money} dateTime={f.dateTime} note="CRM visibility only: the sale's opportunity and contact note. Payments stay in this dashboard." /> : null}
             {isOrder ? (
               <Card>
                 <CardHeader title="Order details" />

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { after } from "next/server";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { getDb, type Executor } from "@/server/db";
 import { integrationConnections, integrationSyncEvents, type SyncCategory } from "@/server/db/schema";
@@ -78,10 +79,36 @@ export async function enqueue(ex: Executor, input: EnqueueInput): Promise<string
       )
       on conflict do nothing
       returning id`);
+    if (res.rows[0]) scheduleKick(values.businessId, input.delayMs);
     return res.rows[0]?.id ?? null;
   }
   const rows = await ex.insert(integrationSyncEvents).values(values).onConflictDoNothing().returning({ id: integrationSyncEvents.id });
+  if (rows[0] && values.status === "pending") scheduleKick(values.businessId, input.delayMs);
   return rows[0]?.id ?? null;
+}
+
+const lastKick = new Map<string, number>();
+
+/**
+ * Runs the worker for this business right after the current request's response (Next.js after()), so a
+ * POS sale or lead change reaches GHL in seconds rather than at the next scheduled run. De-duplicated
+ * per business per instance; outside a request (scripts, tests, the cron worker's own follow-ups) after()
+ * throws and the scheduled worker picks the event up instead. Runs after the transaction has committed.
+ */
+function scheduleKick(businessId: string, delayMs = 0) {
+  if (delayMs > 0) return;
+  const now = Date.now();
+  if ((lastKick.get(businessId) ?? 0) > now - 2000) return;
+  try {
+    after(async () => {
+      lastKick.set(businessId, Date.now());
+      const { kickGhl } = await import("./index");
+      await kickGhl(businessId);
+    });
+    lastKick.set(businessId, now);
+  } catch {
+    // Not in a request scope: the scheduled worker handles it.
+  }
 }
 
 /** Back-off: 30s, 1m, 2m, 4m … capped at 6h, ±20% jitter so retries don't stampede. */

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { CardsSkeleton, Forbidden } from "@/components/app/page";
 import { requireSession } from "@/server/auth/session";
 import { AppError, can } from "@/server/services/core";
+import { ghlRecordStatus } from "@/server/integrations/ghl/record-status";
 import { getSale } from "@/server/services/sales";
 import { SaleDocument } from "../sale-document";
 
@@ -18,7 +19,8 @@ async function Content({ params }: { params: Promise<{ id: string }> }) {
     throw error;
   }
   if (data.sale.kind === "order") redirect(`/app/orders/${id}`);
-  return <SaleDocument data={data} session={session} />;
+  const ghl = await ghlRecordStatus(session.ctx, "sale", id);
+  return <SaleDocument data={data} session={session} ghl={ghl} />;
 }
 
 export default function SalePage(props: PageProps<"/app/sales/[id]">) {

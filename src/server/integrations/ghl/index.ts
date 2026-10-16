@@ -41,11 +41,14 @@ export function processGhl(businessId: string, opts: { limit?: number; onlyIds?:
 }
 
 /** Best-effort immediate processing after a commit (the event is already durable if this fails). */
+/** Processes a few due events for one business now. Returns how many were claimed (0 on failure). */
 export async function kickGhl(businessId: string) {
   try {
-    await processBusiness(businessId, HANDLERS, { limit: 10 });
+    const res = await processBusiness(businessId, HANDLERS, { limit: 10 });
+    return res.claimed;
   } catch (error) {
     log.warn("ghl.kick_failed", { businessId, error: error instanceof Error ? error.message : String(error) });
+    return 0;
   }
 }
 

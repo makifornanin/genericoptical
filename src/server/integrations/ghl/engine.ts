@@ -65,7 +65,9 @@ export async function enqueue(ex: Executor, input: EnqueueInput): Promise<string
     idempotencyKey: input.idempotencyKey ?? null,
     status: input.status ?? "pending",
     lastError: input.note ?? null,
-    nextAttemptAt: new Date(Date.now() + (input.delayMs ?? 0)),
+    // The database clock, the same one claim() compares against, so app/DB clock skew can never make
+    // a just-queued event look "not yet due".
+    nextAttemptAt: sql`now() + make_interval(secs => ${(input.delayMs ?? 0) / 1000})`,
   } as const;
   if (input.coalesce && input.entityId) {
     const res = await ex.execute<{ id: string }>(sql`
@@ -103,7 +105,11 @@ function scheduleKick(businessId: string, delayMs = 0) {
     after(async () => {
       lastKick.set(businessId, Date.now());
       const { kickGhl } = await import("./index");
-      await kickGhl(businessId);
+      // If nothing was claimable yet (e.g. the commit isn't visible to this connection), try once more.
+      if (!(await kickGhl(businessId))) {
+        await new Promise((r) => setTimeout(r, 1500));
+        await kickGhl(businessId);
+      }
     });
     lastKick.set(businessId, now);
   } catch {

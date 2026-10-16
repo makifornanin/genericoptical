@@ -110,14 +110,21 @@ export async function ensureOpticalPipelines(ctx: Ctx, fetchImpl?: typeof fetch)
   const created: string[] = [];
   for (const def of [LEAD_PIPELINE, SALES_PIPELINE]) {
     if (pipelines.some((p) => norm(p.name) === norm(def.name))) continue;
-    let res: Awaited<ReturnType<typeof api.createPipeline>>;
-    try {
-      res = await api.createPipeline({ name: def.name, stages: def.stages.map((name) => ({ name })) });
-    } catch (error) {
-      // The docs list `stages` both as strings and as stage objects; try the other form once.
-      if (!(error instanceof GhlRequestError)) throw error;
-      res = await api.createPipeline({ name: def.name, stages: def.stages });
+    // The docs' example sends stage objects { name, position, showInFunnel }; the schema text says
+    // strings. Try the documented example first and only fall back on a validation error.
+    const shapes: unknown[][] = [def.stages.map((name, i) => ({ name, position: i, showInFunnel: true, showInPieChart: true })), def.stages];
+    let res: Awaited<ReturnType<typeof api.createPipeline>> | null = null;
+    const rejected: string[] = [];
+    for (const stages of shapes) {
+      try {
+        res = await api.createPipeline({ name: def.name, stages });
+        break;
+      } catch (error) {
+        if (!(error instanceof GhlRequestError)) throw error;
+        rejected.push(error.message);
+      }
     }
+    if (!res) throw new GhlRequestError(422, `Couldn't create “${def.name}”: ${rejected.join(" | ")}`);
     created.push(def.name);
     pipelines = (await api.listPipelines()).pipelines ?? [];
     // If the list lags behind the create, use the created pipeline from the response (never create twice).

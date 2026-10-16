@@ -1,11 +1,15 @@
 import { Glasses } from "lucide-react";
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { brandVars } from "@/lib/color";
 import { getSiteBusiness } from "@/server/services/settings";
 
 async function BrandPanel() {
-  const biz = await getSiteBusiness();
+  // Read the business at request time, never while prerendering (the build may have no database),
+  // and fall back to the generic brand if the database is unavailable.
+  await connection();
+  const biz = await getSiteBusiness().catch(() => null);
   return (
     <div
       className="relative hidden flex-col justify-between overflow-hidden bg-brand p-10 text-brand-ink lg:flex"

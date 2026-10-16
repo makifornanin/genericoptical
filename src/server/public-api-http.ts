@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { ZodError } from "zod";
 import type { ApiKeyScope } from "@/server/db/schema";
 import { errorFields, log } from "@/server/log";
@@ -10,6 +11,8 @@ const READ_CACHE = "private, max-age=0, s-maxage=30, stale-while-revalidate=60";
 const NO_STORE = { "Cache-Control": "no-store" };
 
 export function publicError(error: unknown): Response {
+  // Next.js control flow (e.g. leaving prerendering when the request is read) must propagate.
+  unstable_rethrow(error);
   if (error instanceof PublicApiError) {
     const headers: Record<string, string> = { ...NO_STORE };
     if (error.retryAfter) headers["Retry-After"] = String(error.retryAfter);

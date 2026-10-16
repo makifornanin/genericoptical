@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, ChevronRight, CircleDollarSign, Undo2 } from "lucide-react";
+import { Ban, CircleDollarSign, Undo2 } from "lucide-react";
 import { useState } from "react";
 import { newKey, useAction } from "@/components/app/use-action";
 import { Button } from "@/components/ui/button";
@@ -271,7 +271,7 @@ export function OrderStageControl({ saleId, allowed, balanceCents, money }: { sa
           <DialogRoot open={confirmHandover} onOpenChange={setConfirmHandover}>
             <DialogTrigger asChild>
               <Button variant="primary">
-                {NEXT_LABEL.completed} <ChevronRight />
+                {NEXT_LABEL.completed}
               </Button>
             </DialogTrigger>
             <DialogContent
@@ -292,7 +292,7 @@ export function OrderStageControl({ saleId, allowed, balanceCents, money }: { sa
           </DialogRoot>
         ) : (
           <Button variant="primary" loading={act.pending} onClick={() => act.run(saleId, primary)}>
-            {NEXT_LABEL[primary] ?? FULFILLMENT_LABELS[primary]} <ChevronRight />
+            {NEXT_LABEL[primary] ?? FULFILLMENT_LABELS[primary]}
           </Button>
         )
       ) : null}

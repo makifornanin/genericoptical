@@ -1,4 +1,4 @@
-import { ArrowUpRight, CalendarDays, CircleAlert, PackageCheck, UserPlus } from "lucide-react";
+import { CalendarDays, CircleAlert, PackageCheck, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { BarList, RevenueChart } from "@/components/app/charts";
@@ -116,7 +116,7 @@ async function DashboardContent({ searchParams }: { searchParams: SP }) {
         {fin ? (
           <div className="grid gap-4 xl:grid-cols-3">
             <Card className="xl:col-span-2">
-              <CardHeader title="Net sales over time" subtitle={`${range.bucket === "day" ? "Daily" : range.bucket === "week" ? "Weekly" : "Monthly"} · excluding tax`} actions={<ButtonLink href="/app/analytics" variant="ghost" size="sm">Analytics <ArrowUpRight /></ButtonLink>} />
+              <CardHeader title="Net sales over time" subtitle={`${range.bucket === "day" ? "Daily" : range.bucket === "week" ? "Weekly" : "Monthly"} · excluding tax`} actions={<ButtonLink href="/app/analytics" variant="ghost" size="sm">Analytics</ButtonLink>} />
               <CardBody>
                 <RevenueChart data={series} money={f.moneyMeta} />
               </CardBody>
@@ -137,7 +137,7 @@ async function DashboardContent({ searchParams }: { searchParams: SP }) {
         <div className="grid gap-4 xl:grid-cols-3">
           {recent ? (
             <Card className="xl:col-span-2">
-              <CardHeader title="Recent transactions" subtitle="Latest completed sales and handed-over orders" actions={<ButtonLink href="/app/sales" variant="ghost" size="sm">View all <ArrowUpRight /></ButtonLink>} />
+              <CardHeader title="Recent transactions" subtitle="Latest completed sales and handed-over orders" actions={<ButtonLink href="/app/sales" variant="ghost" size="sm">View all</ButtonLink>} />
               <TableWrap>
                 <Table>
                   <THead>

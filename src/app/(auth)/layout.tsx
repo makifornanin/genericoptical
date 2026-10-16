@@ -1,4 +1,3 @@
-import { Glasses } from "lucide-react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -15,11 +14,8 @@ async function BrandPanel() {
       className="relative hidden flex-col justify-between overflow-hidden bg-brand p-10 text-brand-ink lg:flex"
       style={biz ? (brandVars(biz.brandColor, biz.accentColor) as React.CSSProperties) : undefined}
     >
-      <Link href="/login" className="flex items-center gap-2.5">
-        <span className="flex size-9 items-center justify-center rounded-[10px] bg-accent text-accent-ink">
-          <Glasses className="size-5" aria-hidden="true" />
-        </span>
-        <span className="text-[15px] font-semibold">{biz?.name ?? "Optical platform"}</span>
+      <Link href="/login" className="font-display text-[17px] font-semibold tracking-[-0.02em]">
+        Optical Platform
       </Link>
       <div className="max-w-md">
         <p className="font-display text-[44px] leading-[1.02] font-semibold tracking-[-0.03em]">Run the whole shop from one place.</p>

@@ -272,7 +272,7 @@ function AppointmentPanel({ a, onClose, options, canManage }: { a: CalAppt; onCl
                 )}
                 {a.status === "completed" && a.customerId ? (
                   <Link href={`/app/pos?customer=${a.customerId}`} className="text-center text-[13px] font-medium text-text-2 hover:text-text">
-                    Ring up exam / sale at the POS →
+                    Ring up exam / sale at the POS
                   </Link>
                 ) : null}
               </div>

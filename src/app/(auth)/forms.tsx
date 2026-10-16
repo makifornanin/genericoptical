@@ -45,7 +45,7 @@ export function SignInForm({ next, demoAccounts, demoPassword }: { next?: string
                     <span className="block font-medium">{a.role}</span>
                     <span className="block truncate text-text-3">{a.email}</span>
                   </span>
-                  <span className="shrink-0 text-[11.5px] font-medium text-text-2">Use →</span>
+                  <span className="shrink-0 text-[11.5px] font-medium text-text-2">Use</span>
                 </button>
               </li>
             ))}

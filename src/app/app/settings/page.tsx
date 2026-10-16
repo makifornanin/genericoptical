@@ -31,7 +31,7 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
   const tab = typeof sp.tab === "string" ? sp.tab : "business";
   const b = session.business;
   const f = formatter(b);
-  const demo = process.env.DEMO_MODE === "true" && b.isDemo && can(ctx, "demo.reset");
+  const demo = process.env.DEMO_MODE === "true" && b.isDemo && can(ctx, "demo.reset") && (!process.env.VERCEL || process.env.ALLOW_DEMO_RESET === "true");
 
   let body: React.ReactNode = null;
   if (tab === "business") {

@@ -158,6 +158,7 @@ export async function resetDemoAction() {
   if (process.env.DEMO_MODE !== "true" || !session.business.isDemo || !session.ctx.permissions.has("demo.reset")) {
     return { ok: false as const, error: "Demo reset isn't available here." };
   }
+  if (!demoResetAllowedHere()) return { ok: false as const, error: "Demo reset is disabled on hosted deployments, so hosted data is never wiped." };
   const client = await getPool().connect();
   try {
     const { rows } = await client.query<{ locked: boolean }>("select pg_try_advisory_lock(hashtext('specta:demo-reset')) as locked");
@@ -188,4 +189,9 @@ export async function createSiteKeyAction(name: string) {
 
 export async function revokeSiteKeyAction(id: string) {
   return run((ctx) => siteKeys.revokeSiteKey(ctx, z.string().uuid().parse(id)), "Website API key revoked");
+}
+
+/** Hosted (Vercel) databases are never reset from the app unless ALLOW_DEMO_RESET=true is set deliberately. */
+function demoResetAllowedHere() {
+  return !process.env.VERCEL || process.env.ALLOW_DEMO_RESET === "true";
 }

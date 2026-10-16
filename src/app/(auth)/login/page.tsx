@@ -8,7 +8,9 @@ export const metadata: Metadata = { title: "Sign in", robots: { index: false } }
 
 async function LoginContent({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
-  const demo = process.env.DEMO_MODE === "true";
+  // Demo sign-ins are listed only when explicitly allowed (local demos), never on a hosted deployment
+  // by default: DEMO_MODE alone must not publish credentials.
+  const demo = process.env.DEMO_MODE === "true" && process.env.SHOW_DEMO_LOGINS === "true";
   const notice = sp.reset
     ? "Password updated. Sign in with your new password."
     : sp.demoReset

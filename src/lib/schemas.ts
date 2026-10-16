@@ -186,6 +186,14 @@ export const publicLeadInput = z
     website: z.string().max(500).optional().default(""),
     kind: z.enum(["contact", "product_inquiry", "appointment_request"]).default("contact"),
     productName: optText(200),
+    /** Website path the visitor submitted from (lead-source attribution). */
+    sourcePage: z
+      .string()
+      .trim()
+      .max(300)
+      .regex(/^\/[^\s]*$/, "Must be a site path")
+      .nullish()
+      .transform((v) => v || null),
   })
   .refine((v) => v.email || v.phone, { message: "Add an email address or phone number so we can reply.", path: ["email"] });
 
@@ -328,6 +336,23 @@ export const checkoutInput = z.object({
   idempotencyKey,
 });
 export type CheckoutInput = z.input<typeof checkoutInput>;
+/** POS pre-checkout validation (no payments, nothing written). */
+export const quoteInput = checkoutInput.pick({ branchId: true, customerId: true, items: true, orderDiscount: true });
+
+/** A POS cart put on hold. Holds never reserve stock; the cart is re-priced and re-checked on resume. */
+export const heldCartInput = z.object({
+  branchId: uuid,
+  label: z.string().trim().max(60).default(""),
+  customerId: optUuid,
+  lines: z
+    .array(z.object({ variantId: uuid, qty: z.number().int().min(1).max(999), customPriceCents: cents.nullable().default(null) }))
+    .min(1, "The cart is empty.")
+    .max(100),
+  discount: z.object({ type: z.enum(["none", "percent", "amount"]), value: z.string().trim().max(20) }).default({ type: "none", value: "" }),
+  notes: z.string().trim().max(1000).default(""),
+  estimatedTotalCents: cents.default(0),
+});
+export const HELD_CART_TTL_DAYS = 7;
 
 export const FULFILLMENT_STAGES = ["new", "confirmed", "processing", "awaiting_lab", "ready_for_pickup", "completed", "cancelled"] as const;
 export type FulfillmentStage = (typeof FULFILLMENT_STAGES)[number];

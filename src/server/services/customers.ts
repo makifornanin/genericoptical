@@ -15,7 +15,7 @@ import {
   sales,
   users,
 } from "@/server/db/schema";
-import { audit, can, db, diff, invalid, likePattern, mapDbError, nextNumber, notFound, now, pageOf, paging, requirePermission, type Ctx, ref } from "./core";
+import { AppError, audit, can, db, diff, invalid, likePattern, mapDbError, nextNumber, notFound, now, pageOf, paging, requirePermission, type Ctx, ref } from "./core";
 
 export type CustomerFilter = {
   q?: string;
@@ -85,12 +85,23 @@ export async function listCustomers(ctx: Ctx, f: CustomerFilter) {
 }
 
 /** Lightweight lookup for pickers (POS, orders, appointments). */
+/** Phone digits for matching: "0917 123 4567", "+63 917 123 4567" and "639171234567" all give "9171234567". */
+export function phoneKey(phone: string | null | undefined): string | null {
+  const digits = (phone ?? "").replace(/\D/g, "");
+  if (digits.length < 7) return null;
+  return digits.slice(-10);
+}
+const phoneDigitsSql = sql`right(regexp_replace(coalesce(${customers.phone}, ''), '[^0-9]', '', 'g'), 10)`;
+
 export async function searchCustomers(ctx: Ctx, q: string, limit = 12) {
   requirePermission(ctx, "customers.view");
   const conds: SQL[] = [eq(customers.businessId, ctx.businessId), isNull(customers.archivedAt)];
   if (q.trim()) {
     const p = likePattern(q);
-    conds.push(sql`(${customers.firstName} || ' ' || ${customers.lastName} ilike ${p} or coalesce(${customers.email}, '') ilike ${p} or coalesce(${customers.phone}, '') ilike ${p} or ${customers.code} ilike ${p})`);
+    const digits = q.replace(/\D/g, "").replace(/^(63|0)(?=9\d{2})/, "");
+    // Phone numbers match on their digits whatever the formatting (+63 / 0 prefix, spaces, dashes).
+    const byPhone = digits.length >= 3 ? sql` or ${phoneDigitsSql} like ${`%${digits}%`}` : sql``;
+    conds.push(sql`(${customers.firstName} || ' ' || ${customers.lastName} ilike ${p} or coalesce(${customers.email}, '') ilike ${p} or coalesce(${customers.phone}, '') ilike ${p} or ${customers.code} ilike ${p}${byPhone})`);
   }
   return db()
     .select({ id: customers.id, code: customers.code, firstName: customers.firstName, lastName: customers.lastName, email: customers.email, phone: customers.phone })
@@ -224,11 +235,48 @@ async function assertBranch(ex: Executor, ctx: Ctx, branchId: string | null) {
   if (!b) throw invalid("Unknown branch.");
 }
 
-export async function createCustomer(ctx: Ctx, raw: unknown, ex?: Executor) {
+export type CustomerMatch = { id: string; code: string; firstName: string; lastName: string; phone: string | null; email: string | null; matchedOn: ("email" | "phone")[] };
+
+/**
+ * Existing (non-archived) customers with the same email (case-insensitive) or phone (digits). Used to
+ * recognise returning customers at the counter and avoid creating duplicates. Business-scoped.
+ */
+export async function findCustomerMatches(ctx: Ctx, contact: { email?: string | null; phone?: string | null }, ex: Executor = db(), excludeId?: string | null): Promise<CustomerMatch[]> {
+  requirePermission(ctx, "customers.view");
+  const email = contact.email?.trim().toLowerCase() || null;
+  const phone = phoneKey(contact.phone);
+  if (!email && !phone) return [];
+  const conds: SQL[] = [];
+  if (email) conds.push(sql`lower(${customers.email}) = ${email}`);
+  if (phone) conds.push(sql`${phoneDigitsSql} = ${phone}`);
+  const rows = await ex
+    .select({ id: customers.id, code: customers.code, firstName: customers.firstName, lastName: customers.lastName, phone: customers.phone, email: customers.email })
+    .from(customers)
+    .where(and(eq(customers.businessId, ctx.businessId), isNull(customers.archivedAt), or(...conds), excludeId ? sql`${customers.id} <> ${excludeId}` : undefined))
+    .orderBy(asc(customers.createdAt))
+    .limit(5);
+  return rows.map((r) => ({
+    ...r,
+    matchedOn: [...(email && r.email?.toLowerCase() === email ? ["email" as const] : []), ...(phone && phoneKey(r.phone) === phone ? ["phone" as const] : [])],
+  }));
+}
+
+/**
+ * `rejectDuplicates`: staff-entered customers are refused when the email or phone already belongs to
+ * someone (the screen then offers the existing record, or "create anyway" for e.g. a shared family phone).
+ */
+export async function createCustomer(ctx: Ctx, raw: unknown, ex?: Executor, opts: { rejectDuplicates?: boolean } = {}) {
   requirePermission(ctx, "customers.manage");
   const input = customerInput.parse(raw);
   const run = async (tx: Executor) => {
     await assertBranch(tx, ctx, input.homeBranchId);
+    if (opts.rejectDuplicates) {
+      const matches = await findCustomerMatches(ctx, input, tx);
+      if (matches.length) {
+        const m = matches[0];
+        throw new AppError(`${m.firstName} ${m.lastName} (${m.code}) already has this ${m.matchedOn.join(" and ")}. Use the existing customer, or confirm this is a different person.`, "conflict");
+      }
+    }
     const code = await nextNumber(tx, ctx.businessId, "customer", "CUS-", 5);
     const at = now(ctx);
     const [row] = await tx

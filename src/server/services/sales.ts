@@ -5,6 +5,7 @@ import { computeBalance, derivePaymentStatus, priceSale, PricingError, type Pric
 import {
   checkoutInput,
   FULFILLMENT_LABELS,
+  quoteInput,
   orderInput,
   paymentInput,
   refundInput,
@@ -17,6 +18,7 @@ import {
   businesses,
   businessMemberships,
   customers,
+  inventoryBalances,
   inventoryLocations,
   payments,
   prescriptions,
@@ -460,6 +462,58 @@ export async function checkout(ctx: Ctx, raw: unknown) {
     },
     "sales_idempotency_key",
     hash,
+  );
+}
+
+/**
+ * Pre-checkout validation for the POS: prices the cart on the server exactly as checkout would and
+ * reports discount and stock problems. Writes nothing and takes no locks, so it is advisory; checkout
+ * repeats every check under lock and is the authority.
+ */
+export async function quoteCart(ctx: Ctx, raw: unknown) {
+  requirePermission(ctx, "pos.use");
+  const input = quoteInput.parse(raw);
+  return getDb().transaction(
+    async (tx) => {
+      const tax = await businessTax(tx, ctx);
+      const branch = await activeBranch(tx, ctx, input.branchId);
+      const location = await locationForBranch(tx, ctx, branch.id);
+      if (input.customerId) await activeCustomer(tx, ctx, input.customerId);
+      const { pricing, meta } = await buildLines(tx, ctx, input.items, input.customerId);
+      const priced = price(pricing, tax, toDiscount(input.orderDiscount));
+      const problems: string[] = [];
+      try {
+        enforceDiscountLimit(ctx, priced, tax.settings.maxStaffDiscountBps ?? 2000);
+      } catch (error) {
+        if (!(error instanceof AppError)) throw error;
+        problems.push(error.message);
+      }
+      const needs = stockNeeds(meta, priced);
+      const available: Record<string, number> = {};
+      if (needs.size) {
+        const rows = await tx
+          .select({ variantId: inventoryBalances.variantId, onHand: inventoryBalances.onHand, reserved: inventoryBalances.reserved })
+          .from(inventoryBalances)
+          .where(and(eq(inventoryBalances.businessId, ctx.businessId), eq(inventoryBalances.locationId, location.id), inArray(inventoryBalances.variantId, [...needs.keys()])));
+        const byVariant = new Map(rows.map((r) => [r.variantId, Math.max(0, r.onHand - r.reserved)]));
+        for (const [variantId, need] of needs) {
+          const qty = byVariant.get(variantId) ?? 0;
+          available[variantId] = qty;
+          if (qty < need.qty) problems.push(`${need.name}: only ${qty} left at this branch (${need.qty} in the cart).`);
+        }
+      }
+      return {
+        subtotalCents: priced.subtotalCents,
+        discountCents: priced.discountCents,
+        taxCents: priced.taxCents,
+        totalCents: priced.totalCents,
+        lines: meta.map((m, i) => ({ variantId: m.variantId, unitPriceCents: priced.lines[i].unitPriceCents, lineTotalCents: priced.lines[i].lineTotalCents })),
+        available,
+        problems,
+        checkedAt: new Date().toISOString(),
+      };
+    },
+    { accessMode: "read only" },
   );
 }
 

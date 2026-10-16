@@ -466,6 +466,7 @@ export async function sellableVariants(ctx: Ctx, opts: { locationId: string; q?:
       barcode: productVariants.barcode,
       priceCents: productVariants.priceCents,
       costCents: productVariants.costCents,
+      reorderPoint: productVariants.reorderPoint,
       productType: products.productType,
       taxExempt: products.taxExempt,
       imageUrl: products.imageUrl,

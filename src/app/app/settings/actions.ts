@@ -26,33 +26,36 @@ import {
 import { ghlSettingsSchema } from "@/server/integrations/ghl/config";
 import { log } from "@/server/log";
 import { requirePermission, type Ctx } from "@/server/services/core";
+import * as siteKeys from "@/server/services/public-api";
 import * as settings from "@/server/services/settings";
+import { revalidateWebsiteAfter, type WebsiteTag } from "@/server/website-revalidate";
 
-async function run(fn: (ctx: Ctx) => Promise<unknown>, msg: string) {
+async function run(fn: (ctx: Ctx) => Promise<unknown>, msg: string, website: WebsiteTag[] = []) {
   return runAction(async (ctx) => {
     await fn(ctx);
     refresh();
+    if (website.length) revalidateWebsiteAfter(...website);
     return { ok: true };
   }, msg);
 }
 
 export async function saveProfileAction(input: unknown) {
-  return run((ctx) => settings.updateBusinessProfile(ctx, input), "Business profile saved");
+  return run((ctx) => settings.updateBusinessProfile(ctx, input), "Business profile saved", ["site"]);
 }
 export async function saveTaxAction(input: unknown) {
-  return run((ctx) => settings.updateTaxSettings(ctx, input), "Currency & tax settings saved");
+  return run((ctx) => settings.updateTaxSettings(ctx, input), "Currency & tax settings saved", ["site", "catalog"]);
 }
 export async function saveHoursAction(input: unknown) {
-  return run((ctx) => settings.updateBusinessHours(ctx, input), "Business hours saved");
+  return run((ctx) => settings.updateBusinessHours(ctx, input), "Business hours saved", ["site"]);
 }
 export async function saveWebsiteAction(input: unknown) {
-  return run((ctx) => settings.updateWebsiteContent(ctx, input), "Website content saved");
+  return run((ctx) => settings.updateWebsiteContent(ctx, input), "Website content saved", ["site"]);
 }
 export async function saveBranchAction(id: string | null, input: unknown) {
-  return run((ctx) => settings.saveBranch(ctx, id, input), "Branch saved");
+  return run((ctx) => settings.saveBranch(ctx, id, input), "Branch saved", ["site", "catalog"]);
 }
 export async function saveAppointmentTypeAction(id: string | null, input: unknown) {
-  return run((ctx) => settings.saveAppointmentType(ctx, id, input), "Appointment type saved");
+  return run((ctx) => settings.saveAppointmentType(ctx, id, input), "Appointment type saved", ["site"]);
 }
 
 // ─── GoHighLevel ─────────────────────────────────────────────────────────────
@@ -126,7 +129,7 @@ export async function saveGhlSettingsAction(input: unknown) {
 }
 
 export async function mapGhlCalendarAction(calendarId: string, branchId: string | null, appointmentTypeId: string | null) {
-  return run((ctx) => mapCalendar(ctx, z.string().min(1).max(80).parse(calendarId), branchId || null, appointmentTypeId || null), "Calendar mapping saved");
+  return run((ctx) => mapCalendar(ctx, z.string().min(1).max(80).parse(calendarId), branchId || null, appointmentTypeId || null), "Calendar mapping saved", ["site"]);
 }
 
 export async function mapGhlUserAction(ghlUserId: string, membershipId: string | null) {
@@ -173,4 +176,16 @@ export async function resetDemoAction() {
   }
   await clearSessionCookie();
   redirect("/login?demoReset=1");
+}
+
+export async function createSiteKeyAction(name: string) {
+  return runAction(async (ctx) => {
+    const created = await siteKeys.issueSiteKey(ctx, z.string().trim().min(1, "Name the key").max(80).parse(name));
+    refresh();
+    return created;
+  }, "Website API key created");
+}
+
+export async function revokeSiteKeyAction(id: string) {
+  return run((ctx) => siteKeys.revokeSiteKey(ctx, z.string().uuid().parse(id)), "Website API key revoked");
 }

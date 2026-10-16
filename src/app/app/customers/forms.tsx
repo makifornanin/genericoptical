@@ -7,7 +7,9 @@ import { useAction } from "@/components/app/use-action";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog, DialogContent, DialogRoot, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox, FormError, SelectField, TextareaField, TextField } from "@/components/ui/form";
-import { archiveCustomerAction, saveCustomerAction, savePrescriptionAction } from "./actions";
+import Link from "next/link";
+import type { CustomerMatch } from "@/server/services/customers";
+import { archiveCustomerAction, customerMatchesAction, saveCustomerAction, savePrescriptionAction } from "./actions";
 
 export type CustomerFormValues = {
   firstName: string;
@@ -66,7 +68,22 @@ export function CustomerFormDialog({
       else if (!id) router.push(`/app/customers/${c.id}`);
     },
   });
-  const set = <K extends keyof CustomerFormValues>(k: K, val: CustomerFormValues[K]) => setV((p) => ({ ...p, [k]: val }));
+  const [matches, setMatches] = useState<CustomerMatch[]>([]);
+  const check = useAction(customerMatchesAction, { silent: true });
+  const set = <K extends keyof CustomerFormValues>(k: K, val: CustomerFormValues[K]) => {
+    setV((p) => ({ ...p, [k]: val }));
+    if (k === "email" || k === "phone") setMatches([]);
+  };
+  // New customers: look for someone with the same email or phone first, so the counter reuses the
+  // existing record instead of creating a duplicate. The server enforces the same check.
+  const submit = async () => {
+    if (id) return save.run(id, v);
+    if (!matches.length && (v.email.trim() || v.phone.trim())) {
+      const r = await check.run({ email: v.email, phone: v.phone });
+      if (r.ok && r.data.length) return setMatches(r.data);
+    }
+    return save.run(null, v, { allowDuplicate: matches.length > 0 });
+  };
   return (
     <DialogRoot
       open={open}
@@ -74,6 +91,7 @@ export function CustomerFormDialog({
         setOpen(o);
         if (o) {
           setV({ ...EMPTY, ...initial });
+          setMatches([]);
           save.reset();
         }
       }}
@@ -93,8 +111,8 @@ export function CustomerFormDialog({
             <Button variant="ghost" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" loading={save.pending} onClick={() => save.run(id ?? null, v)}>
-              {id ? "Save changes" : "Add customer"}
+            <Button variant="primary" loading={save.pending || check.pending} onClick={submit}>
+              {id ? "Save changes" : matches.length ? "Create new customer anyway" : "Add customer"}
             </Button>
           </>
         }
@@ -103,9 +121,48 @@ export function CustomerFormDialog({
           className="grid gap-4 sm:grid-cols-2"
           onSubmit={(e) => {
             e.preventDefault();
-            save.run(id ?? null, v);
+            void submit();
           }}
         >
+          {matches.length ? (
+            <div className="flex flex-col gap-2 rounded-[12px] border border-warn/30 bg-warn-soft p-3 text-[13px] sm:col-span-2" role="alert">
+              <p className="font-medium text-warn">Already a customer? This {matches[0].matchedOn.join(" and ")} is on file:</p>
+              <ul className="flex flex-col gap-1.5">
+                {matches.map((m) => (
+                  <li key={m.id} className="flex flex-wrap items-center justify-between gap-2 rounded-[10px] bg-surface px-3 py-2">
+                    <span className="min-w-0">
+                      <span className="font-medium">
+                        {m.firstName} {m.lastName}
+                      </span>
+                      <span className="text-text-3">
+                        {" "}
+                        · {m.code}
+                        {m.phone ? ` · ${m.phone}` : ""}
+                        {m.email ? ` · ${m.email}` : ""}
+                      </span>
+                    </span>
+                    {onSaved ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          onSaved({ id: m.id, code: m.code, firstName: m.firstName, lastName: m.lastName });
+                          setOpen(false);
+                        }}
+                      >
+                        Use this customer
+                      </Button>
+                    ) : (
+                      <Link href={`/app/customers/${m.id}`} className="text-[12.5px] font-medium underline-offset-2 hover:underline">
+                        Open profile
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[12px] text-text-2">Different person sharing a phone or email (e.g. family)? Choose “Create new customer anyway”.</p>
+            </div>
+          ) : null}
           <TextField label="First name" required value={v.firstName} onChange={(e) => set("firstName", e.target.value)} error={save.fe("firstName")} autoFocus />
           <TextField label="Last name" required value={v.lastName} onChange={(e) => set("lastName", e.target.value)} error={save.fe("lastName")} />
           <TextField label="Mobile number" type="tel" value={v.phone} onChange={(e) => set("phone", e.target.value)} error={save.fe("phone")} placeholder="+63 9xx xxx xxxx" />

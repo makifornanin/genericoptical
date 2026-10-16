@@ -6,16 +6,19 @@ import type { ProductInput } from "@/lib/schemas";
 import { runAction } from "@/server/actions";
 import * as catalog from "@/server/services/catalog";
 import { invalid } from "@/server/services/core";
+import { revalidateWebsiteAfter } from "@/server/website-revalidate";
 
 export async function saveProductAction(id: string | null, input: ProductInput, opening: catalog.OpeningStock = []) {
   return runAction(async (ctx) => {
     if (id) {
       await catalog.updateProduct(ctx, id, input);
       refresh();
+      revalidateWebsiteAfter("catalog", "site");
       return { productId: id };
     }
     const res = await catalog.createProduct(ctx, input, opening);
     refresh();
+    revalidateWebsiteAfter("catalog", "site");
     return { productId: res!.productId };
   }, id ? "Product saved" : "Product created");
 }
@@ -24,6 +27,7 @@ export async function archiveProductAction(id: string, archived: boolean) {
   return runAction(async (ctx) => {
     await catalog.setProductArchived(ctx, id, archived);
     refresh();
+    revalidateWebsiteAfter("catalog", "site");
     return { id };
   }, archived ? "Product archived" : "Product restored");
 }
@@ -48,6 +52,7 @@ export async function importProductsAction(csvText: string) {
     }
     const res = await catalog.importProducts(ctx, records);
     refresh();
+    revalidateWebsiteAfter("catalog", "site");
     return res;
   });
 }

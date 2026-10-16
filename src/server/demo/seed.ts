@@ -458,19 +458,19 @@ export async function seedDemo(opts: { days?: number; log?: (m: string) => void 
   }
   for (const [i, c] of CARE.entries()) {
     await addProduct(
-      { name: c.name, brand: "Lensmere Care", kind: c.category, type: "stock", image: c.image, supplier: "CPS", description: `${c.name}.` },
+      { name: c.name, brand: "Lensmere Care", kind: c.category, type: "stock", image: c.image, supplier: "CPS", website: true, description: `${c.name}.` },
       [{ label: "Default", sku: `AC-${String(i + 1).padStart(3, "0")}-${c.name.replace(/[^A-Za-z]/g, "").slice(0, 6).toUpperCase()}`, price: c.price, cost: c.cost, reorderPoint: 4, reorderQty: 12, opening: [8, 16] as [number, number] }],
     );
   }
   for (const [i, l] of RX_LENSES.entries()) {
     await addProduct(
-      { name: l.name, brand: "Clarity Lab", kind: "rx_lenses", type: "made_to_order", image: "rx-lens", supplier: "CLL", description: "Made to your prescription at our partner laboratory." },
+      { name: l.name, brand: "Clarity Lab", kind: "rx_lenses", type: "made_to_order", image: "rx-lens", supplier: "CLL", website: true, description: "Made to your prescription at our partner laboratory." },
       [{ label: "Pair", sku: `RX-${String(i + 1).padStart(3, "0")}-${l.name.replace(/[^A-Za-z]/g, "").slice(0, 6).toUpperCase()}`, price: l.price, cost: l.cost }],
     );
   }
   for (const s of SERVICES) {
     await addProduct(
-      { name: s.name, brand: null, kind: "services", type: "service", image: "service-exam", supplier: null, description: s.name, taxExempt: s.code === "eye_exam" },
+      { name: s.name, brand: null, kind: "services", type: "service", image: "service-exam", supplier: null, website: true, description: s.name, taxExempt: s.code === "eye_exam" },
       [{ label: "Service", sku: `SV-${s.code.toUpperCase()}`, price: s.price, cost: 0, code: s.code }],
     );
   }

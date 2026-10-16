@@ -51,6 +51,7 @@ async function Content({ searchParams }: { searchParams: Promise<Record<string, 
           imageUrl: i.imageUrl,
           categoryId: i.categoryId,
           available: i.available,
+          reorderPoint: i.reorderPoint,
         }))}
         branches={branches.map((b) => ({ id: b.id, name: b.name }))}
         branchId={branchId}

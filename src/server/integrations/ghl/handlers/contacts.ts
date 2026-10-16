@@ -97,7 +97,9 @@ export async function ensureContact(api: GhlApi, businessId: string, person: Per
       contactId = found.id;
       contact = opts.pushIdentity ? (await api.updateContact(found.id, identity)).contact : found;
     } else {
-      contact = (await api.createContact({ ...identity, source: person.kind === "customer" ? "Optical dashboard (customer)" : `Optical dashboard (${person.source ?? "lead"})` })).contact;
+      // Website leads keep the plain "Website" source so GHL reports attribute them to the site.
+      const source = person.kind === "customer" ? "Optical dashboard (customer)" : person.source === "website" ? "Website" : `Optical dashboard (${person.source ?? "lead"})`;
+      contact = (await api.createContact({ ...identity, source })).contact;
       contactId = contact.id;
       created = true;
     }

@@ -13,9 +13,12 @@ import { ghlOverview, listMismatches, listSyncEvents } from "@/server/integratio
 import { appointmentTypes } from "@/server/db/schema";
 import { asc, eq } from "drizzle-orm";
 import { can } from "@/server/services/core";
+import { listSiteKeys } from "@/server/services/public-api";
 import { listBranches } from "@/server/services/settings";
+import { env } from "@/server/env";
 import { Pagination } from "@/components/ui/table";
 import { AppointmentTypeDialog, BranchDialog, DemoPanel, HoursForm, ProfileForm, TaxForm, WebsiteForm } from "./forms";
+import { SiteKeysCard } from "./site-keys";
 import { EventTable, GhlCalendarMapping, GhlConnectionCard, GhlEndpoints, GhlMismatches, GhlProblems, GhlSettingsForm, GhlSyncStatus, GhlUserMapping } from "./ghl-panel";
 
 const PATH = "/app/settings";
@@ -158,19 +161,28 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
     );
   } else if (tab === "website") {
     const w = b.websiteContent;
+    const keys = can(ctx, "integrations.manage") ? await listSiteKeys(ctx) : null;
     body = (
-      <WebsiteForm
-        initial={{
-          heroEyebrow: w.heroEyebrow ?? "",
-          heroTitle: w.heroTitle ?? "",
-          heroBody: w.heroBody ?? "",
-          aboutTitle: w.aboutTitle ?? "",
-          aboutBody: w.aboutBody ?? "",
-          privacyContactEmail: w.privacyContactEmail ?? "",
-          values: w.values ?? [],
-          faqs: w.faqs ?? [],
-        }}
-      />
+      <div className="flex flex-col gap-4">
+        <WebsiteForm
+          initial={{
+            heroEyebrow: w.heroEyebrow ?? "",
+            heroTitle: w.heroTitle ?? "",
+            heroBody: w.heroBody ?? "",
+            aboutTitle: w.aboutTitle ?? "",
+            aboutBody: w.aboutBody ?? "",
+            privacyContactEmail: w.privacyContactEmail ?? "",
+            values: w.values ?? [],
+            faqs: w.faqs ?? [],
+          }}
+        />
+        {keys ? (
+          <SiteKeysCard
+            apiUrl={`${env().APP_URL.replace(/\/$/, "")}/api/public/v1`}
+            keys={keys.map((k) => ({ ...k, createdAt: k.createdAt.toISOString(), lastUsedAt: k.lastUsedAt?.toISOString() ?? null, revokedAt: k.revokedAt?.toISOString() ?? null }))}
+          />
+        ) : null}
+      </div>
     );
   } else if (tab === "integrations") {
     if (!can(ctx, "integrations.manage")) body = <p className="text-[13.5px] text-text-2">You don&apos;t have permission to manage integrations.</p>;

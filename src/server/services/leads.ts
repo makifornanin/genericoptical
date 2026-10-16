@@ -486,7 +486,7 @@ export async function capturePublicLead(businessId: string, raw: unknown, meta: 
         await activity(tx, ctx, existing.id, {
           type: "inquiry",
           body: message || "Submitted another website inquiry.",
-          metadata: { interest: input.interest, kind: input.kind, consentRequested: { sms: input.smsConsent, marketing: input.marketingConsent } },
+          metadata: { interest: input.interest, kind: input.kind, sourcePage: input.sourcePage, consentRequested: { sms: input.smsConsent, marketing: input.marketingConsent } },
         });
         await tx.update(leads).set({ updatedAt: now(ctx) }).where(eq(leads.id, existing.id));
         return { ok: true as const, leadId: existing.id };
@@ -516,7 +516,7 @@ export async function capturePublicLead(businessId: string, raw: unknown, meta: 
         type: "created",
         body: message || null,
         toStage: "new",
-        metadata: { source: "website", kind: input.kind, interest: LEAD_INTEREST_LABELS[input.interest] },
+        metadata: { source: "website", kind: input.kind, interest: LEAD_INTEREST_LABELS[input.interest], sourcePage: input.sourcePage },
       });
       await audit(tx, ctx, { action: "lead.created", entityType: "lead", entityId: lead.id, summary: `Website ${input.kind.replace("_", " ")} from ${input.fullName} (${code})` });
       await onLeadChanged(tx, ctx.businessId, lead.id);

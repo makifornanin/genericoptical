@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { buttonClass } from "@/components/ui/button";
 import { formatter } from "@/lib/format";
+import { MANUAL_PAYMENT_NOTE, NON_CASH_METHODS, RECEIPT_DISCLAIMER } from "@/lib/receipt";
 import { PAYMENT_METHOD_LABELS } from "@/lib/schemas";
 import { requireSession } from "@/server/auth/session";
 import { AppError, can } from "@/server/services/core";
@@ -66,7 +68,7 @@ async function Receipt({ params }: { params: Promise<{ id: string }> }) {
         .filter((p) => p.payment.status === "completed")
         .map(({ payment: p }) => (
           <div key={p.id}>
-            <Row label={`${PAYMENT_METHOD_LABELS[p.method]}${p.reference ? ` ${p.reference}` : ""}`} value={f.money(p.amountCents)} />
+            <Row label={`${PAYMENT_METHOD_LABELS[p.method]}${p.reference ? ` ${p.reference}` : ""}${NON_CASH_METHODS.has(p.method) ? " *" : ""}`} value={f.money(p.amountCents)} />
             {p.tenderedCents && p.changeCents ? (
               <>
                 <Row label="  Cash received" value={f.money(p.tenderedCents)} />
@@ -88,8 +90,13 @@ async function Receipt({ params }: { params: Promise<{ id: string }> }) {
       ) : null}
       <div className="my-3 border-t border-dashed border-black" />
       <p className="text-center">{b.receiptFooter ?? "Thank you!"}</p>
+      {data.payments.some((p) => p.payment.status === "completed" && NON_CASH_METHODS.has(p.payment.method)) ? <p className="mt-3 text-[10.5px]">* {MANUAL_PAYMENT_NOTE}</p> : null}
+      <p className="mt-2 text-center text-[10.5px]">{RECEIPT_DISCLAIMER}</p>
       <div className="mt-6 flex justify-center gap-2 font-sans print:hidden">
         <PrintButton />
+        <a href={`/api/sales/${s.id}/receipt`} download className={buttonClass("secondary")}>
+          Download PDF
+        </a>
       </div>
     </div>
   );

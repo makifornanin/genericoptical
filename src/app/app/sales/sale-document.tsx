@@ -1,8 +1,8 @@
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Download, Printer } from "lucide-react";
 import Link from "next/link";
 import { FulfillmentPill, PaymentPill, SaleStatusPill } from "@/components/app/status";
 import { PageBody } from "@/components/app/page";
-import { ButtonLink } from "@/components/ui/button";
+import { ButtonLink, buttonClass } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, DetailList } from "@/components/ui/card";
 import { Pill } from "@/components/ui/pill";
 import { Table, TableWrap, TD, TH, THead, TR } from "@/components/ui/table";
@@ -50,6 +50,9 @@ export function SaleDocument({ data, session }: { data: Sale; session: SessionIn
           <ButtonLink href={`/print/receipt/${s.id}`} target="_blank">
             <Printer /> {isOrder && s.status === "open" ? "Order slip" : "Receipt"}
           </ButtonLink>
+          <a href={`/api/sales/${s.id}/receipt`} download className={buttonClass("secondary")}>
+            <Download /> PDF
+          </a>
           {s.status !== "cancelled" && s.balanceDueCents > 0 && can(ctx, "payments.record") ? <RecordPaymentDialog saleId={s.id} balanceCents={s.balanceDueCents} money={money} /> : null}
           {can(ctx, "sales.refund") && s.status === "completed" && s.refundedCents < s.totalCents ? (
             <RefundDialog

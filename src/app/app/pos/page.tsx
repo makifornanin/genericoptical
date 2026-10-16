@@ -7,6 +7,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { listCategories, sellableVariants } from "@/server/services/catalog";
 import { can } from "@/server/services/core";
 import { locationForBranch } from "@/server/services/inventory";
+import { toPosItem } from "./items";
 import { PosTerminal } from "./terminal";
 
 async function Content({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -34,20 +35,7 @@ async function Content({ searchParams }: { searchParams: Promise<Record<string, 
     <PageBody className="pb-6">
       <PosTerminal
         key={branchId}
-        items={items.map((i) => ({
-          variantId: i.variantId,
-          productName: i.productName,
-          brand: i.brand,
-          label: i.label,
-          sku: i.sku,
-          barcode: i.barcode,
-          priceCents: i.priceCents,
-          productType: i.productType,
-          taxExempt: i.taxExempt,
-          imageUrl: i.imageUrl,
-          categoryId: i.categoryId,
-          available: i.available,
-        }))}
+        items={items.map(toPosItem)}
         categories={categories.filter((c) => used.has(c.id)).map((c) => ({ id: c.id, name: c.name }))}
         branchId={branchId}
         branches={branches.map((b) => ({ id: b.id, name: b.name }))}

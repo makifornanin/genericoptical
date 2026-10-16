@@ -64,6 +64,20 @@
       "when": 1792071612472,
       "tag": "0008_zero_value_returns",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792095356110,
+      "tag": "0009_public_api",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792096449724,
+      "tag": "0010_pos_held_carts",
+      "breakpoints": true
     }
   ]
 }

@@ -1410,3 +1410,82 @@ export const integrationMismatches = pgTable(
   ],
 );
 
+
+// ─── Public website API ──────────────────────────────────────────────────────
+
+export const API_KEY_SCOPES = ["site:read", "catalog:read", "inquiries:write"] as const;
+export type ApiKeyScope = (typeof API_KEY_SCOPES)[number];
+
+/**
+ * Server-to-server keys for the customer website (docs/PUBLIC_API.md). Only a SHA-256 hash is
+ * stored; the key itself is shown once when created. The key decides the business (tenant).
+ */
+export const apiKeys = pgTable(
+  "api_keys",
+  {
+    id: id(),
+    businessId: businessId(),
+    name: text("name").notNull(),
+    /** First characters of the key, shown in lists so a key can be recognised without revealing it. */
+    prefix: text("prefix").notNull(),
+    keyHash: text("key_hash").notNull(),
+    scopes: jsonb("scopes").$type<ApiKeyScope[]>().notNull(),
+    createdByMembershipId: uuid("created_by_membership_id"),
+    createdAt: createdAt(),
+    lastUsedAt: ts("last_used_at"),
+    revokedAt: ts("revoked_at"),
+  },
+  (t) => [uniqueIndex("api_keys_hash_key").on(t.keyHash), index().on(t.businessId)],
+);
+
+/** Fixed-window request counters shared by every server instance (public API rate limits). */
+export const apiRateLimits = pgTable(
+  "api_rate_limits",
+  {
+    bucket: text("bucket").notNull(),
+    windowStart: ts("window_start").notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.bucket, t.windowStart] }), index().on(t.windowStart)],
+);
+
+// ─── POS held carts ──────────────────────────────────────────────────────────
+
+/** A cart saved at the counter. Stored as entered, re-priced and re-checked when resumed. */
+export type HeldCartContent = {
+  lines: { variantId: string; qty: number; customPriceCents: number | null }[];
+  discount: { type: "none" | "percent" | "amount"; value: string };
+  notes: string;
+};
+export const HELD_CART_STATUSES = ["held", "resumed", "cancelled"] as const;
+
+/**
+ * Suspended POS sales. They deliberately do NOT reserve stock: availability is checked again when the
+ * cart is resumed and, authoritatively, at checkout. Held carts expire (expires_at) so none linger.
+ */
+export const posHeldCarts = pgTable(
+  "pos_held_carts",
+  {
+    id: id(),
+    businessId: businessId(),
+    branchId: uuid("branch_id").notNull(),
+    label: text("label").notNull(),
+    customerId: uuid("customer_id"),
+    cart: jsonb("cart").$type<HeldCartContent>().notNull(),
+    itemCount: integer("item_count").notNull(),
+    /** Estimate at the time it was held, for the list only; checkout always re-prices. */
+    estimatedTotalCents: money("estimated_total_cents").notNull(),
+    status: text("status", { enum: HELD_CART_STATUSES }).notNull().default("held"),
+    heldByMembershipId: uuid("held_by_membership_id"),
+    closedByMembershipId: uuid("closed_by_membership_id"),
+    createdAt: createdAt(),
+    expiresAt: ts("expires_at").notNull(),
+    closedAt: ts("closed_at"),
+  },
+  (t) => [
+    foreignKey({ columns: [t.branchId], foreignColumns: [branches.id] }).onDelete("cascade"),
+    foreignKey({ columns: [t.customerId], foreignColumns: [customers.id] }).onDelete("set null"),
+    index().on(t.businessId, t.branchId, t.status),
+    check("pos_held_carts_items", sql`${t.itemCount} between 1 and 200`),
+  ],
+);

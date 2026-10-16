@@ -14,6 +14,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:reset-demo": "tsx scripts/seed.ts --reset",
     "setup:business": "tsx scripts/create-business.ts",
+    "site-key": "tsx scripts/site-key.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
@@ -25,6 +26,7 @@
     "drizzle-orm": "^0.45.4",
     "lucide-react": "^1.57.0",
     "next": "16.4.1",
+    "pdf-lib": "^1.17.1",
     "pg": "^8.23.1",
     "radix-ui": "^1.8.1",
     "react": "19.3.0",

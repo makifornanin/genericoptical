@@ -12,8 +12,9 @@ Read-only business data and inquiry intake for the **customer website**, a separ
   - Site keys are per business and stored only as a SHA-256 hash (table `api_keys`).
   - Each key carries scopes: `site:read`, `catalog:read`, `inquiries:write`.
   - A revoked key stops working immediately.
-- **Creating a key:** `npm run site-key -- create --business <slug> --name "Customer website"`. The key prints once.
-- **Revoking a key:** `npm run site-key -- revoke <prefix>`.
+- **Creating a key:** in the dashboard, **Settings → Website → Website API keys → New key** (owners and managers with *Manage integrations*). The key is shown once; paste it into the website's `DASHBOARD_SITE_KEY`. CLI alternative: `npm run site-key -- create --business <slug> --name "Customer website"`.
+- **Revoking a key:** the same Settings card, or `npm run site-key -- revoke <prefix>`. `npm run site-key -- list --business <slug>` shows keys and when they were last used.
+- **Website configuration:** `DASHBOARD_API_URL` is the dashboard's origin (e.g. `https://optical-management-dashboard.vercel.app`). The website adds `/api/public/v1` itself.
 - **Business isolation:** the key decides the business. Requests can't name another business, and every query is filtered by the key's `business_id`.
 - **Data exposure:** only intentionally public data is returned:
   - business profile, website copy, active branches and hours, public appointment types;
@@ -38,7 +39,8 @@ Exceeding a limit returns **429** with `Retry-After`.
 - **Read responses:** `Cache-Control: private, max-age=0, s-maxage=30, stale-while-revalidate=60`. `private` because they're keyed by the authorization header.
 - **The website's own caching:**
   - responses cached for **60 seconds** (`next: { revalidate: 60 }`), tagged `site` / `catalog`;
-  - an on-demand revalidation route (`POST /api/revalidate`, secret), which the dashboard can call after product changes.
+  - an on-demand revalidation route on the website: `POST /api/revalidate`, `Authorization: Bearer <REVALIDATE_SECRET>`, body `{"tags":["site","catalog"]}`. The dashboard calls it after product, category, branch, hours, website-content, appointment-type and calendar-mapping changes when `WEBSITE_REVALIDATE_URL` / `WEBSITE_REVALIDATE_SECRET` are set.
+- **Stock changes** from sales are not pushed. They reach the website within the 60-second window. Verified locally: a POS sell-out appeared on the product page without any revalidation call.
 
 ## Endpoints
 
@@ -113,7 +115,7 @@ Returns `200 { "product": ProductDetail }` or `404 { "error": "Not found" }`.
     "id": "uuid", "label": "52 · Black", "options": { "size": "52", "colour": "Black" },
     "priceCents": 295000, "sku": "ARD-101-52-BK",
     "availability": "in_stock|low_stock|out_of_stock|made_to_order|service",
-    "branches": [{ "branchId": "uuid", "branchName": "Makati", "availability": "in_stock|low_stock|out_of_stock" }]
+    "branches": [{ "branchId": "uuid", "branchName": "Makati", "availability": "in_stock|low_stock|out_of_stock" }]   // every active branch; [] for made-to-order
   }],
   "related": [ProductSummary]   // up to 4 from the same category
 }

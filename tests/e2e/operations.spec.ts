@@ -4,10 +4,16 @@ import { cents, signIn } from "./helpers";
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** Stock count shown on a POS product tile, e.g. "12 in stock". */
+/** A product tile in the POS grid (not the "Recent" shortcut chips, which share the product name). */
+function productTile(page: Page, name: string) {
+  return page.getByRole("region", { name: "Products" }).getByRole("listitem").getByRole("button", { name: new RegExp(escape(name)) }).first();
+}
+
+/** Stock count shown on a POS product tile: "12 in stock", "Low · 2 left" or "Out of stock". */
 async function tileStock(page: Page, name: string) {
-  const tile = page.getByRole("button", { name: new RegExp(escape(name)) }).first();
-  const label = await tile.locator("span", { hasText: /in stock|Out of stock/ }).first().textContent();
-  return label?.includes("Out of stock") ? 0 : Number(label?.match(/(\d+) in stock/)?.[1] ?? NaN);
+  const label = await productTile(page, name).locator("span", { hasText: /in stock|left|Out of stock/ }).first().textContent();
+  if (label?.includes("Out of stock")) return 0;
+  return Number(label?.match(/(\d+) (?:in stock|left)/)?.[1] ?? NaN);
 }
 
 async function searchPos(page: Page, q: string) {
@@ -21,14 +27,14 @@ test.describe("point of sale and payments", () => {
     await page.goto("/app/pos");
     // Any in-stock care product, so repeated runs don't exhaust one item.
     await searchPos(page, "Lensmere Care");
-    const tile = page.getByRole("region", { name: "Products" }).locator("button:not([disabled])", { hasText: "in stock" }).first();
+    const tile = page.getByRole("region", { name: "Products" }).getByRole("listitem").locator("button:not([disabled])", { hasText: "in stock" }).first();
     await expect(tile).toBeVisible();
     const name = ((await tile.locator("span.line-clamp-1").first().textContent()) ?? "").trim();
     await searchPos(page, name);
     const before = await tileStock(page, name);
     expect(before).toBeGreaterThan(0);
 
-    await page.getByRole("button", { name: new RegExp(escape(name)) }).first().click();
+    await productTile(page, name).click();
     const charge = page.getByRole("button", { name: /Complete sale/ });
     await expect(charge).toBeEnabled();
     await charge.click();

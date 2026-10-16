@@ -65,7 +65,8 @@ export async function probeGhlAccess(ctx: Ctx, fetchImpl?: typeof fetch) {
   }
   await run("inventory", "Products and stock (read)", "products.readonly, products/prices.readonly", async () => {
     const res = await api.listInventory({ limit: 1, offset: 0 });
-    return `${res.total ?? res.inventory?.length ?? 0} price/stock row(s)`;
+    const n = Number(res.total);
+    return Number.isFinite(n) && n >= 0 ? `${n} price/stock row(s)` : "Stock list readable";
   });
   await run("orders", "Online-store orders (read)", "payments/orders.readonly", async () => {
     const res = await api.listOrders({ limit: 1, offset: 0 });
@@ -109,15 +110,19 @@ export async function ensureOpticalPipelines(ctx: Ctx, fetchImpl?: typeof fetch)
   const created: string[] = [];
   for (const def of [LEAD_PIPELINE, SALES_PIPELINE]) {
     if (pipelines.some((p) => norm(p.name) === norm(def.name))) continue;
+    let res: Awaited<ReturnType<typeof api.createPipeline>>;
     try {
-      await api.createPipeline({ name: def.name, stages: def.stages.map((name) => ({ name })) });
+      res = await api.createPipeline({ name: def.name, stages: def.stages.map((name) => ({ name })) });
     } catch (error) {
       // The docs list `stages` both as strings and as stage objects; try the other form once.
       if (!(error instanceof GhlRequestError)) throw error;
-      await api.createPipeline({ name: def.name, stages: def.stages });
+      res = await api.createPipeline({ name: def.name, stages: def.stages });
     }
     created.push(def.name);
     pipelines = (await api.listPipelines()).pipelines ?? [];
+    // If the list lags behind the create, use the created pipeline from the response (never create twice).
+    const made = res.pipeline ?? (res.id ? (res as GhlPipeline) : null);
+    if (made?.id && !pipelines.some((p) => p.id === made.id)) pipelines.push({ id: made.id, name: made.name ?? def.name, stages: made.stages ?? [] });
   }
   // Mirror pipelines for the mapping screens.
   for (const p of pipelines) {

@@ -27,7 +27,8 @@ import {
 } from "@/server/integrations/ghl";
 import { ghlSettingsSchema } from "@/server/integrations/ghl/config";
 import { log } from "@/server/log";
-import { requirePermission, type Ctx } from "@/server/services/core";
+import { invalid, requirePermission, type Ctx } from "@/server/services/core";
+import { GhlError } from "@/server/integrations/ghl/errors";
 import * as siteKeys from "@/server/services/public-api";
 import * as settings from "@/server/services/settings";
 import { revalidateWebsiteAfter, type WebsiteTag } from "@/server/website-revalidate";
@@ -198,15 +199,28 @@ function demoResetAllowedHere() {
   return !process.env.VERCEL || process.env.ALLOW_DEMO_RESET === "true";
 }
 
+/** GoHighLevel API errors carry a useful message (scope, validation); show it instead of a generic failure. */
+async function ghlMessages<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (error instanceof GhlError) {
+      log.warn("ghl.setup_action_failed", { status: error.status, message: error.message.slice(0, 300) });
+      throw invalid(error.message);
+    }
+    throw error;
+  }
+}
+
 /** Read-only check of what the stored GoHighLevel credential can access. */
 export async function checkGhlAccessAction() {
-  return runAction((ctx) => probeGhlAccess(ctx));
+  return runAction((ctx) => ghlMessages(() => probeGhlAccess(ctx)));
 }
 
 /** Finds or creates the "Optical — Lead Management" and "Optical — Sales & Orders" pipelines and maps their stages. */
 export async function ensureGhlPipelinesAction() {
   return runAction(async (ctx) => {
-    const res = await ensureOpticalPipelines(ctx);
+    const res = await ghlMessages(() => ensureOpticalPipelines(ctx));
     refresh();
     return res;
   }, "Pipelines mapped");

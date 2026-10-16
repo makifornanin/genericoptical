@@ -1,0 +1,14 @@
+# Keep uploads to Vercel lean and free of secrets: only the app is deployed.
+.env
+.env.*
+!.env.example
+.vercel
+.next
+node_modules
+legacy
+screenshots
+tests
+test-results
+playwright-report
+blob-report
+*.tsbuildinfo

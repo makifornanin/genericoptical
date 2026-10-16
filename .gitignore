@@ -49,3 +49,6 @@ next-env.d.ts
 
 # demo data snapshot for loading into a hosted staging database (never committed)
 /.demo-snapshot/
+
+# local one-off test scripts (never committed)
+/scripts/.tmp-*

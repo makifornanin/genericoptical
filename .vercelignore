@@ -13,3 +13,4 @@ blob-report
 tests
 *.tsbuildinfo
 *.pem
+scripts/.tmp-*

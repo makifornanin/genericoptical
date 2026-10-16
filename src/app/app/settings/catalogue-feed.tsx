@@ -33,7 +33,7 @@ export function CatalogueFeedCard({ initial, baseUrl }: { initial: { enabled: bo
         />
         {enabled ? (
           <div className="flex flex-col gap-1.5">
-            <span className="text-[12px] text-text-3">Feed URLs (set as the website's feed base in global.js)</span>
+            <span className="text-[12px] text-text-3">Feed URLs (set as the website&apos;s feed base in global.js)</span>
             {urls.map((u) => (
               <div key={u} className="flex items-center gap-2">
                 <code className="min-w-0 flex-1 truncate rounded-[8px] bg-surface-2 px-2 py-1.5 font-mono text-[12px]">{u}</code>

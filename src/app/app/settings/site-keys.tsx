@@ -75,6 +75,7 @@ function CreateKeyDialog({ apiUrl }: { apiUrl: string }) {
           <div className="flex flex-col gap-4 text-[13px] text-text-2">
             <CopyRow label="DASHBOARD_SITE_KEY" value={created.key} secret />
             <CopyRow label="DASHBOARD_API_URL" value={apiUrl} />
+            <p className="-mt-2 text-[12px] text-text-3">This dashboard&apos;s address; the website adds /api/public/v1 itself.</p>
             <p>
               Paste both into the <strong>website</strong> project in Vercel (Settings → Environment Variables), mark the key as sensitive, then redeploy the website. Don&apos;t send the key by chat or email.
             </p>

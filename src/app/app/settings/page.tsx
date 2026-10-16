@@ -178,7 +178,7 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
         />
         {keys ? (
           <SiteKeysCard
-            apiUrl={`${env().APP_URL.replace(/\/$/, "")}/api/public/v1`}
+            apiUrl={new URL(env().APP_URL).origin}
             keys={keys.map((k) => ({ ...k, createdAt: k.createdAt.toISOString(), lastUsedAt: k.lastUsedAt?.toISOString() ?? null, revokedAt: k.revokedAt?.toISOString() ?? null }))}
           />
         ) : null}

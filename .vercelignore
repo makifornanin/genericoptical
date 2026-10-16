@@ -1,0 +1,15 @@
+# Never upload local data, secrets or build/test artefacts to Vercel.
+.data
+.env
+.env.*
+!.env.example
+.vercel
+.next
+node_modules
+coverage
+test-results
+playwright-report
+blob-report
+tests
+*.tsbuildinfo
+*.pem

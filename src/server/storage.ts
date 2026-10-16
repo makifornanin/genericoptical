@@ -22,6 +22,10 @@ function root() {
  * For serverless hosting replace with object storage (S3, R2, Vercel Blob) — see docs/DEPLOYMENT.md.
  */
 export async function saveAttachment(businessId: string, file: File) {
+  // Serverless file systems are temporary: a receipt saved there would silently disappear later.
+  if (process.env.VERCEL) {
+    throw invalid("Receipt attachments aren't available on this deployment yet (they need object storage). Save the expense without the file.");
+  }
   if (!ALLOWED.has(file.type)) throw invalid("Attach a PDF, JPG, PNG or WebP file.");
   if (file.size > MAX_BYTES) throw invalid("Attachments can be up to 5 MB.");
   const bytes = Buffer.from(await file.arrayBuffer());

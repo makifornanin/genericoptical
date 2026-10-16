@@ -31,7 +31,8 @@ Both are isolated staging projects in the "maki's projects" team, deployed from 
 
 | Variable | Purpose | Where to get it | Secret | Status |
 |---|---|---|---|---|
-| `DATABASE_URL` | PostgreSQL connection for the app. Use the provider's **pooled** connection string. | Neon project → Connection details → *Pooled connection*. See [PRODUCTION_DATABASE.md](PRODUCTION_DATABASE.md). | Yes | ⛔ **Missing: the main blocker.** Until it's set, `/api/health` reports `database: unreachable` and sign-in can't work. |
+| `DATABASE_URL` | PostgreSQL connection for the app. Use the provider's **pooled** connection string. | Neon project → Connection details → *Pooled connection*. See [PRODUCTION_DATABASE.md](PRODUCTION_DATABASE.md). | Yes | ✅ set (Neon, Singapore) |
+| `DATABASE_URL_UNPOOLED` | Direct connection, used by the build-time migrations and the demo load (`scripts/vercel-db-setup.ts`). | Neon → Connect → direct connection string. | Yes | ✅ set |
 | `APP_SECRET` | Encrypts stored GHL tokens (AES-256-GCM) and signs reset links. Never rotate it casually: stored GHL credentials would have to be re-entered. | Generated. | Yes | ✅ generated and set |
 | `APP_URL` | The dashboard's public origin, used for links, the OAuth redirect, webhook URLs and absolute product image URLs in the public API. | The Vercel URL above, or your custom domain later. | No | ✅ `https://optical-management-dashboard.vercel.app` |
 | `DEMO_MODE` | `true` on staging (demo banner, demo sign-ins on the login page, demo reset). **Must be `false` in production.** | — | No | ✅ `true` |
@@ -59,7 +60,7 @@ Not applicable on Vercel: `UPLOAD_DIR`. Expense-receipt uploads are refused on V
 | Sales pipeline and stages | Where POS sales and orders appear as opportunities. These are CRM records only, never revenue or payments. | Your GHL pipeline. | Dashboard → Settings → Integrations → **Sync settings & mapping**. | No | 🕒 tomorrow |
 | Calendar mapping | Links each GHL calendar to a branch and an appointment type; the website shows the booking widget only where a mapping exists. | Created in GHL. The dashboard reads the calendar list after connecting. | Dashboard → Settings → Integrations → Sync settings & mapping → **Calendars**. | No | 🕒 tomorrow |
 | Staff ↔ GHL users | Assigns appointments and opportunities to the right person. | — | Same screen → **Users**. | No | 🕒 optional |
-| **Website API key** (`DASHBOARD_SITE_KEY`) | Lets the website read this business's published catalogue and send inquiries. Scoped (`site:read`, `catalog:read`, `inquiries:write`), stored only as a hash, revocable. | Created by the dashboard: shown once. | Dashboard → **Settings → Website → Website API keys → New key**. Copy it straight into the website's `DASHBOARD_SITE_KEY` in Vercel. CLI alternative: `npm run site-key -- create --business <slug>` against the target database. | Yes | ⛔ needs the database first |
+| **Website API key** (`DASHBOARD_SITE_KEY`) | Lets the website read this business's published catalogue and send inquiries. Scoped (`site:read`, `catalog:read`, `inquiries:write`), stored only as a hash, revocable. | Created by the dashboard: shown once. | Dashboard → **Settings → Website → Website API keys → New key**. Copy it straight into the website's `DASHBOARD_SITE_KEY` in Vercel. CLI alternative: `npm run site-key -- create --business <slug>` against the target database. | Yes | ✅ "Customer website (staging)" key created in live Settings and set on the website |
 
 **Webhook (only with the marketplace app / OAuth):** register `https://optical-management-dashboard.vercel.app/api/integrations/ghl/webhooks` in the developer portal. Signature handling follows HighLevel's current guide:
 - Requests are verified with **Ed25519 `X-GHL-Signature`**.
@@ -75,7 +76,7 @@ None of these use the `NEXT_PUBLIC_` prefix: all are server-only and never reach
 | Variable | Purpose | Where to get it | Secret | Status |
 |---|---|---|---|---|
 | `DASHBOARD_API_URL` | The dashboard's origin. The site adds `/api/public/v1` itself; the full path also works. **Needed at build time** (the Content-Security-Policy is computed during the build). | The dashboard URL. | No | ✅ `https://optical-management-dashboard.vercel.app` |
-| `DASHBOARD_SITE_KEY` | Server-to-server key for the dashboard's public API. | Dashboard → Settings → Website → Website API keys. | Yes | ⛔ missing: create it once the dashboard has a database, then redeploy or wait 60 s |
+| `DASHBOARD_SITE_KEY` | Server-to-server key for the dashboard's public API. | Dashboard → Settings → Website → Website API keys. | Yes | ✅ set |
 | `REVALIDATE_SECRET` | Protects `POST /api/revalidate`. **Must equal the dashboard's `WEBSITE_REVALIDATE_SECRET`.** | Generated (already shared). | Yes | ✅ set |
 | `SITE_URL` | Canonical URL for metadata, sitemap and robots. | The website URL or a custom domain. | No | ✅ `https://optical-customer-website.vercel.app` |
 | `SITE_NOINDEX` | `1` keeps search engines out (also automatic while the business is a demo). Remove at launch. | — | No | ✅ `1` |

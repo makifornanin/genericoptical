@@ -6,7 +6,7 @@
 |---|---|---|---|
 | Development (your PC) | Embedded PostgreSQL 18 on `localhost:54329`, files in `.data/postgres` (`npm run db:start`) | Demo business "Lensmere Optical" | Never use this as a hosted database. It isn't backed up, and it lives on one PC. |
 | Automated tests | Throwaway PostgreSQL on `localhost:54339`, created and deleted by each `vitest` run | Fixtures per test | Fully isolated. |
-| **Staging (Vercel)** | **None yet. This is the blocker.** | Demo data only | Needs a hosted PostgreSQL 15+ (Neon recommended). |
+| **Staging (Vercel)** | **Neon** project `frosty-rain-06210397`, branch `production`, AWS Singapore (`ap-southeast-1`), database `neondb`. Connected 2026-10-16 through `DATABASE_URL` / `DATABASE_URL_UNPOOLED` on `optical-management-dashboard`. | Demo data only | Migrated and loaded during the Vercel build (below). |
 | Production | Not created. Don't create it until staging has been reviewed. | The real business only | A separate database from staging. |
 
 Keep these four separate. Never point staging or tests at the production database, and never copy production data into staging.
@@ -30,7 +30,26 @@ Adding Neon requires accepting Neon's terms, so you have to do it yourself. Pick
 
 Don't connect the database to the website project: the website never talks to PostgreSQL.
 
-## Preparing the staging database (from your PC, in `generic eye/`)
+## How staging was prepared (and how to repeat it)
+
+Vercel keeps Production variables **sensitive**: `vercel env pull` returns empty values, so the database can't be reached from a developer machine. The dashboard's `vercel-build` script therefore runs `scripts/vercel-db-setup.ts` before `next build`, on every deploy:
+
+1. It logs the target (region and database name only, never the connection string) and what it finds.
+2. It applies pending migrations, using `DATABASE_URL_UNPOOLED`, or `DATABASE_URL` if that is missing.
+3. It loads the demo **only if** `DEMO_MODE=true`, the upload contains `.demo-snapshot/demo.json.gz`, **and** the database has no businesses. Otherwise it changes nothing.
+
+To (re)create the snapshot locally:
+- run `npm run db:reset-demo`, then `npm run db:snapshot`;
+- it exports the demo only: no sessions, sign-in attempts, reset or OAuth tokens, API keys or rate counters;
+- it is git-ignored and was deleted after the first load.
+
+First run on 2026-10-16:
+- Neon was empty (0 tables);
+- 11 migrations were applied;
+- 33,990 demo rows were loaded;
+- the app's integrity check passed on a rehearsal copy.
+
+### Manual alternative (from your PC, in `generic eye/`)
 
 Run these with the **direct** (non-pooled) connection string in the command's environment. Don't save it in a file in the repository.
 

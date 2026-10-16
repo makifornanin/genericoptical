@@ -20,7 +20,7 @@ Nothing has been tested against a real GoHighLevel account.
 | Vercel project | `optical-management-dashboard` | `optical-customer-website` |
 | Staging URL | https://optical-management-dashboard.vercel.app | https://optical-customer-website.vercel.app |
 | Region | Singapore (`sin1`) | Singapore (`sin1`) |
-| Database | **None yet (blocker)**. Local dev: embedded PostgreSQL on `:54329`. | None by design: it only calls the dashboard API. |
+| Database | **Neon**, Singapore (`ap-southeast-1`), project `frosty-rain-06210397` (connected 2026-10-16). Local dev: embedded PostgreSQL on `:54329`. | None by design: it only calls the dashboard API. |
 
 The website never connects to PostgreSQL. It calls the dashboard's public API from its server with a scoped site key ([PUBLIC_API.md](PUBLIC_API.md)). Browsers never call the dashboard, and the dashboard sends no CORS headers.
 
@@ -28,10 +28,12 @@ The website never connects to PostgreSQL. It calls the dashboard's public API fr
 
 | Item | Status | Evidence |
 |---|---|---|
-| Dashboard on Vercel | **Deployed and tested** (without a database) | `/login` 200, `/app/*` redirects to sign-in, security headers present, `/api/public/v1/site` without a key → 401, `/api/health` → 503 `database: unreachable`. |
+| Dashboard on Vercel (before Neon) | Deployed and tested without a database | `/login` 200, `/app/*` redirects to sign-in, security headers present, `/api/public/v1/site` without a key → 401, `/api/health` → 503 `database: unreachable`. |
 | Website on Vercel | **Deployed and tested** (setup state) | 15 routes return 200. Each page shows "Setup needed" because there is no site key yet. `noindex` and `robots: Disallow /`, CSP present, no secrets in the HTML, inquiry → 503 "please call us", revalidate with a wrong secret → 401. |
-| Live catalogue on the deployed website | **Requires credentials** | Needs `DATABASE_URL` on the dashboard, migrations plus the demo seed, and then a site key on the website ([PRODUCTION_DATABASE.md](PRODUCTION_DATABASE.md)). |
-| Dashboard sign-in on Vercel | **Requires credentials** | Needs `DATABASE_URL`. |
+| **Dashboard on Vercel, with Neon** | **Deployed and tested** | `/api/health` → `{"status":"ok","database":"ok"}`. In a real browser, the demo owner signed in. Dashboard, POS (107 product tiles), Customers and Inventory loaded demo data, and it was still there after reloading. No page errors. |
+| **Website on Vercel, live catalogue** | **Deployed and tested** | Real products from Neon on every page (no "Setup needed"): prices, variants, per-branch availability, images served by the dashboard. No secrets in the HTML. |
+| **Website → dashboard on Vercel** | **Deployed and tested** | The live contact form created a lead, visible in the live dashboard with source *Website*. The site key was created through the live Settings screen. |
+| **Login screen** | **Deployed and tested** | Text-only "Optical Platform" wordmark; no eyeglasses icon or arrows. |
 
 ## 3. Customer website
 
@@ -97,8 +99,8 @@ All pages are built: Home, Eyewear (catalogue), Product details, Services, Book,
 
 ## 8. Needed tomorrow (in this order)
 
-1. **Database (blocker):** create Neon in Singapore and connect it to `optical-management-dashboard` ([PRODUCTION_DATABASE.md](PRODUCTION_DATABASE.md)). Run `db:migrate` and the demo `db:seed` with the direct connection string, redeploy the dashboard, and check `/api/health`.
-2. **Website key:** in the dashboard, Settings → Website → Website API keys → New key. Put it in the website's `DASHBOARD_SITE_KEY` and redeploy. Check that the catalogue appears.
+1. ~~Database~~: done on 2026-10-16 (Neon, migrated and seeded through the build).
+2. ~~Website key~~: done (created in live Settings, set on the website).
 3. **Decide the demo exposure** before connecting a real GHL sub-account. Staging lists the demo sign-ins: either set `DEMO_MODE=false` and change the passwords, or use a GHL test sub-account.
 4. **GHL:** create the Private Integration token, then connect it in Settings → Integrations. Then:
    - choose the pipeline and stages;
@@ -113,7 +115,7 @@ All pages are built: Home, Eyewear (catalogue), Product details, Services, Book,
 
 ## 9. Known limits and blockers
 
-- **Blocker:** no hosted database. Adding Neon needs your acceptance of Neon's terms.
+- **Database setup runs in the Vercel build** (sensitive variables can't be pulled locally). See [PRODUCTION_DATABASE.md](PRODUCTION_DATABASE.md).
 - **Hobby plan:** the GHL worker cron runs once a day. Actions still sync immediately; Pro allows every 5 minutes.
 - **Website rate limit:** the website's own first-line limit is per server instance. The durable limits are the dashboard's (PostgreSQL).
 - **Legal text** on the website is still a draft and needs legal review.

@@ -46,3 +46,6 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /blob-report/
+
+# demo data snapshot for loading into a hosted staging database (never committed)
+/.demo-snapshot/

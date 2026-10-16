@@ -17,7 +17,9 @@
     "site-key": "tsx scripts/site-key.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "vercel-build": "tsx scripts/vercel-db-setup.ts && next build",
+    "db:snapshot": "tsx scripts/demo-snapshot.ts .demo-snapshot/demo.json.gz"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

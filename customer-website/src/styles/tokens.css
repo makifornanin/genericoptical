@@ -1,0 +1,57 @@
+/*
+ * Design tokens. One typeface, a neutral palette with the business's colours for dark surfaces and
+ * one accent, flat light-stone product tiles (the same tone as the product renders' backdrop), and
+ * hairline rules. See docs/DESIGN_SYSTEM.md.
+ */
+:root {
+  /* Colour */
+  --ink: #121212;
+  --ink-2: #3b3b38;
+  --muted: #6b6b66;
+  --paper: #ffffff;
+  --stone: #f0f0ed; /* = render backdrop rgb(240, 240, 237) */
+  --stone-2: #e6e6e1;
+  --line: #121212;
+  --line-soft: #dcdcd6;
+  --brand: var(--theme-brand, #1f2b22);
+  --brand-ink: var(--theme-brand-ink, #ffffff);
+  --accent: var(--theme-accent, #b5e14a);
+  --accent-ink: var(--theme-accent-ink, #121212);
+  --pos: #2d6a3e;
+  --warn: #8a5a0b;
+  --neg: #a1301f;
+  --focus: #1f5fd1;
+
+  /* Type */
+  --font: var(--font-host), "Helvetica Neue", Arial, sans-serif;
+  --t-xs: 12px;
+  --t-s: 13.5px;
+  --t-b: 16px;
+  --t-m: 18px;
+  --t-l: 22px;
+  --t-xl: clamp(24px, 2.4vw, 30px);
+  --t-2xl: clamp(30px, 3.4vw, 44px);
+  --t-3xl: clamp(36px, 4.4vw, 58px);
+  --tracking-tight: -0.022em;
+
+  /* Space & layout */
+  --gutter: clamp(16px, 2.2vw, 32px);
+  --section: clamp(48px, 5.6vw, 88px);
+  --max: 1520px;
+  --header-h: 64px;
+  --topbar-h: 36px;
+  --radius-pill: 999px;
+  --radius: 4px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --fast: 160ms;
+  --slow: 280ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fast: 0ms;
+    --slow: 0ms;
+  }
+}

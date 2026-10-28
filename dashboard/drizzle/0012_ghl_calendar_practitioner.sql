@@ -1,0 +1,1 @@
+ALTER TABLE "ghl_calendars" ADD COLUMN "practitioner_membership_id" uuid;

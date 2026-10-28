@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book an appointment · Lensmere Optical</title>
+  <meta name="description" content="Book an eye examination or contact lens fitting online.">
+  <!-- Demo business (fictional): the original sets robots noindex,nofollow when the business is a demo.
+       Remove this line for a real business. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:site_name" content="Lensmere Optical">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#18191b">
+  <link rel="icon" href="../assets/favicon.ico">
+  <!-- Same font families as the original (next/font/google): Inter Tight (body, variable weight)
+       and Instrument Sans 500/600/700 (display headings). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&amp;family=Instrument+Sans:wght@500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- DEMO BANNER — shown only because Lensmere is a demo business (biz.isDemo). Delete for a real business.
+       GHL: a native Section + Text element (or drop it). -->
+  <div class="demo-banner">
+    <strong>Demo website.</strong> Lensmere Optical is a fictional business — names, prices and branches are sample data.
+    <!-- Original links to /login (staff dashboard), which is not part of the GHL site. -->
+    <a href="#">Open the staff demo</a>
+  </div>
+
+  <!-- HEADER — sticky, translucent canvas background with blur. Original: site-header.tsx.
+       GHL: native Header/Navigation menu element. Business name, tagline and logo come from Settings
+       (DYNAMIC: biz.name, biz.tagline, biz.logoUrl → the round initial mark is used when there is no logo). -->
+  <header class="site-header">
+    <div class="site-header__bar">
+      <a class="brand-link" href="index.html" aria-label="Lensmere Optical home">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-text">
+          <span class="brand-name truncate">Lensmere Optical</span>
+          <span class="brand-tagline truncate">Eye care &amp; eyewear</span>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <a href="products.html">Eyewear</a>
+        <a href="services.html">Services</a>
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <a class="btn btn--brand header-cta" href="booking.html">Book an exam</a>
+      <button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="site-mobile-nav" aria-label="Open menu">
+        <svg class="icon icon-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+        <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <!-- Mobile menu (< 768px): toggled by site.js. GHL's native nav element provides its own hamburger menu. -->
+    <nav id="site-mobile-nav" class="mobile-nav" aria-label="Main" hidden>
+      <ul>
+        <li><a href="products.html">Eyewear</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <a class="btn btn--brand btn--lg" href="booking.html">Book an exam</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- BOOKING INTRO — static copy. GHL: native Section (Text, Headline, Paragraph). -->
+    <section class="booking-intro">
+      <div class="container booking-intro__inner">
+        <p class="eyebrow">Online booking</p>
+        <h1>Book an appointment.</h1>
+        <p class="booking-intro__body">Choose a branch, a service and a time. It takes about a minute.</p>
+      </div>
+    </section>
+
+    <div class="container booking-layout">
+      <div>
+        <!-- BOOKING PICKER — original: book/booking-form.tsx (client component).
+             DYNAMIC + BACKEND: branches and services come from the database; the 21-day date strip disables days the
+             branch is closed; time slots are fetched live from publicSlotsAction → availableSlots() (30-minute steps
+             inside opening hours, at least 30 minutes from now, only when a practitioner is free for exams/fittings);
+             "Request appointment" calls bookAppointmentAction → requestPublicAppointment(), which creates the
+             appointment + lead. Deep links: ?branch=<id> and ?type=<id> preselect a choice.
+             GHL: replace the WHOLE card with a GHL calendar widget (Calendars → embed) — one calendar per
+             branch × service (see ghl-migration-guide.md §4) or a GHL "service menu" calendar. This markup is only a
+             static visual mock of the selected state shown in screenshots/booking-slots-selected-*.png. -->
+        <p class="mock-label" role="note"><span><strong>Static mock of the date/time picker.</strong> Selections below are illustrative only — no availability is loaded and nothing is booked. In GHL, replace this card with a GHL calendar booking widget.</span></p>
+        <form class="booking-card" action="#" method="post" novalidate data-static-form aria-label="Book an appointment (static mock)">
+          <section class="step step--done" aria-labelledby="step1">
+            <h2 id="step1"><span class="step__num">1</span>Choose a branch</h2>
+            <div class="choice-grid choice-grid--3" data-choice-group>
+              <button type="button" class="choice" aria-pressed="true">
+                <span class="choice__name">Makati</span>
+                <span class="choice__sub">2F Linden Arcade, 118 Lumen Street, Makati City</span>
+              </button>
+              <button type="button" class="choice" aria-pressed="false">
+                <span class="choice__name">Quezon City</span>
+                <span class="choice__sub">Unit 4, 52 Verde Avenue, Quezon City</span>
+              </button>
+              <button type="button" class="choice" aria-pressed="false">
+                <span class="choice__name">Pasig</span>
+                <span class="choice__sub">G/F Alder Place, 9 Alder Road, Pasig City</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="step step--done" aria-labelledby="step2">
+            <h2 id="step2"><span class="step__num">2</span>Choose a service</h2>
+            <div class="choice-grid choice-grid--2" data-choice-group>
+              <button type="button" class="choice" aria-pressed="true">
+                <span class="choice__row">
+                  <span class="choice__name">Comprehensive eye exam</span>
+                  <span class="choice__price">₱500.00</span>
+                </span>
+                <span class="choice__meta"><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 45 min</span>
+              </button>
+              <button type="button" class="choice" aria-pressed="false">
+                <span class="choice__row">
+                  <span class="choice__name">Contact lens fitting</span>
+                  <span class="choice__price">₱800.00</span>
+                </span>
+                <span class="choice__meta"><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 30 min</span>
+              </button>
+              <button type="button" class="choice" aria-pressed="false">
+                <span class="choice__row">
+                  <span class="choice__name">Frame &amp; lens consultation</span>
+                </span>
+                <span class="choice__meta"><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 30 min</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="step step--done" aria-labelledby="step3">
+            <h2 id="step3"><span class="step__num">3</span>Pick a date and time</h2>
+            <!-- DYNAMIC: next 21 days from today in the business time zone; closed days are disabled. -->
+            <div class="date-strip" role="radiogroup" aria-label="Date" data-choice-group data-choice-attr="aria-checked">
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Thursday, October 15">
+                <span class="date-btn__dow">Thu</span>
+                <span class="date-btn__num">15</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="true" aria-label="Friday, October 16">
+                <span class="date-btn__dow">Fri</span>
+                <span class="date-btn__num">16</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Saturday, October 17">
+                <span class="date-btn__dow">Sat</span>
+                <span class="date-btn__num">17</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Sunday, October 18">
+                <span class="date-btn__dow">Sun</span>
+                <span class="date-btn__num">18</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Monday, October 19">
+                <span class="date-btn__dow">Mon</span>
+                <span class="date-btn__num">19</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Tuesday, October 20">
+                <span class="date-btn__dow">Tue</span>
+                <span class="date-btn__num">20</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Wednesday, October 21">
+                <span class="date-btn__dow">Wed</span>
+                <span class="date-btn__num">21</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Thursday, October 22">
+                <span class="date-btn__dow">Thu</span>
+                <span class="date-btn__num">22</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Friday, October 23">
+                <span class="date-btn__dow">Fri</span>
+                <span class="date-btn__num">23</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Saturday, October 24">
+                <span class="date-btn__dow">Sat</span>
+                <span class="date-btn__num">24</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Sunday, October 25">
+                <span class="date-btn__dow">Sun</span>
+                <span class="date-btn__num">25</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Monday, October 26">
+                <span class="date-btn__dow">Mon</span>
+                <span class="date-btn__num">26</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Tuesday, October 27">
+                <span class="date-btn__dow">Tue</span>
+                <span class="date-btn__num">27</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Wednesday, October 28">
+                <span class="date-btn__dow">Wed</span>
+                <span class="date-btn__num">28</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Thursday, October 29">
+                <span class="date-btn__dow">Thu</span>
+                <span class="date-btn__num">29</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Friday, October 30">
+                <span class="date-btn__dow">Fri</span>
+                <span class="date-btn__num">30</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Saturday, October 31">
+                <span class="date-btn__dow">Sat</span>
+                <span class="date-btn__num">31</span>
+                <span class="date-btn__month">Oct</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Sunday, November 1">
+                <span class="date-btn__dow">Sun</span>
+                <span class="date-btn__num">1</span>
+                <span class="date-btn__month">Nov</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Monday, November 2">
+                <span class="date-btn__dow">Mon</span>
+                <span class="date-btn__num">2</span>
+                <span class="date-btn__month">Nov</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Tuesday, November 3">
+                <span class="date-btn__dow">Tue</span>
+                <span class="date-btn__num">3</span>
+                <span class="date-btn__month">Nov</span>
+              </button>
+              <button type="button" class="date-btn" role="radio" aria-checked="false" aria-label="Wednesday, November 4">
+                <span class="date-btn__dow">Wed</span>
+                <span class="date-btn__num">4</span>
+                <span class="date-btn__month">Nov</span>
+              </button>
+            </div>
+            <!-- DYNAMIC: open start times for the chosen branch/service/date (live). Other states in the original:
+                 "Select a day to see open times." · "Checking availability…" · "No open times that day — try another
+                 date or call the branch." -->
+            <div class="slots" aria-live="polite">
+              <div class="slot-grid" role="radiogroup" aria-label="Time" data-choice-group data-choice-attr="aria-checked">
+                <button type="button" class="slot-btn" role="radio" aria-checked="false">12:30 pm</button>
+                <button type="button" class="slot-btn" role="radio" aria-checked="true">1:00 pm</button>
+                <button type="button" class="slot-btn" role="radio" aria-checked="false">1:30 pm</button>
+                <button type="button" class="slot-btn" role="radio" aria-checked="false">2:00 pm</button>
+                <button type="button" class="slot-btn" role="radio" aria-checked="false">2:30 pm</button>
+                <button type="button" class="slot-btn" role="radio" aria-checked="false">4:30 pm</button>
+                <button type="button" class="slot-btn" role="radio" aria-checked="false">5:00 pm</button>
+                <button type="button" class="slot-btn" role="radio" aria-checked="false">5:30 pm</button>
+                <button type="button" class="slot-btn" role="radio" aria-checked="false">6:00 pm</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="step" aria-labelledby="step4">
+            <h2 id="step4"><span class="step__num">4</span>Your details</h2>
+            <div class="fields">
+              <div class="field">
+                <label for="bk-name">Full name<span class="req"> *</span></label>
+                <input class="control" id="bk-name" name="fullName" autocomplete="name" required>
+              </div>
+              <div class="form-row form-row--2">
+                <div class="field">
+                  <label for="bk-phone">Mobile number<span class="req"> *</span></label>
+                  <input class="control" id="bk-phone" name="phone" type="tel" autocomplete="tel" required>
+                </div>
+                <div class="field">
+                  <label for="bk-email">Email</label>
+                  <input class="control" id="bk-email" name="email" type="email" autocomplete="email">
+                </div>
+              </div>
+              <div class="field">
+                <label for="bk-message">Anything we should know?</label>
+                <textarea class="control" id="bk-message" name="message" rows="3" placeholder="e.g. current glasses, symptoms, contact lens history"></textarea>
+              </div>
+              <div class="honeypot" aria-hidden="true">
+                <label>Website <input name="website" tabindex="-1" autocomplete="off"></label>
+              </div>
+              <div class="checks checks--flush">
+                <label class="check"><input type="checkbox" name="smsConsent"> <span>Text me appointment reminders</span></label>
+                <label class="check"><input type="checkbox" name="marketingConsent"> <span>Send me occasional offers and eye-care reminders</span></label>
+              </div>
+            </div>
+          </section>
+
+          <p class="mock-label" data-static-note hidden role="status"><span><strong>Static mock.</strong> Nothing was booked. The original shows “You're booked in.” with the service, branch, date and time after a successful request.</span></p>
+          <div class="booking-foot">
+            <p class="booking-foot__summary"><strong>Comprehensive eye exam</strong> · Makati · Friday, October 16, 1:00 pm</p>
+            <button type="submit" class="btn btn--brand btn--lg">Request appointment</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ASIDE — "How it works" is static copy; DYNAMIC: business opening hours, time zone and phone.
+           GHL: native Text elements next to the calendar widget. -->
+      <aside class="booking-aside">
+        <div>
+          <p class="eyebrow">How it works</p>
+          <ol>
+            <li>1. Request a time that suits you — slots reflect real availability.</li>
+            <li>2. We hold it straight away and confirm by phone or email.</li>
+            <li>3. Bring your current glasses or contact lenses, and any old prescriptions.</li>
+          </ol>
+        </div>
+        <div>
+          <p class="eyebrow">Opening hours</p>
+          <ul class="booking-aside__hours">
+            <li class="hours-row"><span>Mon – Sat</span><span class="hours-row__time">10am – 7pm</span></li>
+            <li class="hours-row"><span>Sun</span><span class="hours-row__time">11am – 5pm</span></li>
+          </ul>
+          <p class="booking-aside__note">Times shown in Asia/Manila time. Some branches keep different hours.</p>
+        </div>
+        <div>
+          <p class="eyebrow">Prefer to call?</p>
+          <a class="booking-aside__phone" href="tel:+63280000100">+63 2 8000 0100</a>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- FOOTER — brand-coloured. Original: SiteFrame in layout.tsx.
+       DYNAMIC: business name/tagline/phone/email/address (Settings) and the first 3 active branches with their
+       opening hours (branches table; branch hours fall back to the business hours).
+       GHL: native Footer section with Text/Button elements; branch hours are typed in by hand (update them
+       whenever hours change — GHL does not read our branch table). -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-name">Lensmere Optical</p>
+          <p class="footer-tagline">Eye care &amp; eyewear</p>
+          <div class="footer-contact">
+            <p><a href="tel:+63280000100">+63 2 8000 0100</a></p>
+            <p><a href="mailto:hello@lensmere.example">hello@lensmere.example</a></p>
+            <p>2F Linden Arcade, 118 Lumen Street, Makati City</p>
+          </div>
+          <a class="footer-cta" href="booking.html">Book an eye exam <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+        </div>
+        <div class="footer-branches">
+          <div>
+            <p class="eyebrow eyebrow--inherit">Makati</p>
+            <p class="footer-branch__address">2F Linden Arcade, 118 Lumen Street<br>Makati City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Quezon City</p>
+            <p class="footer-branch__address">Unit 4, 52 Verde Avenue<br>Quezon City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Pasig</p>
+            <p class="footer-branch__address">G/F Alder Place, 9 Alder Road<br>Pasig City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="products.html">Eyewear</a>
+          <a href="services.html">Services</a>
+          <a href="about.html">About</a>
+          <a href="faq.html">FAQ</a>
+          <a href="contact.html">Contact</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
+        <!-- DYNAMIC: year (new Date().getFullYear()) and biz.legalName. "Staff sign in" links to the Next.js
+             dashboard (/login) — not part of the GHL site; remove or point it at the app URL. -->
+        <p class="footer-copy">© 2026 Lensmere Optical Co. (demo). <a href="#">Staff sign in</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+ALTER TABLE "ghl_opportunities" ADD COLUMN "owner_lead_id" uuid;--> statement-breakpoint
+CREATE UNIQUE INDEX "ghl_opportunities_owner_lead_key" ON "ghl_opportunities" USING btree ("business_id","owner_lead_id") WHERE "ghl_opportunities"."owner_lead_id" is not null;

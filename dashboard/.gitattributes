@@ -1,0 +1,7 @@
+# Keep line endings consistent (LF) regardless of the editor or OS.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.webp binary
+*.woff2 binary

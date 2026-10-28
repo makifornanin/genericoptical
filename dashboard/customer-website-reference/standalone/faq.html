@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frequently asked questions · Lensmere Optical</title>
+  <meta name="description" content="Comprehensive eye examinations, prescription eyewear and contact lens fittings across three branches — with optometrists who take the time to explain your options.">
+  <!-- Demo business (fictional): the original sets robots noindex,nofollow when the business is a demo.
+       Remove this line for a real business. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:site_name" content="Lensmere Optical">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#18191b">
+  <link rel="icon" href="../assets/favicon.ico">
+  <!-- Same font families as the original (next/font/google): Inter Tight (body, variable weight)
+       and Instrument Sans 500/600/700 (display headings). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&amp;family=Instrument+Sans:wght@500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- DEMO BANNER — shown only because Lensmere is a demo business (biz.isDemo). Delete for a real business.
+       GHL: a native Section + Text element (or drop it). -->
+  <div class="demo-banner">
+    <strong>Demo website.</strong> Lensmere Optical is a fictional business — names, prices and branches are sample data.
+    <!-- Original links to /login (staff dashboard), which is not part of the GHL site. -->
+    <a href="#">Open the staff demo</a>
+  </div>
+
+  <!-- HEADER — sticky, translucent canvas background with blur. Original: site-header.tsx.
+       GHL: native Header/Navigation menu element. Business name, tagline and logo come from Settings
+       (DYNAMIC: biz.name, biz.tagline, biz.logoUrl → the round initial mark is used when there is no logo). -->
+  <header class="site-header">
+    <div class="site-header__bar">
+      <a class="brand-link" href="index.html" aria-label="Lensmere Optical home">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-text">
+          <span class="brand-name truncate">Lensmere Optical</span>
+          <span class="brand-tagline truncate">Eye care &amp; eyewear</span>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <a href="products.html">Eyewear</a>
+        <a href="services.html">Services</a>
+        <a href="about.html">About</a>
+        <a href="faq.html" aria-current="page">FAQ</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <a class="btn btn--brand header-cta" href="booking.html">Book an exam</a>
+      <button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="site-mobile-nav" aria-label="Open menu">
+        <svg class="icon icon-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+        <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <!-- Mobile menu (< 768px): toggled by site.js. GHL's native nav element provides its own hamburger menu. -->
+    <nav id="site-mobile-nav" class="mobile-nav" aria-label="Main" hidden>
+      <ul>
+        <li><a href="products.html">Eyewear</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="faq.html" aria-current="page">FAQ</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <a class="btn btn--brand btn--lg" href="booking.html">Book an exam</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- PAGE INTRO — static copy (hard-coded in the page file). Original: PageIntro in site-ui.tsx.
+         GHL: native Section with Text (eyebrow), Headline (H1) and Paragraph elements. -->
+    <section class="page-intro">
+      <div class="container page-intro__inner">
+        <p class="eyebrow">FAQ</p>
+        <h1>Questions, answered.</h1>
+      </div>
+    </section>
+
+    <div class="container faq-layout">
+      <div>
+        <!-- FAQ LIST — DYNAMIC: websiteContent.faqs (Settings → Website); the first item starts open.
+             Native <details>/<summary> accordions — no JS. The original also outputs FAQPage JSON-LD (below).
+             GHL: native FAQ element, or paste this block into a custom-code element. -->
+        <div class="faq-list">
+          <details open>
+            <summary>Do I need an appointment for an eye exam? <span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-list__answer">Walk-ins are welcome when an optometrist is free, but booking guarantees your slot. Comprehensive exams take about 45 minutes.</p>
+          </details>
+          <details>
+            <summary>How long do prescription glasses take? <span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-list__answer">Most single-vision orders are ready in 3–5 days. Progressive and specialty lenses take 5–7 days because they're made to measure at our partner laboratory.</p>
+          </details>
+          <details>
+            <summary>Can I bring a prescription from another clinic? <span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-list__answer">Yes. Bring your written prescription (ideally less than a year old) and we'll fit lenses to it. We may recommend a quick check if it's older.</p>
+          </details>
+          <details>
+            <summary>Which payment methods do you accept? <span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-list__answer">Cash, credit and debit cards, bank transfer, GCash and Maya. Orders can be reserved with a deposit and settled at pickup.</p>
+          </details>
+          <details>
+            <summary>Do you fit contact lenses for first-time wearers? <span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-list__answer">Yes. A contact lens fitting includes measurements, trial lenses and a lesson on safe handling and care.</p>
+          </details>
+          <details>
+            <summary>Is there a warranty on frames? <span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-list__answer">Frames carry a 6-month warranty against manufacturing defects, and adjustments are always free.</p>
+          </details>
+        </div>
+        <!-- Structured data (SEO): FAQPage schema generated from the same FAQ list. GHL: paste into the page's
+             "Tracking code / Head" custom code. Keep it in sync with the visible FAQs. -->
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do I need an appointment for an eye exam?","acceptedAnswer":{"@type":"Answer","text":"Walk-ins are welcome when an optometrist is free, but booking guarantees your slot. Comprehensive exams take about 45 minutes."}},{"@type":"Question","name":"How long do prescription glasses take?","acceptedAnswer":{"@type":"Answer","text":"Most single-vision orders are ready in 3–5 days. Progressive and specialty lenses take 5–7 days because they're made to measure at our partner laboratory."}},{"@type":"Question","name":"Can I bring a prescription from another clinic?","acceptedAnswer":{"@type":"Answer","text":"Yes. Bring your written prescription (ideally less than a year old) and we'll fit lenses to it. We may recommend a quick check if it's older."}},{"@type":"Question","name":"Which payment methods do you accept?","acceptedAnswer":{"@type":"Answer","text":"Cash, credit and debit cards, bank transfer, GCash and Maya. Orders can be reserved with a deposit and settled at pickup."}},{"@type":"Question","name":"Do you fit contact lenses for first-time wearers?","acceptedAnswer":{"@type":"Answer","text":"Yes. A contact lens fitting includes measurements, trial lenses and a lesson on safe handling and care."}},{"@type":"Question","name":"Is there a warranty on frames?","acceptedAnswer":{"@type":"Answer","text":"Frames carry a 6-month warranty against manufacturing defects, and adjustments are always free."}}]}</script>
+      </div>
+      <!-- STILL HAVE A QUESTION? — static. GHL: native card (Text + Button → contact page). -->
+      <aside class="aside-card">
+        <p class="aside-card__title">Still have a question?</p>
+        <p class="aside-card__body">Send us a message and we'll get back to you, usually within one business day.</p>
+        <a class="btn btn--brand" href="contact.html">Contact us</a>
+      </aside>
+    </div>
+  </main>
+
+  <!-- FOOTER — brand-coloured. Original: SiteFrame in layout.tsx.
+       DYNAMIC: business name/tagline/phone/email/address (Settings) and the first 3 active branches with their
+       opening hours (branches table; branch hours fall back to the business hours).
+       GHL: native Footer section with Text/Button elements; branch hours are typed in by hand (update them
+       whenever hours change — GHL does not read our branch table). -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-name">Lensmere Optical</p>
+          <p class="footer-tagline">Eye care &amp; eyewear</p>
+          <div class="footer-contact">
+            <p><a href="tel:+63280000100">+63 2 8000 0100</a></p>
+            <p><a href="mailto:hello@lensmere.example">hello@lensmere.example</a></p>
+            <p>2F Linden Arcade, 118 Lumen Street, Makati City</p>
+          </div>
+          <a class="footer-cta" href="booking.html">Book an eye exam <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+        </div>
+        <div class="footer-branches">
+          <div>
+            <p class="eyebrow eyebrow--inherit">Makati</p>
+            <p class="footer-branch__address">2F Linden Arcade, 118 Lumen Street<br>Makati City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Quezon City</p>
+            <p class="footer-branch__address">Unit 4, 52 Verde Avenue<br>Quezon City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Pasig</p>
+            <p class="footer-branch__address">G/F Alder Place, 9 Alder Road<br>Pasig City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="products.html">Eyewear</a>
+          <a href="services.html">Services</a>
+          <a href="about.html">About</a>
+          <a href="faq.html">FAQ</a>
+          <a href="contact.html">Contact</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
+        <!-- DYNAMIC: year (new Date().getFullYear()) and biz.legalName. "Staff sign in" links to the Next.js
+             dashboard (/login) — not part of the GHL site; remove or point it at the app URL. -->
+        <p class="footer-copy">© 2026 Lensmere Optical Co. (demo). <a href="#">Staff sign in</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>

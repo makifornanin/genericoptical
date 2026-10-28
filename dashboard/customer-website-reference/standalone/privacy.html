@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy notice · Lensmere Optical</title>
+  <meta name="description" content="Comprehensive eye examinations, prescription eyewear and contact lens fittings across three branches — with optometrists who take the time to explain your options.">
+  <!-- Demo business (fictional): the original sets robots noindex,nofollow when the business is a demo.
+       Remove this line for a real business. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:site_name" content="Lensmere Optical">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#18191b">
+  <link rel="icon" href="../assets/favicon.ico">
+  <!-- Same font families as the original (next/font/google): Inter Tight (body, variable weight)
+       and Instrument Sans 500/600/700 (display headings). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&amp;family=Instrument+Sans:wght@500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- DEMO BANNER — shown only because Lensmere is a demo business (biz.isDemo). Delete for a real business.
+       GHL: a native Section + Text element (or drop it). -->
+  <div class="demo-banner">
+    <strong>Demo website.</strong> Lensmere Optical is a fictional business — names, prices and branches are sample data.
+    <!-- Original links to /login (staff dashboard), which is not part of the GHL site. -->
+    <a href="#">Open the staff demo</a>
+  </div>
+
+  <!-- HEADER — sticky, translucent canvas background with blur. Original: site-header.tsx.
+       GHL: native Header/Navigation menu element. Business name, tagline and logo come from Settings
+       (DYNAMIC: biz.name, biz.tagline, biz.logoUrl → the round initial mark is used when there is no logo). -->
+  <header class="site-header">
+    <div class="site-header__bar">
+      <a class="brand-link" href="index.html" aria-label="Lensmere Optical home">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-text">
+          <span class="brand-name truncate">Lensmere Optical</span>
+          <span class="brand-tagline truncate">Eye care &amp; eyewear</span>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <a href="products.html">Eyewear</a>
+        <a href="services.html">Services</a>
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <a class="btn btn--brand header-cta" href="booking.html">Book an exam</a>
+      <button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="site-mobile-nav" aria-label="Open menu">
+        <svg class="icon icon-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+        <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <!-- Mobile menu (< 768px): toggled by site.js. GHL's native nav element provides its own hamburger menu. -->
+    <nav id="site-mobile-nav" class="mobile-nav" aria-label="Main" hidden>
+      <ul>
+        <li><a href="products.html">Eyewear</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <a class="btn btn--brand btn--lg" href="booking.html">Book an exam</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- LEGAL PAGE — original: legal.tsx (LegalPage) + privacy/page.tsx. Plain-language starting point that must be
+         reviewed for the business's jurisdiction (e.g. the Philippine Data Privacy Act of 2012) before going live.
+         DYNAMIC: legal name (biz.legalName) and the privacy contact (websiteContent.privacyContactEmail, else biz.email).
+         Layout: sticky "On this page" list (desktop only) + numbered sections.
+         GHL: native Section with Headline/Text elements (GHL has no sticky TOC element — use the custom HTML below or
+         omit the TOC). -->
+    <div class="container legal">
+      <div class="legal__grid">
+        <nav class="legal__toc" aria-label="On this page">
+          <ol>
+            <li><a href="#s1">What we collect</a></li>
+            <li><a href="#s2">Why we use it</a></li>
+            <li><a href="#s3">Who can see it</a></li>
+            <li><a href="#s4">How long we keep it</a></li>
+            <li><a href="#s5">Your rights</a></li>
+          </ol>
+        </nav>
+        <article class="legal__article">
+          <p class="eyebrow">Privacy</p>
+          <h1>Privacy notice</h1>
+          <div class="legal__intro"><p>Lensmere Optical Co. (demo) (“we”) collects only the personal information needed to look after your eyes and your orders. This notice explains what we collect, why, and the choices you have.</p></div>
+        <section class="legal__section" id="s1">
+          <h2><span class="legal__num">01</span>What we collect</h2>
+          <div class="legal__body">
+            <ul>
+              <li>Contact details you give us: name, phone number, email address.</li>
+              <li>Appointment and order history, payments and balances.</li>
+              <li>Clinical information recorded during an examination, including prescriptions. This is health information and is handled with extra care.</li>
+              <li>Messages you send through this website, and the branch you prefer.</li>
+            </ul>
+          </div>
+        </section>
+        <section class="legal__section" id="s2">
+          <h2><span class="legal__num">02</span>Why we use it</h2>
+          <div class="legal__body">
+            <ul>
+              <li>To book, confirm and remind you about appointments.</li>
+              <li>To make, fit and deliver eyewear and contact lenses to your prescription.</li>
+              <li>To reply to enquiries and tell you when an order is ready.</li>
+              <li>To send offers or eye-care reminders — only if you opted in. You can opt out at any time.</li>
+            </ul>
+          </div>
+        </section>
+        <section class="legal__section" id="s3">
+          <h2><span class="legal__num">03</span>Who can see it</h2>
+          <div class="legal__body">
+            <p>Access is limited to staff who need it for their role; prescriptions are visible only to authorised clinical and dispensing staff. We share details with laboratories that make your lenses and with service providers that send messages on our behalf, under confidentiality obligations. We do not sell personal information.</p>
+          </div>
+        </section>
+        <section class="legal__section" id="s4">
+          <h2><span class="legal__num">04</span>How long we keep it</h2>
+          <div class="legal__body">
+            <p>Clinical and financial records are kept for as long as the law requires. Enquiries that don't become appointments or orders are archived when no longer needed.</p>
+          </div>
+        </section>
+        <section class="legal__section" id="s5">
+          <h2><span class="legal__num">05</span>Your rights</h2>
+          <div class="legal__body">
+            <p>You may ask to see, correct or delete your information, or withdraw consent for marketing, by contacting <a href="mailto:privacy@lensmere.example">privacy@lensmere.example</a>. Some records must be retained for legal reasons; we'll explain if that applies.</p>
+          </div>
+        </section>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER — brand-coloured. Original: SiteFrame in layout.tsx.
+       DYNAMIC: business name/tagline/phone/email/address (Settings) and the first 3 active branches with their
+       opening hours (branches table; branch hours fall back to the business hours).
+       GHL: native Footer section with Text/Button elements; branch hours are typed in by hand (update them
+       whenever hours change — GHL does not read our branch table). -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-name">Lensmere Optical</p>
+          <p class="footer-tagline">Eye care &amp; eyewear</p>
+          <div class="footer-contact">
+            <p><a href="tel:+63280000100">+63 2 8000 0100</a></p>
+            <p><a href="mailto:hello@lensmere.example">hello@lensmere.example</a></p>
+            <p>2F Linden Arcade, 118 Lumen Street, Makati City</p>
+          </div>
+          <a class="footer-cta" href="booking.html">Book an eye exam <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+        </div>
+        <div class="footer-branches">
+          <div>
+            <p class="eyebrow eyebrow--inherit">Makati</p>
+            <p class="footer-branch__address">2F Linden Arcade, 118 Lumen Street<br>Makati City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Quezon City</p>
+            <p class="footer-branch__address">Unit 4, 52 Verde Avenue<br>Quezon City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Pasig</p>
+            <p class="footer-branch__address">G/F Alder Place, 9 Alder Road<br>Pasig City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="products.html">Eyewear</a>
+          <a href="services.html">Services</a>
+          <a href="about.html">About</a>
+          <a href="faq.html">FAQ</a>
+          <a href="contact.html">Contact</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
+        <!-- DYNAMIC: year (new Date().getFullYear()) and biz.legalName. "Staff sign in" links to the Next.js
+             dashboard (/login) — not part of the GHL site; remove or point it at the app URL. -->
+        <p class="footer-copy">© 2026 Lensmere Optical Co. (demo). <a href="#">Staff sign in</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>

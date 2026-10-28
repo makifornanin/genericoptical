@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lensmere Optical — Eye care &amp; eyewear</title>
+  <meta name="description" content="Comprehensive eye examinations, prescription eyewear and contact lens fittings across three branches — with optometrists who take the time to explain your options.">
+  <!-- Demo business (fictional): the original sets robots noindex,nofollow when the business is a demo.
+       Remove this line for a real business. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:site_name" content="Lensmere Optical">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#18191b">
+  <link rel="icon" href="../assets/favicon.ico">
+  <!-- Same font families as the original (next/font/google): Inter Tight (body, variable weight)
+       and Instrument Sans 500/600/700 (display headings). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&amp;family=Instrument+Sans:wght@500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- DEMO BANNER — shown only because Lensmere is a demo business (biz.isDemo). Delete for a real business.
+       GHL: a native Section + Text element (or drop it). -->
+  <div class="demo-banner">
+    <strong>Demo website.</strong> Lensmere Optical is a fictional business — names, prices and branches are sample data.
+    <!-- Original links to /login (staff dashboard), which is not part of the GHL site. -->
+    <a href="#">Open the staff demo</a>
+  </div>
+
+  <!-- HEADER — sticky, translucent canvas background with blur. Original: site-header.tsx.
+       GHL: native Header/Navigation menu element. Business name, tagline and logo come from Settings
+       (DYNAMIC: biz.name, biz.tagline, biz.logoUrl → the round initial mark is used when there is no logo). -->
+  <header class="site-header">
+    <div class="site-header__bar">
+      <a class="brand-link" href="index.html" aria-label="Lensmere Optical home">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-text">
+          <span class="brand-name truncate">Lensmere Optical</span>
+          <span class="brand-tagline truncate">Eye care &amp; eyewear</span>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <a href="products.html">Eyewear</a>
+        <a href="services.html">Services</a>
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <a class="btn btn--brand header-cta" href="booking.html">Book an exam</a>
+      <button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="site-mobile-nav" aria-label="Open menu">
+        <svg class="icon icon-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+        <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <!-- Mobile menu (< 768px): toggled by site.js. GHL's native nav element provides its own hamburger menu. -->
+    <nav id="site-mobile-nav" class="mobile-nav" aria-label="Main" hidden>
+      <ul>
+        <li><a href="products.html">Eyewear</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <a class="btn btn--brand btn--lg" href="booking.html">Book an exam</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- HERO — copy from Settings → Website (websiteContent.heroEyebrow / heroTitle / heroBody).
+         DYNAMIC: the 3 stats (branch count, number of frames + sunglasses listed online, eye-exam duration) and the
+         product images on the right (picked from the catalogue: one per colourway). Prices are from the catalogue.
+         GHL: native Section (2 columns) — Headline, Paragraph, 2 Buttons; stats as a 3-column Row of Text elements
+         typed by hand; images as native Image elements linking to the product pages. -->
+    <section class="hero">
+      <div class="container hero__inner">
+        <div>
+          <p class="eyebrow">Eye care &amp; eyewear</p>
+          <h1>Clear vision, unhurried care, and frames that feel like you.</h1>
+          <p class="hero__body">Comprehensive eye examinations, prescription eyewear and contact lens fittings across three branches — with optometrists who take the time to explain your options.</p>
+          <div class="hero__actions">
+            <a class="btn btn--brand btn--lg" href="booking.html">Book an eye exam <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+            <a class="btn btn--outline btn--lg" href="products.html">Browse eyewear</a>
+          </div>
+          <dl class="hero-stats">
+            <div><dt>Branches</dt><dd>3</dd></div>
+            <div><dt>Frames &amp; eyewear</dt><dd>27</dd></div>
+            <div><dt>Eye exam</dt><dd>45 min</dd></div>
+          </dl>
+        </div>
+        <div class="hero-art">
+          <a class="hero-art__main" href="product-detail.html">
+            <div class="product-art product-art--hero"><img src="../assets/products/frame-rectangle-black.svg" alt="Arden 101"></div>
+          </a>
+          <a href="product-detail.html">
+            <div class="product-art product-art--r20"><img src="../assets/products/frame-round-tortoise.svg" alt="Arden Round 33"></div>
+            <p class="hero-art__name">Arden Round 33</p>
+            <p class="hero-art__price">from ₱3,250.00</p>
+          </a>
+          <a href="product-detail.html">
+            <div class="product-art product-art--r20"><img src="../assets/products/sun-round-smoke.svg" alt="Brio Kids Sun"></div>
+            <p class="hero-art__name">Brio Kids Sun</p>
+            <p class="hero-art__price">from ₱1,450.00</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 01 SERVICES — DYNAMIC: one row per public appointment type (appointment_types table: name, description,
+         duration, price; "Price on request" when no price). Each "Book" deep-links to /book?type=<id>.
+         GHL: native Section with a repeated Row (Text elements) typed by hand; "Book" buttons link to the matching
+         GHL calendar (or the booking page). -->
+    <section>
+      <div class="container section-pad">
+      <div class="section-head">
+        <p class="eyebrow"><span class="eyebrow__index">01</span>Services</p>
+        <div class="section-head__text">
+          <h2>Care that starts with a proper examination.</h2>
+          <p class="section-head__body">Every service below can be booked online. Durations are what we actually schedule, so you'll never be rushed.</p>
+        </div>
+        <div class="section-head__action"><a class="arrow-link" href="services.html">All services <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div>
+      </div>
+        <ol class="service-rows">
+          <li>
+            <span class="service-rows__num">01</span>
+            <div>
+              <p class="service-rows__name">Comprehensive eye exam</p>
+              <p class="service-rows__desc">Refraction, eye-health screening and prescription.</p>
+            </div>
+            <p class="service-rows__duration"><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 45 minutes</p>
+            <p class="service-rows__price">₱500.00</p>
+            <a class="underline-link" href="booking.html">Book <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+          </li>
+          <li>
+            <span class="service-rows__num">02</span>
+            <div>
+              <p class="service-rows__name">Contact lens fitting</p>
+              <p class="service-rows__desc">Measurements, trial lenses and handling lesson.</p>
+            </div>
+            <p class="service-rows__duration"><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 30 minutes</p>
+            <p class="service-rows__price">₱800.00</p>
+            <a class="underline-link" href="booking.html">Book <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+          </li>
+          <li>
+            <span class="service-rows__num">03</span>
+            <div>
+              <p class="service-rows__name">Frame &amp; lens consultation</p>
+              <p class="service-rows__desc">Help choosing frames and lens options.</p>
+            </div>
+            <p class="service-rows__duration"><svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 30 minutes</p>
+            <p class="service-rows__price">Price on request</p>
+            <a class="underline-link" href="booking.html">Book <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 02 EYEWEAR — DYNAMIC: 8 featured products picked automatically from the online catalogue (one per shape,
+         ~3 frames per sunglass), with brand, category and lowest variant price.
+         GHL: a native Image + Text grid typed by hand, or a GHL Store "product list" element if the catalogue is
+         moved into GHL Products (see ghl-migration-guide.md §5). -->
+    <section class="bg-surface">
+      <div class="container section-pad">
+      <div class="section-head">
+        <p class="eyebrow"><span class="eyebrow__index">02</span>Eyewear</p>
+        <div class="section-head__text">
+          <h2>Frames chosen for fit, not just fashion.</h2>
+          <p class="section-head__body">A considered selection across shapes and materials. Try anything on in branch — our opticians will check the fit to your face and prescription.</p>
+        </div>
+        <div class="section-head__action"><a class="arrow-link" href="products.html">See all eyewear <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div>
+      </div>
+        <ul class="product-grid product-grid--4">
+          <li>
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-rectangle-black.svg" alt="Arden 101" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name truncate">Arden 101</p>
+                  <p class="product-card__meta truncate">Arden · Frames</p>
+                </div>
+                <p class="product-card__price tabular">₱2,950.00</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-square-black.svg" alt="Arden 204" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name truncate">Arden 204</p>
+                  <p class="product-card__meta truncate">Arden · Frames</p>
+                </div>
+                <p class="product-card__price tabular">₱3,450.00</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-round-tortoise.svg" alt="Arden Round 33" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name truncate">Arden Round 33</p>
+                  <p class="product-card__meta truncate">Arden · Frames</p>
+                </div>
+                <p class="product-card__price tabular">₱3,250.00</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/sun-round-smoke.svg" alt="Brio Kids Sun" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name truncate">Brio Kids Sun</p>
+                  <p class="product-card__meta truncate">Brio · Sunglasses</p>
+                </div>
+                <p class="product-card__price tabular">₱1,450.00</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-aviator-gold.svg" alt="Halden Aviator RX" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name truncate">Halden Aviator RX</p>
+                  <p class="product-card__meta truncate">Halden · Frames</p>
+                </div>
+                <p class="product-card__price tabular">₱4,250.00</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-oval-gold.svg" alt="Halden Oval" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name truncate">Halden Oval</p>
+                  <p class="product-card__meta truncate">Halden · Frames</p>
+                </div>
+                <p class="product-card__price tabular">₱3,650.00</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/frame-hexagon-gold.svg" alt="Kiyo Hex" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name truncate">Kiyo Hex</p>
+                  <p class="product-card__meta truncate">Kiyo · Frames</p>
+                </div>
+                <p class="product-card__price tabular">₱3,150.00</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="product-card" href="product-detail.html">
+              <div class="product-art"><img src="../assets/products/sun-aviator-brown.svg" alt="Halden Pilot" loading="lazy"></div>
+              <div class="product-card__row">
+                <div class="product-card__text">
+                  <p class="product-card__name truncate">Halden Pilot</p>
+                  <p class="product-card__meta truncate">Halden · Sunglasses</p>
+                </div>
+                <p class="product-card__price tabular">₱4,450.00</p>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 03 OUR APPROACH — copy from Settings → Website (websiteContent.aboutTitle / aboutBody / values[]).
+         GHL: native Section; values as a 4-column Row of Text boxes (white cards with hairline dividers). -->
+    <section>
+      <div class="container section-pad">
+      <div class="section-head">
+        <p class="eyebrow"><span class="eyebrow__index">03</span>Our approach</p>
+        <div class="section-head__text">
+          <h2>It starts with listening.</h2>
+          <p class="section-head__body">Choosing eyewear is about more than picking a frame. We begin with a thorough examination, explain what we find in plain language, and help you weigh lens and frame options against how you actually live — screens, sport, driving, reading. From the first check to the final fitting, every visit is meant to feel considered and never rushed.</p>
+        </div>
+      </div>
+        <ul class="values-grid">
+          <li>
+            <span class="values-grid__num">01</span>
+            <p class="values-grid__title">Thorough eye exams</p>
+            <p class="values-grid__body">Refraction, eye-health screening and a clear explanation of your prescription.</p>
+          </li>
+          <li>
+            <span class="values-grid__num">02</span>
+            <p class="values-grid__title">Honest guidance</p>
+            <p class="values-grid__body">Lens and frame recommendations that fit your needs and budget.</p>
+          </li>
+          <li>
+            <span class="values-grid__num">03</span>
+            <p class="values-grid__title">Made-to-measure lenses</p>
+            <p class="values-grid__body">Single vision, progressives and specialty lenses from our partner laboratory.</p>
+          </li>
+          <li>
+            <span class="values-grid__num">04</span>
+            <p class="values-grid__title">Aftercare included</p>
+            <p class="values-grid__body">Free adjustments and fit checks for the life of your frames.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 04 VISIT US — DYNAMIC: one card per active branch (address, phone, opening hours) and a live
+         "Open now · until 7pm" badge computed in the business time zone (Asia/Manila). "Book here" deep-links to
+         /book?branch=<id>; a "Map" button appears when the branch has a map URL (none in the demo).
+         GHL: native cards typed by hand. The live badge has no native equivalent — drop it, or keep the small
+         openStatus() script from site.js in a custom-code element. "Book here" → that branch's GHL calendar. -->
+    <section>
+      <div class="container section-pad-bottom">
+      <div class="section-head">
+        <p class="eyebrow"><span class="eyebrow__index">04</span>Visit us</p>
+        <div class="section-head__text">
+          <h2>3 branches, one standard of care.</h2>
+        </div>
+      </div>
+        <ul class="branch-cards">
+          <li class="branch-card">
+            <div class="branch-card__top">
+              <p class="branch-card__name">Makati</p>
+              <span class="status-badge" data-open="true" data-hours='{"mon":["10:00","19:00"],"tue":["10:00","19:00"],"wed":["10:00","19:00"],"thu":["10:00","19:00"],"fri":["10:00","19:00"],"sat":["10:00","19:00"],"sun":["11:00","17:00"]}' data-timezone="Asia/Manila" data-status-label="#status-makati"><span>Open</span></span>
+            </div>
+            <p class="branch-card__status" id="status-makati">Open now · until 7pm</p>
+            <div class="branch-card__info">
+              <p><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><span>2F Linden Arcade, 118 Lumen Street, Makati City</span></p>
+              <p><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg><a href="tel:+63280000101">+63 2 8000 0101</a></p>
+            </div>
+            <ul class="branch-card__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="hours-row__time">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="hours-row__time">11am – 5pm</span></li>
+            </ul>
+            <div class="branch-card__actions">
+              <a class="btn btn--brand" href="booking.html">Book here</a>
+            </div>
+          </li>
+          <li class="branch-card">
+            <div class="branch-card__top">
+              <p class="branch-card__name">Quezon City</p>
+              <span class="status-badge" data-open="true" data-hours='{"mon":["10:00","19:00"],"tue":["10:00","19:00"],"wed":["10:00","19:00"],"thu":["10:00","19:00"],"fri":["10:00","19:00"],"sat":["10:00","19:00"],"sun":["11:00","17:00"]}' data-timezone="Asia/Manila" data-status-label="#status-quezon-city"><span>Open</span></span>
+            </div>
+            <p class="branch-card__status" id="status-quezon-city">Open now · until 7pm</p>
+            <div class="branch-card__info">
+              <p><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><span>Unit 4, 52 Verde Avenue, Quezon City</span></p>
+              <p><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg><a href="tel:+63280000102">+63 2 8000 0102</a></p>
+            </div>
+            <ul class="branch-card__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="hours-row__time">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="hours-row__time">11am – 5pm</span></li>
+            </ul>
+            <div class="branch-card__actions">
+              <a class="btn btn--brand" href="booking.html">Book here</a>
+            </div>
+          </li>
+          <li class="branch-card">
+            <div class="branch-card__top">
+              <p class="branch-card__name">Pasig</p>
+              <span class="status-badge" data-open="true" data-hours='{"mon":["10:00","19:00"],"tue":["10:00","19:00"],"wed":["10:00","19:00"],"thu":["10:00","19:00"],"fri":["10:00","19:00"],"sat":["10:00","19:00"],"sun":["11:00","17:00"]}' data-timezone="Asia/Manila" data-status-label="#status-pasig"><span>Open</span></span>
+            </div>
+            <p class="branch-card__status" id="status-pasig">Open now · until 7pm</p>
+            <div class="branch-card__info">
+              <p><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><span>G/F Alder Place, 9 Alder Road, Pasig City</span></p>
+              <p><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg><a href="tel:+63280000103">+63 2 8000 0103</a></p>
+            </div>
+            <ul class="branch-card__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="hours-row__time">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="hours-row__time">11am – 5pm</span></li>
+            </ul>
+            <div class="branch-card__actions">
+              <a class="btn btn--brand" href="booking.html">Book here</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CTA + FAQ TEASER — static CTA copy; DYNAMIC: first 4 FAQs from Settings → Website (websiteContent.faqs).
+         GHL: native Section with a dark (brand) background, 2 columns: Headline/Paragraph/2 Buttons on the left;
+         GHL "FAQ" element (or custom HTML with native <details>) on the right. -->
+    <section>
+      <div class="container">
+        <div class="cta-panel">
+          <div class="cta-panel__main">
+            <p class="eyebrow eyebrow--inherit">Ready when you are</p>
+            <h2>Book your next eye exam online.</h2>
+            <p class="cta-panel__body">Pick a branch, a service and a time that suits you. We'll confirm by phone or email.</p>
+            <div class="cta-panel__actions">
+              <a class="btn btn--accent btn--lg" href="booking.html">Book an appointment <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+              <a class="btn btn--light btn--lg" href="contact.html">Ask a question</a>
+            </div>
+          </div>
+          <div class="cta-panel__faq">
+            <p class="eyebrow eyebrow--inherit">Common questions</p>
+            <div class="cta-faq">
+              <details>
+                <summary>Do I need an appointment for an eye exam? <span class="faq-plus" aria-hidden="true">+</span></summary>
+                <p class="cta-faq__answer">Walk-ins are welcome when an optometrist is free, but booking guarantees your slot. Comprehensive exams take about 45 minutes.</p>
+              </details>
+              <details>
+                <summary>How long do prescription glasses take? <span class="faq-plus" aria-hidden="true">+</span></summary>
+                <p class="cta-faq__answer">Most single-vision orders are ready in 3–5 days. Progressive and specialty lenses take 5–7 days because they're made to measure at our partner laboratory.</p>
+              </details>
+              <details>
+                <summary>Can I bring a prescription from another clinic? <span class="faq-plus" aria-hidden="true">+</span></summary>
+                <p class="cta-faq__answer">Yes. Bring your written prescription (ideally less than a year old) and we'll fit lenses to it. We may recommend a quick check if it's older.</p>
+              </details>
+              <details>
+                <summary>Which payment methods do you accept? <span class="faq-plus" aria-hidden="true">+</span></summary>
+                <p class="cta-faq__answer">Cash, credit and debit cards, bank transfer, GCash and Maya. Orders can be reserved with a deposit and settled at pickup.</p>
+              </details>
+            </div>
+            <a class="arrow-link" href="faq.html">All questions <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER — brand-coloured. Original: SiteFrame in layout.tsx.
+       DYNAMIC: business name/tagline/phone/email/address (Settings) and the first 3 active branches with their
+       opening hours (branches table; branch hours fall back to the business hours).
+       GHL: native Footer section with Text/Button elements; branch hours are typed in by hand (update them
+       whenever hours change — GHL does not read our branch table). -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-name">Lensmere Optical</p>
+          <p class="footer-tagline">Eye care &amp; eyewear</p>
+          <div class="footer-contact">
+            <p><a href="tel:+63280000100">+63 2 8000 0100</a></p>
+            <p><a href="mailto:hello@lensmere.example">hello@lensmere.example</a></p>
+            <p>2F Linden Arcade, 118 Lumen Street, Makati City</p>
+          </div>
+          <a class="footer-cta" href="booking.html">Book an eye exam <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+        </div>
+        <div class="footer-branches">
+          <div>
+            <p class="eyebrow eyebrow--inherit">Makati</p>
+            <p class="footer-branch__address">2F Linden Arcade, 118 Lumen Street<br>Makati City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Quezon City</p>
+            <p class="footer-branch__address">Unit 4, 52 Verde Avenue<br>Quezon City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow eyebrow--inherit">Pasig</p>
+            <p class="footer-branch__address">G/F Alder Place, 9 Alder Road<br>Pasig City</p>
+            <ul class="footer-branch__hours">
+              <li class="hours-row"><span>Mon – Sat</span><span class="tabular">10am – 7pm</span></li>
+              <li class="hours-row"><span>Sun</span><span class="tabular">11am – 5pm</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="products.html">Eyewear</a>
+          <a href="services.html">Services</a>
+          <a href="about.html">About</a>
+          <a href="faq.html">FAQ</a>
+          <a href="contact.html">Contact</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
+        <!-- DYNAMIC: year (new Date().getFullYear()) and biz.legalName. "Staff sign in" links to the Next.js
+             dashboard (/login) — not part of the GHL site; remove or point it at the app URL. -->
+        <p class="footer-copy">© 2026 Lensmere Optical Co. (demo). <a href="#">Staff sign in</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>

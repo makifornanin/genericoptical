@@ -1,7 +1,7 @@
 /*
  * Types for the dashboard's public website API v1 (contract: docs/PUBLIC_API.md in the dashboard
- * repository). Responses are normalised in src/lib/api.ts, so optional/nullable fields are always
- * present with the types below.
+ * repository). Responses are normalised in src/lib/api.ts and src/lib/orders-api.ts, so optional or
+ * nullable fields are always present with the types below.
  */
 
 export type Availability = "in_stock" | "low_stock" | "out_of_stock" | "made_to_order" | "service";
@@ -103,6 +103,14 @@ export interface BookingConfig {
   ghlConnected: boolean;
 }
 
+/** Website orders, as switched on in the dashboard (Settings → Website). */
+export interface OrderingConfig {
+  enabled: boolean;
+  /** Online card payments are simulated: nothing is ever charged. */
+  demoPayments: boolean;
+  paymentOptions: PaymentOption[];
+}
+
 export interface SiteData {
   business: Business;
   content: WebsiteContent;
@@ -111,6 +119,7 @@ export interface SiteData {
   inBranchServices: InBranchService[];
   categories: Category[];
   booking: BookingConfig;
+  ordering: OrderingConfig;
   generatedAt: string | null;
 }
 
@@ -132,6 +141,10 @@ export interface ProductSummary {
   priceFromCents: number | null;
   priceToCents: number | null;
   variantCount: number;
+  /** Distinct variant colours in display order (frames). */
+  colours: string[];
+  /** Storefront filters: shape, material, frameType, lensType, gender, ageGroup when set. */
+  filters: Record<string, string>;
   availability: Availability;
   updatedAt: string | null;
 }
@@ -158,6 +171,18 @@ export interface ProductDetail extends ProductSummary {
   related: ProductSummary[];
 }
 
+export type LensType = "single_vision" | "progressive" | "bifocal";
+
+/** A prescription lens product (made to order at the lab) that can be fitted to a frame. */
+export interface Lens {
+  variantId: string;
+  name: string;
+  description: string | null;
+  priceCents: number;
+  type: LensType;
+  features: string[];
+}
+
 export const INQUIRY_KINDS = ["contact", "product_inquiry", "appointment_request"] as const;
 export type InquiryKind = (typeof INQUIRY_KINDS)[number];
 
@@ -178,4 +203,98 @@ export interface InquiryPayload {
   productName: string | null;
   sourcePage: string | null;
   website: string;
+}
+
+/* ── Orders ──────────────────────────────────────────────────────────────────────────────────── */
+
+export type PaymentOption = "demo_card" | "pay_at_pickup";
+export type RxMode = "enter" | "send_later" | "on_file" | "book_exam";
+
+export interface RxEye {
+  sph: string;
+  cyl: string | null;
+  axis: string | null;
+  add: string | null;
+}
+
+export interface Prescription {
+  mode: RxMode;
+  od?: RxEye;
+  os?: RxEye;
+  pd?: string | null;
+  issuedOn?: string | null;
+}
+
+export interface QuoteLine {
+  variantId: string;
+  name: string;
+  variantLabel: string | null;
+  productType: "stock" | "service" | "made_to_order";
+  quantity: number;
+  unitPriceCents: number;
+  lineTotalCents: number;
+}
+
+export interface QuoteBranch {
+  branchId: string;
+  name: string;
+  code: string | null;
+  canFulfil: boolean;
+  unavailableVariantIds: string[];
+}
+
+export interface Quote {
+  currency: string;
+  pricesIncludeTax: boolean;
+  subtotalCents: number;
+  taxCents: number;
+  totalCents: number;
+  lines: QuoteLine[];
+  branches: QuoteBranch[];
+}
+
+export type OrderStage = "new" | "confirmed" | "processing" | "awaiting_lab" | "ready_for_pickup" | "completed" | "cancelled";
+
+export interface OrderItem {
+  name: string;
+  variantLabel: string | null;
+  productType: "stock" | "service" | "made_to_order";
+  quantity: number;
+  unitPriceCents: number;
+  lineTotalCents: number;
+  note: string | null;
+}
+
+export interface OrderPrescription {
+  frame: string;
+  lens: string;
+  mode: RxMode;
+  values?: { od: RxEye; os: RxEye; pd: string | null; issuedOn: string | null };
+}
+
+/** The customer's view of a website order (GET /api/public/v1/orders/:number with its token). */
+export interface OrderView {
+  number: string;
+  placedAt: string;
+  status: "open" | "completed" | "cancelled";
+  stage: OrderStage;
+  paymentStatus: "unpaid" | "partially_paid" | "paid";
+  paymentOption: PaymentOption;
+  currency: string;
+  subtotalCents: number;
+  taxCents: number;
+  totalCents: number;
+  paidCents: number;
+  balanceDueCents: number;
+  readyBy: string | null;
+  readyAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  cancelledByCustomer: boolean;
+  canCancel: boolean;
+  contact: { name: string; email: string | null; phone: string | null };
+  branch: { id: string; name: string; address: string[]; phone: string | null; mapUrl: string | null; hours: WeeklyHours | null };
+  items: OrderItem[];
+  prescriptions: OrderPrescription[];
+  timeline: { stage: string; at: string }[];
 }

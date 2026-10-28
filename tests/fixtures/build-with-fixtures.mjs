@@ -15,7 +15,7 @@ export const TEST_ENV = {
   DASHBOARD_API_URL: "http://localhost:3299",
   DASHBOARD_SITE_KEY: "test-key",
   REVALIDATE_SECRET: "test-secret",
-  SITE_URL: "http://localhost:3200",
+  SITE_URL: "http://localhost:3210",
 };
 
 const fixture = spawn(process.execPath, [join(ROOT, "tests", "fixtures", "api-server.mjs")], { stdio: "inherit", env: { ...process.env, FIXTURE_LOG: "build-inquiries.json" } });

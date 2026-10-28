@@ -1,89 +1,34 @@
-import type { Metadata } from "next";
-import { LegalPage, LegalSection } from "@/components/Legal";
 import { getSite } from "@/lib/api";
-import { telHref } from "@/lib/format";
 import { pageMetadata } from "@/lib/seo";
 
-export const revalidate = 60;
-
-export const metadata: Metadata = pageMetadata({
-  title: "Terms of service",
-  description: "Terms for using this website, booking appointments and ordering eyewear.",
-  path: "/terms",
-});
-
-const TOC = [
-  { id: "appointments", label: "Appointments" },
-  { id: "prices", label: "Prices" },
-  { id: "orders", label: "Orders and deposits" },
-  { id: "online", label: "Online enquiries and reservations" },
-  { id: "returns", label: "Returns, refunds and warranty" },
-  { id: "payments", label: "Payments" },
-  { id: "contact", label: "Contact" },
-];
+export const metadata = pageMetadata({ title: "Terms", description: "Terms for orders placed on this website.", path: "/terms" });
+export const revalidate = 3600;
 
 export default async function TermsPage() {
-  const result = await getSite();
-  const b = result.ok ? result.data.business : null;
-  const legalName = b?.legalName ?? b?.name ?? "us";
-  const tax = b?.taxName ? (b.pricesIncludeTax ? ` and include ${b.taxName} where applicable` : ` and exclude ${b.taxName}`) : "";
-
+  const site = await getSite();
+  const b = site.ok ? site.data.business : null;
   return (
-    <LegalPage
-      eyebrow="Terms"
-      title="Terms of service"
-      toc={TOC}
-      intro={<>These terms cover appointments, orders and purchases with {legalName}, in branch and through this website.</>}
-    >
-      <LegalSection id="appointments" num={1} title="Appointments">
-        <p>
-          Online bookings are made through our booking calendar and confirmed by email or text. An appointment request sent with a form is not a booking until we
-          confirm a time with you. Please let us know as early as possible if you need to reschedule or cancel so we can offer the slot to someone else.
-        </p>
-      </LegalSection>
-      <LegalSection id="prices" num={2} title="Prices">
-        <p>
-          Prices on this website are in {b?.currency ?? "local currency"}
-          {tax}. Prescription lens prices depend on your prescription and options; we&apos;ll quote before ordering. Prices and availability may change without notice,
-          and stock differs by branch.
-        </p>
-      </LegalSection>
-      <LegalSection id="orders" num={3} title="Orders and deposits">
-        <p>
-          Made-to-order eyewear may require a deposit. The remaining balance is due when you collect your order. Estimated ready dates are guides; lens laboratories
-          occasionally need more time and we&apos;ll keep you informed.
-        </p>
-      </LegalSection>
-      <LegalSection id="online" num={4} title="Online enquiries and reservations">
-        <p>
-          Products can&apos;t be bought on this website. When you ask about an item we&apos;ll confirm its availability and can reserve it for you to try in branch; the
-          sale happens in branch. Availability shown online is updated regularly but can change at any moment.
-        </p>
-      </LegalSection>
-      <LegalSection id="returns" num={5} title="Returns, refunds and warranty">
-        <p>
-          Lenses made to your prescription are custom products. If something isn&apos;t right — the fit, the prescription or a defect — bring it back and we&apos;ll
-          assess, adjust, remake or refund in line with our policy and your statutory rights. Frames carry a warranty against manufacturing defects; adjustments are
-          free.
-        </p>
-      </LegalSection>
-      <LegalSection id="payments" num={6} title="Payments">
-        <p>We accept the payment methods listed in branch. Payments made at the counter are confirmed on your receipt; keep it for warranty claims.</p>
-      </LegalSection>
-      <LegalSection id="contact" num={7} title="Contact">
-        <p>
-          Questions about these terms?
-          {b?.email ? (
-            <>
-              {" "}
-              Email <a href={`mailto:${b.email}`}>{b.email}</a>
-            </>
-          ) : null}
-          {b?.email && b?.phone ? " or call " : b?.phone ? " Call " : ""}
-          {b?.phone ? <a href={telHref(b.phone)}>{b.phone}</a> : null}
-          {b?.email || b?.phone ? "." : " Contact us through this website."}
-        </p>
-      </LegalSection>
-    </LegalPage>
+    <div className="wrap legal">
+      <header className="page-head">
+        <h1>Terms</h1>
+      </header>
+      <p className="notice notice--warn">Draft for review: have these terms checked by a lawyer before using them with real customers.</p>
+      {b?.isDemo ? (
+        <>
+          <h2>Demonstration store</h2>
+          <p>This website demonstrates online ordering for an optical shop. The business, branches and products are fictional. Orders are recorded in the shop&apos;s system, but the online card step is simulated: no payment is taken and no goods are supplied.</p>
+        </>
+      ) : null}
+      <h2>Orders</h2>
+      <p>When you place an order we set the items aside at your chosen branch. Prices are shown in {b?.currency ?? "local currency"} and include {b?.taxName ?? "tax"}. If a price changes before you check out, we show you the new total before you confirm.</p>
+      <h2>Prescription lenses</h2>
+      <p>Lenses are made to the prescription you give us. Our optometrist checks it before lenses are ordered and contacts you if anything is unclear, out of date or doesn&apos;t match the lenses you chose.</p>
+      <h2>Collection</h2>
+      <p>We contact you when your order is ready. Please bring a photo ID; we fit and adjust your glasses when you collect them.</p>
+      <h2>Payment</h2>
+      <p>Pay online at checkout or in branch at pickup. Orders paid at pickup can be cancelled from your order page until we start preparing them.</p>
+      <h2>Contact</h2>
+      <p>{b?.legalName ?? b?.name ?? "We"}{b?.address ? `, ${b.address}` : ""}{b?.email ? ` · ${b.email}` : ""}{b?.phone ? ` · ${b.phone}` : ""}</p>
+    </div>
   );
 }

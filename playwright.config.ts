@@ -2,14 +2,14 @@ import { defineConfig, devices } from "@playwright/test";
 
 /*
  * End-to-end tests against the production build (`npm run test:build` first — `npm test` does
- * both) served by `next start` on port 3200, with the fixture dashboard API on port 3299.
+ * both) served by `next start` on port 3210, with the fixture dashboard API on port 3299.
  * The "outage" project switches the fixture API off, so it runs alone after everything else.
  */
 const TEST_ENV = {
   DASHBOARD_API_URL: "http://localhost:3299",
   DASHBOARD_SITE_KEY: "test-key",
   REVALIDATE_SECRET: "test-secret",
-  SITE_URL: "http://localhost:3200",
+  SITE_URL: "http://localhost:3210",
 };
 
 export default defineConfig({
@@ -20,7 +20,7 @@ export default defineConfig({
   outputDir: "test-results",
   timeout: 60_000,
   use: {
-    baseURL: "http://localhost:3200",
+    baseURL: "http://localhost:3210",
     ...devices["Desktop Chrome"],
     trace: "retain-on-failure",
   },
@@ -38,8 +38,8 @@ export default defineConfig({
       timeout: 15_000,
     },
     {
-      command: "node node_modules/next/dist/bin/next start -p 3200",
-      url: "http://localhost:3200/api/health",
+      command: "node node_modules/next/dist/bin/next start -p 3210",
+      url: "http://localhost:3210/api/health",
       env: TEST_ENV,
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,

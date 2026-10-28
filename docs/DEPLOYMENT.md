@@ -46,9 +46,10 @@ In the dashboard (Settings → Website / integrations — being built in paralle
 
 ## 4. GoHighLevel
 
-- Booking calendars are mapped to services and branches **in the dashboard** (its GHL integration). The site shows GHL's official widget only where a calendar is mapped; elsewhere it shows an appointment-request form.
-- In each GHL calendar, set the confirmation redirect to `https://<site>/booking-confirmed`.
-- Inquiries reach GHL through the dashboard (lead → GHL contact). The website never calls GHL's API.
+- **The embeds** (inquiry form, booking calendar and Conversation AI chat) are the business's own, set in `src/lib/ghl.ts`. See the README's "GoHighLevel embeds". Changing one means editing that file and redeploying, and the CSP follows automatically.
+- **Inquiries** from the contact page go straight to GoHighLevel through its form. Orders go to the dashboard, which syncs them to GHL as opportunities. The website never calls GHL's API itself.
+- **Calendars:** if the dashboard maps calendars to services and branches (Settings → Integrations → GoHighLevel), the eye-exam page uses those first.
+- **After booking:** set where GHL sends people once they've booked in the calendar's own settings. This site has no "booking confirmed" page; the home page is a sensible target.
 
 ## 5. Check the deployment
 

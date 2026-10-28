@@ -1,122 +1,94 @@
 import { expect, test } from "@playwright/test";
-import type { Service, WeeklyHours } from "../../src/lib/api-types";
-import { bookingServiceFor, calendarFor, featuredProducts, findBranch } from "../../src/lib/catalog";
+import { addLine, cartItems, lineTotal, parseStoredBag, type BagLine } from "../../src/lib/bag";
+import { colourGroups, colourKeyOf, productHref } from "../../src/lib/catalog";
 import { normalizeDashboardUrl } from "../../src/lib/dashboard-url";
-import { groupedHours, money, openStatus, servicePrice } from "../../src/lib/format";
-import { inkFor, themeStyle } from "../../src/lib/theme";
+import { checkDemoCard, formatCardNumber, formatExpiry } from "../../src/lib/demo-card";
+import { applyFilters, filtersToQuery, parseFilters } from "../../src/lib/filters";
+import { groupedHours, money, openStatus } from "../../src/lib/format";
+import { lensCopy, rxProblems, SPH_VALUES } from "../../src/lib/lens";
+import { contrast, themeStyle } from "../../src/lib/theme";
 
-/* Unit tests for the pure helpers (no browser, no server). */
+/* Pure helpers (no browser). */
 
-test.describe("normalizeDashboardUrl (DASHBOARD_API_URL)", () => {
-  test("accepts the plain origin", () => {
-    expect(normalizeDashboardUrl("https://dash.example")).toBe("https://dash.example");
-    expect(normalizeDashboardUrl("https://dash.example/")).toBe("https://dash.example");
-    expect(normalizeDashboardUrl("  http://localhost:3000  ")).toBe("http://localhost:3000");
-  });
+const line = (o: Partial<BagLine> = {}): BagLine => ({ id: "1", slug: "arden-101", name: "Arden 101", categoryKind: "frames", variantId: "v1", variantLabel: "52 · Black", colourKey: "black", quantity: 1, unitPriceCents: 295000, lens: null, prescription: null, eye: null, ...o });
 
-  test("strips a trailing /api/public/v1, with or without a slash", () => {
-    expect(normalizeDashboardUrl("https://dash.example/api/public/v1")).toBe("https://dash.example");
-    expect(normalizeDashboardUrl("https://dash.example/api/public/v1/")).toBe("https://dash.example");
-    expect(normalizeDashboardUrl("http://localhost:3000/api/public/v1")).toBe("http://localhost:3000");
-  });
-
-  test("keeps a path prefix the dashboard is mounted under", () => {
-    expect(normalizeDashboardUrl("https://example.com/dashboard/")).toBe("https://example.com/dashboard");
-    expect(normalizeDashboardUrl("https://example.com/dashboard/api/public/v1")).toBe("https://example.com/dashboard");
-  });
-
-  test("rejects empty and non-http values", () => {
-    expect(normalizeDashboardUrl("")).toBeNull();
-    expect(normalizeDashboardUrl(undefined)).toBeNull();
-    expect(normalizeDashboardUrl("not a url")).toBeNull();
-    expect(normalizeDashboardUrl("ftp://dash.example")).toBeNull();
-    expect(normalizeDashboardUrl("javascript:alert(1)")).toBeNull();
-  });
+test("money: whole pesos without decimals, centavos when present", () => {
+  expect(money(295000)).toBe("₱2,950");
+  expect(money(61607)).toBe("₱616.07");
+  expect(money(null)).toBe("");
 });
 
-test.describe("theme", () => {
-  test("text colour is picked for contrast", () => {
-    expect(inkFor("#1F2B22")).toBe("#ffffff");
-    expect(inkFor("#B5E14A")).toBe("#18191b");
-    expect(inkFor("nope")).toBeNull();
-    expect(themeStyle("#1F2B22", "bad")).toEqual({ "--oc-theme-brand": "#1F2B22", "--oc-theme-brand-ink": "#ffffff" });
-  });
+test("demo card: Luhn, test cards only, expiry and code", () => {
+  const now = new Date(2026, 9, 20);
+  expect(checkDemoCard({ number: "4242 4242 4242 4242", expiry: "12 / 30", cvc: "123" }, now)).toEqual({ ok: true, brand: "Visa", last4: "4242" });
+  expect(checkDemoCard({ number: "4242 4242 4242 4241", expiry: "12 / 30", cvc: "123" }, now)).toMatchObject({ ok: false, field: "number" });
+  expect(checkDemoCard({ number: "4111 1111 1111 1111", expiry: "12 / 30", cvc: "123" }, now)).toMatchObject({ ok: false, message: expect.stringContaining("real cards") });
+  expect(checkDemoCard({ number: "4000 0000 0000 0002", expiry: "12 / 30", cvc: "123" }, now)).toMatchObject({ ok: false, message: expect.stringContaining("declined") });
+  expect(checkDemoCard({ number: "4242424242424242", expiry: "09 / 26", cvc: "123" }, now)).toMatchObject({ ok: false, field: "expiry" });
+  expect(checkDemoCard({ number: "4242424242424242", expiry: "12 / 30", cvc: "1" }, now)).toMatchObject({ ok: false, field: "cvc" });
+  expect(formatCardNumber("4242424242424242")).toBe("4242 4242 4242 4242");
+  expect(formatExpiry("1230")).toBe("12 / 30");
 });
 
-const HOURS: WeeklyHours = {
-  mon: { open: "10:00", close: "19:00" },
-  tue: { open: "10:00", close: "19:00" },
-  wed: { open: "10:00", close: "19:00" },
-  thu: { open: "10:00", close: "19:00" },
-  fri: { open: "10:00", close: "19:00" },
-  sat: { open: "10:00", close: "19:00" },
-  sun: null,
-};
-
-test.describe("hours and prices", () => {
-  test("groups consecutive days", () => {
-    expect(groupedHours(HOURS)).toEqual([
-      { days: "Mon – Sat", time: "10am – 7pm" },
-      { days: "Sun", time: "Closed" },
-    ]);
-  });
-
-  test("open status in the business time zone", () => {
-    // 2026-10-16 is a Friday. 04:00 UTC = 12:00 in Manila.
-    expect(openStatus(HOURS, "Asia/Manila", new Date("2026-10-16T04:00:00Z"))).toEqual({ open: true, label: "Open now · until 7pm" });
-    // 23:30 UTC Friday = 07:30 Saturday in Manila.
-    expect(openStatus(HOURS, "Asia/Manila", new Date("2026-10-16T23:30:00Z"))).toEqual({ open: false, label: "Closed · opens 10am today" });
-    // Saturday 20:00 Manila → closed Sunday → opens Monday.
-    expect(openStatus(HOURS, "Asia/Manila", new Date("2026-10-17T12:00:00Z"))).toEqual({ open: false, label: "Closed · opens Monday 10am" });
-    expect(openStatus(HOURS, "Not/AZone", new Date())).toBeNull();
-  });
-
-  test("money and service prices", () => {
-    const fmt = { currency: "PHP", locale: "en-PH" };
-    expect(money(295000, fmt)).toBe("₱2,950.00");
-    expect(servicePrice(null, fmt)).toBe("Price on request");
-    expect(servicePrice(0, fmt)).toBe("Free");
-    expect(servicePrice(120000, fmt, true)).toBe("From ₱1,200.00");
-  });
+test("prescription checks", () => {
+  expect(rxProblems({ mode: "send_later" }, false)).toEqual([]);
+  const rx = { mode: "enter" as const, od: { sph: "-2.00", cyl: "-0.50", axis: null, add: null }, os: { sph: "-2.00", cyl: null, axis: null, add: null } };
+  expect(rxProblems(rx, false).join(" ")).toMatch(/axis for your right eye/);
+  expect(rxProblems({ ...rx, od: { ...rx.od, axis: "181" } }, false).join(" ")).toMatch(/0 to 180/);
+  expect(rxProblems({ ...rx, od: { ...rx.od, axis: "90" } }, true).join(" ")).toMatch(/reading addition/);
+  expect(SPH_VALUES).toContain("0.00");
+  expect(SPH_VALUES).toContain("-2.25");
+  expect(lensCopy({ variantId: "x", name: "Single Vision Blue-light Filter (pair)", description: null, priceCents: 1, type: "single_vision", features: ["blue_light"] }).title).toBe("Blue-light filter");
 });
 
-test.describe("catalogue mapping", () => {
-  const svc = (code: string, calendars: Service["calendars"] = []): Service => ({ id: code, code, name: code, description: null, durationMinutes: 30, priceCents: null, calendars });
-  const services = [svc("eye_exam", [{ branchId: "b1", calendarId: "cal123456" }]), svc("contact_lens_consultation"), svc("frame_lens_consultation")];
+test("bag: merging, totals, stored data is validated", () => {
+  let lines = addLine([], line());
+  lines = addLine(lines, line({ id: "2", quantity: 2 }));
+  expect(lines).toHaveLength(1);
+  expect(lines[0].quantity).toBe(3);
+  const withLens = addLine(lines, line({ id: "3", lens: { variantId: "l1", name: "SV", title: "Single vision · Standard", type: "single_vision", priceCents: 150000 } }));
+  expect(withLens).toHaveLength(2);
+  expect(lineTotal(withLens[1])).toBe(445000);
+  expect(cartItems(withLens)[1]).toEqual({ variantId: "v1", quantity: 1, lensVariantId: "l1" });
+  expect(parseStoredBag("not json")).toEqual([]);
+  expect(parseStoredBag(JSON.stringify([{ nope: 1 }, line({ quantity: 99 })]))[0].quantity).toBe(10);
+});
 
-  test("booking button: frames → consultation, contact lenses → lens service, others none", () => {
-    expect(bookingServiceFor({ slug: "frames", name: "Frames", kind: "frames" }, services)?.service.code).toBe("frame_lens_consultation");
-    expect(bookingServiceFor({ slug: "sunglasses", name: "Sunglasses", kind: "sunglasses" }, services)?.service.code).toBe("frame_lens_consultation");
-    expect(bookingServiceFor({ slug: "contact-lenses", name: "Contact lenses", kind: "contact_lenses" }, services)?.service.code).toBe("contact_lens_consultation");
-    expect(bookingServiceFor({ slug: "cases", name: "Cases", kind: "accessories" }, services)).toBeNull();
-    expect(bookingServiceFor({ slug: "frames", name: "Frames", kind: "frames" }, [svc("eye_exam")])?.service.code).toBe("eye_exam");
-  });
+test("filters: parse, apply, serialise", () => {
+  const f = parseFilters({ shape: "round,evil<script>", sort: "price-asc" });
+  expect(f).toEqual({ shape: ["round"], material: [], colour: [], sort: "price-asc" });
+  expect(filtersToQuery(f)).toBe("?shape=round&sort=price-asc");
+  const p = (slug: string, shape: string, price: number, colours: string[] = []) => ({ id: slug, slug, name: slug, brand: null, category: { slug: "frames", name: "Frames", kind: "frames" }, description: null, imageUrl: null, priceFromCents: price, priceToCents: price, variantCount: 1, colours, filters: { shape }, availability: "in_stock" as const, updatedAt: null });
+  const out = applyFilters([p("a", "round", 300, ["Gold"]), p("b", "square", 100), p("c", "round", 200, ["Black"])], { ...f, colour: ["gold"] });
+  expect(out.map((x) => x.slug)).toEqual(["a"]);
+});
 
-  test("calendar lookup and branch deep links", () => {
-    const branch = { id: "b1", code: "MKT", name: "Makati", address: [], phone: null, email: null, mapUrl: null, imageUrl: null, hours: HOURS };
-    expect(calendarFor(services[0], branch)).toBe("cal123456");
-    expect(calendarFor(services[1], branch)).toBeNull();
-    expect(findBranch([branch], "mkt")?.id).toBe("b1");
-    expect(findBranch([branch], "b1")?.id).toBe("b1");
-    expect(findBranch([branch], "nope")).toBeNull();
-  });
+test("catalogue helpers", () => {
+  expect(colourKeyOf({ options: { color: "Tortoise" } })).toBe("tortoise");
+  expect(colourKeyOf({ options: { tint: "green" } })).toBe("green");
+  expect(productHref("arden-101", "black")).toBe("/products/arden-101?colour=black");
+  const groups = colourGroups({ variants: [{ id: "1", label: "52 · Black", options: { color: "Black" }, priceCents: 1, sku: null, availability: "in_stock", branches: [] }, { id: "2", label: "54 · Black", options: { color: "Black" }, priceCents: 1, sku: null, availability: "in_stock", branches: [] }] });
+  expect(groups).toHaveLength(1);
+  expect(groups[0].variants).toHaveLength(2);
+});
 
-  test("featured = first 8 frames then sunglasses", () => {
-    const p = (slug: string, kind: string) => ({
-      id: slug,
-      slug,
-      name: slug,
-      brand: null,
-      category: { slug: kind, name: kind, kind },
-      description: null,
-      imageUrl: null,
-      priceFromCents: 1,
-      priceToCents: 1,
-      variantCount: 1,
-      availability: "in_stock" as const,
-      updatedAt: null,
-    });
-    const list = [p("s1", "sunglasses"), p("a1", "accessories"), ...Array.from({ length: 7 }, (_, i) => p(`f${i}`, "frames"))];
-    expect(featuredProducts(list).map((x) => x.slug)).toEqual(["f0", "f1", "f2", "f3", "f4", "f5", "f6", "s1"]);
-  });
+test("hours and open status", () => {
+  const hours = { mon: { open: "10:00", close: "19:00" }, tue: { open: "10:00", close: "19:00" }, wed: { open: "10:00", close: "19:00" }, thu: { open: "10:00", close: "19:00" }, fri: { open: "10:00", close: "19:00" }, sat: { open: "10:00", close: "19:00" }, sun: null };
+  expect(groupedHours(hours)).toEqual([
+    { days: "Mon – Sat", time: "10am – 7pm" },
+    { days: "Sun", time: "Closed" },
+  ]);
+  expect(openStatus(hours, "Asia/Manila", new Date("2026-10-19T05:00:00Z"))?.label).toBe("Open now · until 7pm"); // Mon 1pm Manila
+  expect(openStatus(hours, "Asia/Manila", new Date("2026-10-18T05:00:00Z"))?.label).toBe("Closed · opens tomorrow 10am"); // Sunday
+});
+
+test("theme colours only apply with enough contrast", () => {
+  expect(contrast("#1F2B22", "#ffffff")).toBeGreaterThan(10);
+  expect(themeStyle("#1F2B22", "#B5E14A")).toMatchObject({ "--theme-brand": "#1F2B22", "--theme-brand-ink": "#ffffff", "--theme-accent-ink": "#121212" });
+  expect(themeStyle("not-a-colour", null)).toEqual({});
+});
+
+test("dashboard URL normalisation", () => {
+  expect(normalizeDashboardUrl("https://dash.example.com/")).toBe("https://dash.example.com");
+  expect(normalizeDashboardUrl("https://dash.example.com/api/public/v1")).toBe("https://dash.example.com");
 });

@@ -1,8 +1,0 @@
-product_name,brand,category,type,supplier_code,sku,barcode,variant_label,price,cost,reorder_point,reorder_qty,tax_exempt,active,description
-Arden 101,Arden,Frames,stock,ARD,ARD-101-52-BK,,52 · Black,2950.00,,2,4,no,yes,Hand-polished acetate rectangle frame.
-Arden 101,Arden,Frames,stock,ARD,ARD-101-54-TO,,54 · Tortoise,3150.00,,2,4,no,yes,Hand-polished acetate rectangle frame.
-New Frame X,Kiyo,Frames,stock,KIY,KIY-X-50,,50 · Black,2800.00,,1,2,no,yes,"Brand new frame, with a comma"
-Old Frame,Kiyo,Frames,stock,KIY,KIY-OLD,,Default,1000.00,,0,0,no,no,Discontinued
-Eye exam,,Services,service,,SV-EXAM,,Default,500.00,,0,0,yes,yes,Comprehensive eye exam
-Single vision lens,,Rx lenses,made_to_order,,RX-SV,,Default,1500.00,,0,0,no,yes,Made to order
-Lens cloth,Lensmere,Cleaning,stock,,ACC-CLOTH,,Default,150.00,,5,10,no,yes,Microfiber cloth

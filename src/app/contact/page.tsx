@@ -1,98 +1,67 @@
-import "@/styles/pages/contact.css";
-import type { Metadata } from "next";
-import { Icon } from "@/components/Icon";
-import { InquiryForm } from "@/components/InquiryForm";
-import { PageIntro } from "@/components/SectionHead";
+import { GhlInquiryForm } from "@/components/GhlEmbeds";
 import { getSite } from "@/lib/api";
-import { groupedHours, telHref } from "@/lib/format";
+import { telHref } from "@/lib/format";
 import { pageMetadata } from "@/lib/seo";
-import { REPLY_TIME } from "@/lib/site-settings";
 
-export const revalidate = 60;
+export const metadata = pageMetadata({ title: "Contact us", description: "Send us a message or call a branch.", path: "/contact" });
 
-export const metadata: Metadata = pageMetadata({
-  title: "Contact us",
-  description: "Questions about eye exams, glasses, contact lenses or an order? Send us a message or call a branch.",
-  path: "/contact",
-});
+/* The message form is the business's own GoHighLevel form: submissions go straight to GoHighLevel. */
 
-export default async function ContactPage() {
-  const result = await getSite();
-  const site = result.ok ? result.data : null;
-  const b = site?.business;
-
+export default async function ContactPage(props: PageProps<"/contact">) {
+  const [site, search] = await Promise.all([getSite(), props.searchParams]);
+  const b = site.ok ? site.data.business : null;
+  const branches = site.ok ? site.data.branches : [];
+  const product = typeof search.product === "string" ? search.product.slice(0, 200) : null;
   return (
-    <>
-      <PageIntro eyebrow="Contact" title="Ask us anything.">
-        Questions about an exam, a frame you saw, an order in progress or your contact lenses — send a message and we&apos;ll reply, {REPLY_TIME}.
-      </PageIntro>
-      <section>
-        <div className="oc-container oc-contact">
-          <div>
-            {/* The form posts to this site's /api/inquiry, which forwards it to the dashboard — it
-                works even while the business profile below can't be loaded. */}
-            <InquiryForm kind="contact" title="Website inquiry form" branches={(site?.branches ?? []).map((br) => ({ id: br.id, name: br.name }))} phone={b?.phone ?? null} />
-            <p className="oc-contact__routing">Messages reach our customer team, who pass them to your preferred branch.</p>
-          </div>
-          <div>
-            {b && (b.phone || b.email) ? (
-              <>
-                <p className="oc-eyebrow">Reach us directly</p>
-                <div className="oc-contact__direct">
-                  {b.phone ? (
-                    <p>
-                      <Icon name="phone" className="oc-icon--muted" />
-                      <a href={telHref(b.phone)}>{b.phone}</a>
-                    </p>
-                  ) : null}
-                  {b.email ? (
-                    <p>
-                      <Icon name="mail" className="oc-icon--muted" />
-                      <a href={`mailto:${b.email}`}>{b.email}</a>
-                    </p>
-                  ) : null}
-                </div>
-              </>
-            ) : null}
-            {!site ? (
-              <p className="oc-notice" role="note" data-api-state={result.ok ? "unavailable" : result.reason}>
-                <span>Our branch details are temporarily unavailable. You can still send us a message with the form.</span>
-              </p>
-            ) : null}
-            {(site?.branches ?? []).map((br) => (
-              <div className="oc-contact-branch" key={br.id}>
-                <h2 className="oc-contact-branch__name">{br.name}</h2>
-                {br.address.length ? (
-                  <p className="oc-contact-branch__line">
-                    <Icon name="pin" />
-                    <span>
-                      {br.address.join(", ")}
-                      {br.mapUrl ? (
-                        <>
-                          {" · "}
-                          <a className="oc-text-link" href={br.mapUrl} target="_blank" rel="noopener">
-                            Map<span className="oc-sr-only"> (opens in a new tab)</span>
-                          </a>
-                        </>
-                      ) : null}
-                    </span>
-                  </p>
-                ) : null}
+    <div className="wrap">
+      <header className="page-head">
+        <h1>Contact us</h1>
+        <p>
+          {product
+            ? `Ask about ${product}: availability, sizing, lenses or anything else. Mention the frame in your message so we know which one you mean.`
+            : "Questions about frames, lenses, an order or an appointment? Send us a message."}
+        </p>
+      </header>
+      <div className="split">
+        <div className="split__aside" style={{ display: "grid", gap: 18, alignContent: "start" }}>
+          {b?.phone ? (
+            <p>
+              <span className="eyebrow" style={{ display: "block" }}>
+                Call
+              </span>
+              <a href={telHref(b.phone)} className="link" style={{ fontSize: 20 }}>
+                {b.phone}
+              </a>
+            </p>
+          ) : null}
+          {b?.email ? (
+            <p>
+              <span className="eyebrow" style={{ display: "block" }}>
+                Email
+              </span>
+              <a href={`mailto:${b.email}`} className="link" style={{ fontSize: 20 }}>
+                {b.email}
+              </a>
+            </p>
+          ) : null}
+          <ul style={{ display: "grid", gap: 10 }}>
+            {branches.map((br) => (
+              <li key={br.id}>
+                <strong style={{ fontWeight: 500 }}>{br.name}</strong>
                 {br.phone ? (
-                  <p className="oc-contact-branch__line">
-                    <Icon name="phone" />
-                    <a href={telHref(br.phone)}>{br.phone}</a>
-                  </p>
+                  <>
+                    {" · "}
+                    <a href={telHref(br.phone)} className="link">
+                      {br.phone}
+                    </a>
+                  </>
                 ) : null}
-                <p className="oc-contact-branch__line">
-                  <Icon name="clock" />
-                  <span>{groupedHours(br.hours).map((g) => `${g.days} ${g.time}`).join(" · ")}</span>
-                </p>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
-      </section>
-    </>
+        <GhlInquiryForm />
+      </div>
+    </div>
   );
 }

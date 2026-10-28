@@ -15,9 +15,7 @@
     "fixtures": "node tests/fixtures/api-server.mjs",
     "test:build": "node tests/fixtures/build-with-fixtures.mjs",
     "test:e2e": "playwright test",
-    "test": "npm run test:build && npm run test:e2e",
-    "screenshots": "node tests/tools/screenshots.mjs",
-    "compare": "node tests/tools/compare.mjs"
+    "test": "npm run test:build && npm run test:e2e"
   },
   "dependencies": {
     "next": "16.4.1",

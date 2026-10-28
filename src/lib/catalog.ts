@@ -1,87 +1,107 @@
-import type { Branch, CategoryRef, Interest, ProductSummary, Service } from "./api-types";
+import type { CategoryRef, ProductDetail, ProductSummary, ProductVariant } from "./api-types";
 
-/* How the API's data maps onto the existing page sections. Client-safe (no server APIs). */
+/*
+ * How the dashboard's categories map onto the store's collections, and the colour/size vocabulary
+ * shared by tiles, filters and product pages. Client-safe (no server APIs, no secrets).
+ */
 
-function kindOf(c: { kind: string; slug: string }): string {
-  return `${c.kind} ${c.slug}`.toLowerCase().replace(/-/g, "_");
-}
-export function isContactLens(c: { kind: string; slug: string }): boolean {
-  return kindOf(c).includes("contact");
-}
-export function isSunglasses(c: { kind: string; slug: string }): boolean {
-  return kindOf(c).includes("sunglass");
-}
-export function isFrames(c: { kind: string; slug: string }): boolean {
-  return !isSunglasses(c) && kindOf(c).includes("frame");
-}
+export type CollectionKey = "glasses" | "sunglasses" | "contact-lenses" | "accessories";
 
-/** Frames, then sunglasses, keeping the API's order within each (the API has no "featured" flag). */
-export function eyewearFirst(products: ProductSummary[]): ProductSummary[] {
-  return [...products.filter((p) => isFrames(p.category)), ...products.filter((p) => isSunglasses(p.category))];
+export interface Collection {
+  key: CollectionKey;
+  title: string;
+  path: string;
+  /** Dashboard category kinds that belong to this collection. */
+  kinds: string[];
+  /** Plural noun for the count line: "20 frames". */
+  noun: [string, string];
+  filters: ("shape" | "material" | "colour")[];
 }
 
-/** Home "Eyewear" row: the first 8 frames + sunglasses. */
-export function featuredProducts(products: ProductSummary[]): ProductSummary[] {
-  return eyewearFirst(products).slice(0, 8);
+export const COLLECTIONS: Record<CollectionKey, Collection> = {
+  glasses: { key: "glasses", title: "Glasses", path: "/glasses", kinds: ["frames"], noun: ["frame", "frames"], filters: ["shape", "material", "colour"] },
+  sunglasses: { key: "sunglasses", title: "Sunglasses", path: "/sunglasses", kinds: ["sunglasses"], noun: ["pair", "pairs"], filters: ["shape"] },
+  "contact-lenses": { key: "contact-lenses", title: "Contact lenses", path: "/contact-lenses", kinds: ["contact_lenses"], noun: ["product", "products"], filters: [] },
+  accessories: { key: "accessories", title: "Accessories & care", path: "/accessories", kinds: ["cleaning", "cases", "accessories"], noun: ["product", "products"], filters: [] },
+};
+
+export function collectionOf(category: CategoryRef): Collection | null {
+  return Object.values(COLLECTIONS).find((c) => c.kinds.includes(category.kind)) ?? null;
 }
 
-/** Hero art: the first three products that have an image (eyewear first). */
-export function heroProducts(products: ProductSummary[]): ProductSummary[] {
-  const eyewear = eyewearFirst(products);
-  const rest = products.filter((p) => !eyewear.includes(p));
-  return [...eyewear, ...rest].filter((p) => p.imageUrl).slice(0, 3);
+export function inCollection(p: ProductSummary, c: Collection): boolean {
+  return c.kinds.includes(p.category.kind);
 }
 
-/** Booking service for a product page: frames/sunglasses → consultation, contact lenses → lens service. */
-export function bookingServiceFor(category: CategoryRef, services: Service[]): { service: Service; label: string } | null {
-  if (!services.length) return null;
-  const code = (s: Service) => s.code.toLowerCase();
-  if (isContactLens(category)) {
-    const s = services.find((x) => code(x).includes("contact_lens")) ?? services[0];
-    return { service: s, label: "Book a lens consultation" };
+export const isFrame = (c: CategoryRef) => c.kind === "frames";
+export const isSunglasses = (c: CategoryRef) => c.kind === "sunglasses";
+export const isContactLens = (c: CategoryRef) => c.kind === "contact_lenses";
+
+/* ── Colours ─────────────────────────────────────────────────────────────────────────────────── */
+
+/** A variant's colour key: the frame colour, or the lens tint for sunglasses ("tortoise", "green"). */
+export function colourKeyOf(v: Pick<ProductVariant, "options">): string | null {
+  const c = v.options.color ?? v.options.colour ?? v.options.tint;
+  return c ? c.trim().toLowerCase() : null;
+}
+
+const COLOUR_NAMES: Record<string, string> = {
+  black: "Black",
+  tortoise: "Tortoise",
+  crystal: "Crystal",
+  gold: "Gold",
+  silver: "Silver",
+  green: "Green lens",
+  smoke: "Smoke lens",
+  brown: "Brown lens",
+};
+export const colourName = (key: string) => COLOUR_NAMES[key] ?? key.charAt(0).toUpperCase() + key.slice(1);
+
+/** Swatch fill: a flat colour, or a small pattern for tortoiseshell. */
+export const SWATCH: Record<string, string> = {
+  black: "#141414",
+  tortoise: "url(/media/swatches/tortoise.svg)",
+  crystal: "#ebe8e1",
+  gold: "#cba663",
+  silver: "#c7c8ca",
+  green: "#3e4b3b",
+  smoke: "#47474a",
+  brown: "#6b4426",
+};
+
+/** Colour keys in the order the variants list them, each with the variants of that colour. */
+export function colourGroups(p: Pick<ProductDetail, "variants">): { key: string; variants: ProductVariant[] }[] {
+  const groups = new Map<string, ProductVariant[]>();
+  for (const v of p.variants) {
+    const key = colourKeyOf(v) ?? "default";
+    groups.set(key, [...(groups.get(key) ?? []), v]);
   }
-  if (isFrames(category) || isSunglasses(category)) {
-    const s = services.find((x) => code(x).includes("consult") && !code(x).includes("contact_lens")) ?? services.find((x) => code(x).includes("consult")) ?? services[0];
-    return { service: s, label: "Book a fitting" };
-  }
-  return null;
+  return [...groups.entries()].map(([key, variants]) => ({ key, variants }));
 }
 
-export function interestForCategory(category: CategoryRef): Interest {
-  if (isContactLens(category)) return "contact_lenses";
-  if (isSunglasses(category)) return "sunglasses";
-  if (isFrames(category)) return "frames";
-  return "other";
-}
+/** Colour keys for a summary (frames list their colours; other products have none). */
+export const summaryColourKeys = (p: ProductSummary) => p.colours.map((c) => c.trim().toLowerCase());
 
-export function interestForService(service: Service | null): Interest {
-  const c = service?.code.toLowerCase() ?? "";
-  if (c.includes("contact_lens")) return "contact_lenses";
-  if (c.includes("exam")) return "eye_exam";
-  if (c.includes("repair") || c.includes("adjust")) return "repair";
-  if (c.includes("consult")) return "prescription_glasses";
-  return "eye_exam";
-}
+/* ── Shapes & sizes ──────────────────────────────────────────────────────────────────────────── */
 
-/** A deep-link value (?branch=) may be a branch id or its code (case-insensitive). */
-export function findBranch(branches: Branch[], value: string | null | undefined): Branch | null {
-  if (!value) return null;
-  const v = value.toLowerCase();
-  return branches.find((b) => b.id.toLowerCase() === v || (b.code ?? "").toLowerCase() === v) ?? null;
-}
+export const SHAPE_LABELS: Record<string, string> = {
+  rectangle: "Rectangle",
+  square: "Square",
+  round: "Round",
+  oval: "Oval",
+  cateye: "Cat-eye",
+  aviator: "Aviator",
+  hexagon: "Hexagonal",
+  browline: "Browline",
+};
+export const MATERIAL_LABELS: Record<string, string> = { acetate: "Acetate", metal: "Metal" };
+export const label = (map: Record<string, string>, key: string | undefined) => (key ? (map[key] ?? key.charAt(0).toUpperCase() + key.slice(1)) : "");
 
-/** A deep-link value (?service=) is a service code (or id). */
-export function findService(services: Service[], value: string | null | undefined): Service | null {
-  if (!value) return null;
-  const v = value.toLowerCase();
-  return services.find((s) => s.code.toLowerCase() === v || s.id.toLowerCase() === v) ?? null;
-}
+/** "52" → "52 mm" lens width, the size the frame is sold in. */
+export const sizeLabel = (size: string) => (/^\d+$/.test(size) ? `${size} mm` : size);
 
-export function branchParam(b: Branch): string {
-  return b.code ? b.code.toLowerCase() : b.id;
-}
+/* ── Links ───────────────────────────────────────────────────────────────────────────────────── */
 
-export function calendarFor(service: Service | null, branch: Branch | null): string | null {
-  if (!service || !branch) return null;
-  return service.calendars.find((c) => c.branchId === branch.id)?.calendarId ?? null;
+export function productHref(slug: string, colourKey?: string | null): string {
+  return colourKey && colourKey !== "default" ? `/products/${slug}?colour=${encodeURIComponent(colourKey)}` : `/products/${slug}`;
 }

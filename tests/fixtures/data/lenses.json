@@ -1,0 +1,62 @@
+[
+  {
+    "variantId": "3ac818a6-30fe-4527-bc69-748a6da26c30",
+    "productId": "517fcfbb-7933-4e21-8922-8c480fac6949",
+    "name": "Single Vision 1.56 (pair)",
+    "description": "Made to your prescription at our partner laboratory.",
+    "priceCents": 150000,
+    "type": "single_vision",
+    "features": []
+  },
+  {
+    "variantId": "282a4210-cb23-4fa4-bd96-ccd7f60e6188",
+    "productId": "35d169d2-1b7b-4c8a-a741-9f20f8461a55",
+    "name": "Single Vision Blue-light Filter (pair)",
+    "description": "Made to your prescription at our partner laboratory.",
+    "priceCents": 280000,
+    "type": "single_vision",
+    "features": [
+      "blue_light"
+    ]
+  },
+  {
+    "variantId": "4bc45de8-8a08-40a5-94af-e8269fcb436b",
+    "productId": "1e0ea9ec-faac-45a0-a62a-0650d9b26403",
+    "name": "Bifocal Flat-top (pair)",
+    "description": "Made to your prescription at our partner laboratory.",
+    "priceCents": 380000,
+    "type": "bifocal",
+    "features": []
+  },
+  {
+    "variantId": "a58cd08d-9f9a-45b2-bfb1-a62ad2ec0f9a",
+    "productId": "c5f42b3b-6d96-40e2-afe7-f1abf209a3ce",
+    "name": "Single Vision Thin 1.67 (pair)",
+    "description": "Made to your prescription at our partner laboratory.",
+    "priceCents": 450000,
+    "type": "single_vision",
+    "features": [
+      "thin"
+    ]
+  },
+  {
+    "variantId": "08e5ef07-4731-4617-a0c5-054c8b21f899",
+    "productId": "457e1072-79dc-4142-96f6-16e343f00005",
+    "name": "Photochromic Single Vision (pair)",
+    "description": "Made to your prescription at our partner laboratory.",
+    "priceCents": 520000,
+    "type": "single_vision",
+    "features": [
+      "photochromic"
+    ]
+  },
+  {
+    "variantId": "b3b4af58-9b28-4c63-9dac-aa2d37de953f",
+    "productId": "fd6d785a-385d-4066-a8f4-240f5ebbbce3",
+    "name": "Progressive Multifocal (pair)",
+    "description": "Made to your prescription at our partner laboratory.",
+    "priceCents": 950000,
+    "type": "progressive",
+    "features": []
+  }
+]

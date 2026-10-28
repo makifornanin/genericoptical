@@ -3,12 +3,12 @@
     "name": "Lensmere Optical",
     "legalName": "Lensmere Optical Co. (demo)",
     "tagline": "Eye care & eyewear",
-    "description": "Comprehensive eye examinations, prescription eyewear and contact lens fittings across three branches.",
+    "description": "A fictional three-branch optical business used to demonstrate the platform.",
     "logoUrl": null,
     "phone": "+63 2 8000 0100",
     "email": "hello@lensmere.example",
     "address": "2F Linden Arcade, 118 Lumen Street, Makati City",
-    "website": null,
+    "website": "https://lensmere.example",
     "timezone": "Asia/Manila",
     "currency": "PHP",
     "locale": "en-PH",
@@ -19,11 +19,11 @@
     "isDemo": true
   },
   "content": {
-    "heroEyebrow": null,
+    "heroEyebrow": "Eye care & eyewear",
     "heroTitle": "Clear vision, unhurried care, and frames that feel like you.",
     "heroBody": "Comprehensive eye examinations, prescription eyewear and contact lens fittings across three branches — with optometrists who take the time to explain your options.",
     "aboutTitle": "It starts with listening.",
-    "aboutBody": "Choosing eyewear is about more than picking a frame. We begin with a thorough examination, explain what we find in plain language, and help you weigh lens and frame options against how you actually live — screens, sport, driving, reading.\n\nFrom the first check to the final fitting, every visit is meant to feel considered and never rushed.",
+    "aboutBody": "Choosing eyewear is about more than picking a frame. We begin with a thorough examination, explain what we find in plain language, and help you weigh lens and frame options against how you actually live — screens, sport, driving, reading. From the first check to the final fitting, every visit is meant to feel considered and never rushed.",
     "values": [
       {
         "title": "Thorough eye exams",
@@ -61,7 +61,7 @@
       },
       {
         "question": "Do you fit contact lenses for first-time wearers?",
-        "answer": "Yes. A contact lens consultation includes measurements, trial lenses and a lesson on safe handling and care."
+        "answer": "Yes. A contact lens fitting includes measurements, trial lenses and a lesson on safe handling and care."
       },
       {
         "question": "Is there a warranty on frames?",
@@ -72,7 +72,7 @@
   },
   "branches": [
     {
-      "id": "74cdd666-0b33-4e70-9760-932ffbe5e489",
+      "id": "a257277d-943a-4924-b165-ee5259c440aa",
       "code": "MKT",
       "name": "Makati",
       "address": [
@@ -80,27 +80,15 @@
         "Makati City"
       ],
       "phone": "+63 2 8000 0101",
-      "email": "makati@lensmere.example",
+      "email": "mkt@lensmere.example",
       "mapUrl": null,
       "imageUrl": null,
       "hours": {
-        "mon": {
-          "open": "10:00",
-          "close": "19:00"
-        },
-        "tue": {
-          "open": "10:00",
-          "close": "19:00"
-        },
-        "wed": {
-          "open": "10:00",
-          "close": "19:00"
-        },
-        "thu": {
-          "open": "10:00",
-          "close": "19:00"
-        },
         "fri": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "mon": {
           "open": "10:00",
           "close": "19:00"
         },
@@ -111,11 +99,23 @@
         "sun": {
           "open": "11:00",
           "close": "17:00"
+        },
+        "thu": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "tue": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "wed": {
+          "open": "10:00",
+          "close": "19:00"
         }
       }
     },
     {
-      "id": "e2aa75b5-de4b-4b8e-bfb0-58906ce62a17",
+      "id": "ae9c02e1-91b8-420e-98a7-1446ef2326e2",
       "code": "QC",
       "name": "Quezon City",
       "address": [
@@ -123,27 +123,15 @@
         "Quezon City"
       ],
       "phone": "+63 2 8000 0102",
-      "email": "quezon-city@lensmere.example",
+      "email": "qc@lensmere.example",
       "mapUrl": null,
       "imageUrl": null,
       "hours": {
-        "mon": {
-          "open": "10:00",
-          "close": "19:00"
-        },
-        "tue": {
-          "open": "10:00",
-          "close": "19:00"
-        },
-        "wed": {
-          "open": "10:00",
-          "close": "19:00"
-        },
-        "thu": {
-          "open": "10:00",
-          "close": "19:00"
-        },
         "fri": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "mon": {
           "open": "10:00",
           "close": "19:00"
         },
@@ -154,11 +142,23 @@
         "sun": {
           "open": "11:00",
           "close": "17:00"
+        },
+        "thu": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "tue": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "wed": {
+          "open": "10:00",
+          "close": "19:00"
         }
       }
     },
     {
-      "id": "0370b397-165e-4773-97cd-110864aea832",
+      "id": "f8f86ba1-255e-4fed-9194-71ac52d95c4f",
       "code": "PSG",
       "name": "Pasig",
       "address": [
@@ -166,27 +166,15 @@
         "Pasig City"
       ],
       "phone": "+63 2 8000 0103",
-      "email": "pasig@lensmere.example",
+      "email": "psg@lensmere.example",
       "mapUrl": null,
       "imageUrl": null,
       "hours": {
-        "mon": {
-          "open": "10:00",
-          "close": "19:00"
-        },
-        "tue": {
-          "open": "10:00",
-          "close": "19:00"
-        },
-        "wed": {
-          "open": "10:00",
-          "close": "19:00"
-        },
-        "thu": {
-          "open": "10:00",
-          "close": "19:00"
-        },
         "fri": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "mon": {
           "open": "10:00",
           "close": "19:00"
         },
@@ -197,71 +185,120 @@
         "sun": {
           "open": "11:00",
           "close": "17:00"
+        },
+        "thu": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "tue": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "wed": {
+          "open": "10:00",
+          "close": "19:00"
         }
       }
     }
   ],
   "services": [
     {
-      "id": "0f9e7348-b123-472c-a7ad-e64bd1f9fb5d",
+      "id": "cc071645-a626-477b-b52c-3a830d63ac08",
       "code": "eye_exam",
       "name": "Comprehensive eye exam",
-      "description": "Refraction, eye-health screening and a clear explanation of your prescription.",
+      "description": "Refraction, eye-health screening and prescription.",
       "durationMinutes": 45,
       "priceCents": 50000,
-      "calendars": [
-        {
-          "branchId": "74cdd666-0b33-4e70-9760-932ffbe5e489",
-          "calendarId": "FixtureEyeExamMKT01"
-        }
-      ]
+      "calendars": []
     },
     {
-      "id": "313f0b8d-c8ef-473b-b514-6a4dd053e38f",
-      "code": "contact_lens_consultation",
-      "name": "Contact lens consultation",
-      "description": "Measurements, trial lenses and a handling lesson — for first-time and experienced wearers.",
+      "id": "a264b1ed-7153-4b8d-87ab-3dd270a747d3",
+      "code": "contact_lens_fitting",
+      "name": "Contact lens fitting",
+      "description": "Measurements, trial lenses and handling lesson.",
       "durationMinutes": 30,
       "priceCents": 80000,
       "calendars": []
     },
     {
-      "id": "ab0254f8-148f-4f78-b63d-4ce286c3c2d7",
-      "code": "frame_lens_consultation",
+      "id": "9f6c22fa-b803-45a4-a726-4596dd96d84c",
+      "code": "frame_consultation",
       "name": "Frame & lens consultation",
-      "description": "Help choosing frames and lens options for how you work, drive and read.",
+      "description": "Help choosing frames and lens options.",
       "durationMinutes": 30,
-      "priceCents": 0,
+      "priceCents": null,
       "calendars": []
     }
   ],
   "inBranchServices": [
     {
-      "id": "91bb51d3-cde4-4afc-9e91-e1827c168ade",
-      "name": "Single-vision prescription lenses",
-      "description": "Made to your prescription by our partner laboratory. Ready in 3–5 days.",
+      "id": "1e0ea9ec-faac-45a0-a62a-0650d9b26403",
+      "name": "Bifocal Flat-top (pair)",
+      "description": "Made to your prescription at our partner laboratory.",
+      "priceCents": 380000,
+      "fromPrice": false
+    },
+    {
+      "id": "91e63bc2-3387-4896-b20b-d39ddd19e772",
+      "name": "Comprehensive Eye Examination",
+      "description": "Comprehensive Eye Examination",
+      "priceCents": 50000,
+      "fromPrice": false
+    },
+    {
+      "id": "82148fe3-512f-4f64-80e8-fb744897e00f",
+      "name": "Contact Lens Fitting",
+      "description": "Contact Lens Fitting",
+      "priceCents": 80000,
+      "fromPrice": false
+    },
+    {
+      "id": "753fcf49-b97a-4482-bcbf-bd285fb46826",
+      "name": "Frame Adjustment & Minor Repair",
+      "description": "Frame Adjustment & Minor Repair",
+      "priceCents": 20000,
+      "fromPrice": false
+    },
+    {
+      "id": "a220970c-9d85-4adb-97cf-cc491771026e",
+      "name": "Lens Replacement Fitting",
+      "description": "Lens Replacement Fitting",
+      "priceCents": 30000,
+      "fromPrice": false
+    },
+    {
+      "id": "457e1072-79dc-4142-96f6-16e343f00005",
+      "name": "Photochromic Single Vision (pair)",
+      "description": "Made to your prescription at our partner laboratory.",
+      "priceCents": 520000,
+      "fromPrice": false
+    },
+    {
+      "id": "fd6d785a-385d-4066-a8f4-240f5ebbbce3",
+      "name": "Progressive Multifocal (pair)",
+      "description": "Made to your prescription at our partner laboratory.",
+      "priceCents": 950000,
+      "fromPrice": false
+    },
+    {
+      "id": "517fcfbb-7933-4e21-8922-8c480fac6949",
+      "name": "Single Vision 1.56 (pair)",
+      "description": "Made to your prescription at our partner laboratory.",
       "priceCents": 150000,
-      "fromPrice": true
+      "fromPrice": false
     },
     {
-      "id": "dae5ce5c-e7e2-455f-a0d0-3018cdc5a464",
-      "name": "Progressive lenses",
-      "description": "Near, intermediate and distance in one lens, measured and fitted in branch. Ready in 5–7 days.",
+      "id": "35d169d2-1b7b-4c8a-a741-9f20f8461a55",
+      "name": "Single Vision Blue-light Filter (pair)",
+      "description": "Made to your prescription at our partner laboratory.",
+      "priceCents": 280000,
+      "fromPrice": false
+    },
+    {
+      "id": "c5f42b3b-6d96-40e2-afe7-f1abf209a3ce",
+      "name": "Single Vision Thin 1.67 (pair)",
+      "description": "Made to your prescription at our partner laboratory.",
       "priceCents": 450000,
-      "fromPrice": true
-    },
-    {
-      "id": "77b98505-388e-48cc-9432-994015494369",
-      "name": "Lens replacement",
-      "description": "New lenses in the frame you already love. Bring your frame and prescription; we check the frame's condition first.",
-      "priceCents": 120000,
-      "fromPrice": true
-    },
-    {
-      "id": "d0becedb-6f8d-4e8a-81b4-643845661564",
-      "name": "Frame adjustment & repairs",
-      "description": "Free adjustments for any frame bought from us; screws, nose pads and hinge repairs while you wait where possible.",
-      "priceCents": null,
       "fromPrice": false
     }
   ],
@@ -287,25 +324,35 @@
     {
       "slug": "cleaning-care",
       "name": "Cleaning & care",
-      "kind": "accessories",
-      "productCount": 3
+      "kind": "cleaning",
+      "productCount": 5
     },
     {
       "slug": "cases",
       "name": "Cases",
-      "kind": "accessories",
-      "productCount": 1
+      "kind": "cases",
+      "productCount": 3
     },
     {
       "slug": "accessories",
       "name": "Accessories",
       "kind": "accessories",
-      "productCount": 1
+      "productCount": 4
     }
   ],
   "booking": {
     "widgetBase": "https://api.leadconnectorhq.com/widget/booking/",
-    "ghlConnected": true
+    "ghlConnected": false
   },
-  "generatedAt": "2026-10-15T09:00:00.000Z"
+  "ordering": {
+    "enabled": true,
+    "fulfilment": [
+      "pickup"
+    ],
+    "paymentOptions": [
+      "demo_card",
+      "pay_at_pickup"
+    ],
+    "demoPayments": true
+  }
 }

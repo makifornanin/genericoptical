@@ -1,68 +1,71 @@
-import "@/styles/oc-base.css";
-import "@/styles/app.css";
+import "@/styles/tokens.css";
+import "@/styles/base.css";
+import "@/styles/components.css";
+import "@/styles/pages.css";
 import type { Metadata, Viewport } from "next";
-import { Instrument_Sans, Inter_Tight } from "next/font/google";
+import { Host_Grotesk } from "next/font/google";
 import type { ReactNode } from "react";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader, type Banner } from "@/components/SiteHeader";
+import { AddedToBag } from "@/components/AddedToBag";
+import { BagProvider } from "@/components/BagProvider";
+import { GhlChat } from "@/components/GhlEmbeds";
+import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
 import { getSite } from "@/lib/api";
-import type { SiteData } from "@/lib/api-types";
+import { DEMO_NOTICE } from "@/lib/content";
 import { siteUrl } from "@/lib/env";
 import { shouldNoindex } from "@/lib/seo";
-import { FALLBACK_BRAND, HEADER_CTA, NAV, PROMO, SHOW_DEMO_NOTICE } from "@/lib/site-settings";
 import { themeStyle } from "@/lib/theme";
 
-// Self-hosted by next/font at build time (no request to Google from the visitor's browser).
-const interTight = Inter_Tight({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-inter-tight", display: "swap" });
-const instrumentSans = Instrument_Sans({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-instrument-sans", display: "swap" });
+// Self-hosted by next/font at build time: visitors' browsers never contact Google.
+const host = Host_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-host", display: "swap" });
 
 export const revalidate = 60;
+const FALLBACK_NAME = "Optical store";
 
-export const viewport: Viewport = {
-  themeColor: "#f6f6f3",
-};
+export const viewport: Viewport = { themeColor: "#ffffff" };
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSite();
-  const business = site.ok ? site.data.business : null;
-  const name = business?.name ?? FALLBACK_BRAND;
-  const tagline = business?.tagline;
-  const description = business?.description ?? "Eye examinations, prescription eyewear, sunglasses and contact lenses — book online or visit a branch.";
+  const b = site.ok ? site.data.business : null;
+  const name = b?.name ?? FALLBACK_NAME;
   const noindex = await shouldNoindex();
   return {
     metadataBase: new URL(siteUrl()),
-    title: { default: tagline ? `${name} — ${tagline}` : name, template: `%s · ${name}` },
-    description,
+    title: { default: b?.tagline ? `${name} — ${b.tagline}` : name, template: `%s · ${name}` },
+    description: "Prescription glasses, sunglasses and contact lenses. Order online and collect in branch, or book an eye exam.",
     applicationName: name,
     icons: { icon: "/brand/favicon.ico" },
-    openGraph: { type: "website", siteName: name, locale: business?.locale.replace("-", "_") },
+    openGraph: { type: "website", siteName: name, locale: b?.locale.replace("-", "_") },
     formatDetection: { telephone: false },
     ...(noindex ? { robots: { index: false, follow: false } } : {}),
   };
 }
 
-function banner(site: SiteData | null): Banner | null {
-  if (site?.business.isDemo && SHOW_DEMO_NOTICE) {
-    return { strong: "Demo website.", text: `${site.business.name} is a fictional business — names, prices and branches are sample data.` };
-  }
-  if (PROMO.enabled && (PROMO.strong || PROMO.text)) return PROMO;
-  return null;
+/** "Lensmere Optical" → "Lensmere": the short wordmark for the header. */
+function wordmarkOf(name: string) {
+  const short = name.replace(/\s+(optical|opticians?|eyewear|eye care|vision)( co\.?| inc\.?)?$/i, "").trim();
+  return short || name;
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const result = await getSite();
   const site = result.ok ? result.data : null;
   const b = site?.business;
+  const name = b?.name ?? FALLBACK_NAME;
+  const notice = b?.isDemo ? { text: DEMO_NOTICE.short, href: "/help#demo", link: "How it works" } : null;
   return (
-    <html lang={b?.locale ?? "en"} className={`${interTight.variable} ${instrumentSans.variable}`}>
-      <body>
-        <div className="oc oc-root" style={themeStyle(b?.brandColor, b?.accentColor)}>
-          <SiteHeader name={b?.name ?? FALLBACK_BRAND} tagline={b?.tagline ?? null} logoUrl={b?.logoUrl ?? null} nav={NAV} cta={HEADER_CTA} banner={banner(site)} />
-          <main id="oc-main" tabIndex={-1}>
-            {children}
-          </main>
-          <SiteFooter site={site} />
-        </div>
+    <html lang={b?.locale ?? "en"} className={host.variable}>
+      <body style={themeStyle(b?.brandColor, b?.accentColor)}>
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
+        <BagProvider>
+          <Header wordmark={wordmarkOf(name)} notice={notice} />
+          <main id="main">{children}</main>
+          <Footer site={site} name={name} />
+          <AddedToBag currency={b?.currency ?? "PHP"} locale={b?.locale ?? "en-PH"} />
+        </BagProvider>
+        <GhlChat />
       </body>
     </html>
   );

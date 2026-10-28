@@ -1,86 +1,49 @@
-import type { Metadata } from "next";
-import { LegalPage, LegalSection } from "@/components/Legal";
 import { getSite } from "@/lib/api";
 import { pageMetadata } from "@/lib/seo";
-import { LEGAL } from "@/lib/site-settings";
 
-export const revalidate = 60;
-
-export const metadata: Metadata = pageMetadata({
-  title: "Privacy notice",
-  description: "What personal information we collect, why we use it, who can see it and your rights.",
-  path: "/privacy",
-});
-
-const TOC = [
-  { id: "collect", label: "What we collect" },
-  { id: "use", label: "Why we use it" },
-  { id: "online", label: "Online forms and bookings" },
-  { id: "access", label: "Who can see it" },
-  { id: "retention", label: "How long we keep it" },
-  { id: "cookies", label: "Cookies" },
-  { id: "rights", label: "Your rights" },
-];
+export const metadata = pageMetadata({ title: "Privacy notice", description: "How we collect and use your personal information.", path: "/privacy" });
+export const revalidate = 3600;
 
 export default async function PrivacyPage() {
-  const result = await getSite();
-  const b = result.ok ? result.data.business : null;
-  const legalName = b?.legalName ?? b?.name ?? null;
-  const privacyEmail = (result.ok && result.data.content.privacyContactEmail) || b?.email || null;
-
+  const site = await getSite();
+  const b = site.ok ? site.data.business : null;
+  const name = b?.legalName ?? b?.name ?? "We";
+  const email = site.ok ? (site.data.content.privacyContactEmail ?? b?.email) : null;
   return (
-    <LegalPage
-      eyebrow="Privacy"
-      title="Privacy notice"
-      toc={TOC}
-      intro={<>{legalName ? `${legalName} (“we”) collects` : "We collect"} only the personal information needed to look after your eyes and your orders. This notice explains what we collect, why, and the choices you have.</>}
-    >
-      <LegalSection id="collect" num={1} title="What we collect">
-        <ul>
-          <li>Contact details you give us: name, phone number, email address.</li>
-          <li>Appointment and order history, payments and balances.</li>
-          <li>Clinical information recorded during an examination, including prescriptions. This is health information and is handled with extra care.</li>
-          <li>Messages you send through this website, and the branch you prefer.</li>
-        </ul>
-      </LegalSection>
-      <LegalSection id="use" num={2} title="Why we use it">
-        <ul>
-          <li>To book, confirm and remind you about appointments.</li>
-          <li>To make, fit and deliver eyewear and contact lenses to your prescription.</li>
-          <li>To reply to enquiries and tell you when an order is ready.</li>
-          <li>To send offers or eye-care reminders — only if you opted in. You can opt out at any time.</li>
-        </ul>
-      </LegalSection>
-      <LegalSection id="online" num={3} title="Online forms and bookings">
-        <p>
-          Messages you send with the forms on this website go to our practice-management system, so our team can reply and serve you in branch, and to our
-          customer-communication platform, which we use to reply and to send reminders. The online booking calendar is provided by that platform: it stores your
-          booking on our behalf and sends confirmations and reminders.
-        </p>
-      </LegalSection>
-      <LegalSection id="access" num={4} title="Who can see it">
-        <p>
-          Access is limited to staff who need it for their role; prescriptions are visible only to authorised clinical and dispensing staff. We share details with
-          laboratories that make your lenses and with service providers that run our systems or send messages on our behalf, under confidentiality obligations. We do
-          not sell personal information.
-        </p>
-      </LegalSection>
-      <LegalSection id="retention" num={5} title="How long we keep it">
-        <p>Clinical and financial records are kept for as long as the law requires. Enquiries that don&apos;t become appointments or orders are deleted or archived when no longer needed.</p>
-      </LegalSection>
-      <LegalSection id="cookies" num={6} title="Cookies">
-        <p>
-          This website and the embedded booking calendar use cookies that are needed for them to work securely. If we add analytics or advertising cookies, we will ask
-          for your consent first where the law requires it.
-        </p>
-      </LegalSection>
-      <LegalSection id="rights" num={7} title="Your rights">
-        <p>
-          {LEGAL.jurisdiction ? `Under the laws of ${LEGAL.jurisdiction} you` : "Under applicable data-protection law you"} may ask to see, correct or delete your
-          information, or withdraw consent for marketing, by contacting {privacyEmail ? <a href={`mailto:${privacyEmail}`}>{privacyEmail}</a> : "us"}. Some records must
-          be retained for legal reasons; we&apos;ll explain if that applies.
-        </p>
-      </LegalSection>
-    </LegalPage>
+    <div className="wrap legal">
+      <header className="page-head">
+        <h1>Privacy notice</h1>
+      </header>
+      <p className="notice notice--warn">Draft for review: this notice describes how this website and the shop&apos;s systems handle data. Have it checked by a lawyer before using it with real customers.</p>
+      <h2>Who we are</h2>
+      <p>{name} runs this website and its branches, and decides how your personal information is used.</p>
+      <h2>What we collect</h2>
+      <ul>
+        <li>Your name, email address and mobile number when you place an order, send a message or request an appointment.</li>
+        <li>What you order, the branch you collect from, and whether you paid online or will pay at pickup. We never receive card numbers: the online card step on this demo store runs in your browser and only the card type and last four digits are recorded.</li>
+        <li>Prescription values, if you type them in when choosing lenses. These are health information: we use them only to make your lenses, and our optometrist checks them first.</li>
+        <li>Your IP address with orders and messages, to prevent abuse.</li>
+        <li>Your bag, kept in your own browser until you check out or clear it.</li>
+      </ul>
+      <h2>How we use it</h2>
+      <ul>
+        <li>To prepare, make and hand over your order, and to contact you about it.</li>
+        <li>To answer your messages and arrange appointments.</li>
+        <li>To send news and offers, only if you ticked the box asking for them.</li>
+      </ul>
+      <h2>Who we share it with</h2>
+      <p>Your details are stored in our shop management system. Customer and order records are also kept in our customer-relationship system (GoHighLevel) so our team can follow up. Lenses are made by our partner laboratory, which receives what it needs to make them. We don&apos;t sell your information.</p>
+      <h2>How long we keep it</h2>
+      <p>Order and payment records are kept as long as the law requires for business records. You can ask us to delete marketing contact details at any time.</p>
+      <h2>Your rights</h2>
+      <p>You can ask to see, correct or delete your information, or object to how we use it{email ? (
+          <>
+            {" "}
+            by emailing <a className="link" href={`mailto:${email}`}>{email}</a>
+          </>
+        ) : null}
+        .
+      </p>
+    </div>
   );
 }

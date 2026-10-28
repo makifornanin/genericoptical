@@ -1,4 +1,4 @@
-import { DAY_KEYS, type Availability, type BranchAvailability, type DayKey, type WeeklyHours } from "./api-types";
+import { DAY_KEYS, type DayKey, type WeeklyHours } from "./api-types";
 
 /* Formatting helpers shared by Server and Client Components (no secrets, no server APIs). */
 
@@ -7,13 +7,17 @@ export interface MoneyFormat {
   locale: string;
 }
 
-export function money(cents: number | null | undefined, fmt: MoneyFormat): string {
+export const DEFAULT_MONEY: MoneyFormat = { currency: "PHP", locale: "en-PH" };
+
+/** "₱2,950" for whole amounts, "₱2,950.50" otherwise. */
+export function money(cents: number | null | undefined, fmt: MoneyFormat = DEFAULT_MONEY): string {
   if (typeof cents !== "number" || !Number.isFinite(cents)) return "";
   const amount = cents / 100;
+  const whole = Number.isInteger(amount);
   try {
-    return new Intl.NumberFormat(fmt.locale, { style: "currency", currency: fmt.currency }).format(amount);
+    return new Intl.NumberFormat(fmt.locale, { style: "currency", currency: fmt.currency, minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 }).format(amount);
   } catch {
-    return `${fmt.currency} ${amount.toFixed(2)}`;
+    return `${fmt.currency} ${whole ? amount.toFixed(0) : amount.toFixed(2)}`;
   }
 }
 
@@ -28,7 +32,27 @@ export function telHref(phone: string | null | undefined): string {
   return `tel:${String(phone ?? "").replace(/[^\d+]/g, "")}`;
 }
 
-/* ── Opening hours (ported from scripts/oc-site.js) ─────────────────────────────────────────── */
+export const plural = (n: number, [one, many]: [string, string]) => `${n} ${n === 1 ? one : many}`;
+
+/* ── Dates ───────────────────────────────────────────────────────────────────────────────────── */
+
+/** "Tue 28 Oct" for a yyyy-MM-dd day (no time zone shift). */
+export function shortDay(day: string, locale = "en-PH"): string {
+  const [y, m, d] = day.split("-").map(Number);
+  if (!y || !m || !d) return day;
+  return new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, d)));
+}
+
+/** "28 Oct, 3:42 pm" in the business time zone. */
+export function dateTime(iso: string, timeZone: string, locale = "en-PH"): string {
+  try {
+    return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone }).format(new Date(iso));
+  } catch {
+    return iso;
+  }
+}
+
+/* ── Opening hours ───────────────────────────────────────────────────────────────────────────── */
 
 const DAY_SHORT: Record<DayKey, string> = { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" };
 const DAY_LONG: Record<DayKey, string> = { mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday", fri: "Friday", sat: "Saturday", sun: "Sunday" };
@@ -77,21 +101,4 @@ export function openStatus(hours: WeeklyHours, timeZone: string, at: Date): { op
     /* invalid time zone: no badge */
   }
   return null;
-}
-
-/* ── Availability ──────────────────────────────────────────────────────────────────────────── */
-
-export const AVAILABILITY_LABEL: Record<Availability, string> = {
-  in_stock: "In stock",
-  low_stock: "Low stock",
-  out_of_stock: "Out of stock — ask us",
-  made_to_order: "Made to order",
-  service: "",
-};
-
-/** Existing tag styles: --pos for in stock, --warn for low stock, plain for the rest. */
-export function availabilityTagClass(a: Availability | BranchAvailability): string {
-  if (a === "in_stock") return "oc-tag oc-tag--pos";
-  if (a === "low_stock") return "oc-tag oc-tag--warn";
-  return "oc-tag";
 }

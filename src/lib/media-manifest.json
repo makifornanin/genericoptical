@@ -1,0 +1,490 @@
+{
+ "products": {
+  "anti-fog-wipes-30": {
+   "default": {
+    "views": [
+     "front",
+     "angle"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "aquasoft-daily-30-pack": {
+   "default": {
+    "views": [
+     "front",
+     "angle"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "aquasoft-monthly-6-pack": {
+   "default": {
+    "views": [
+     "front",
+     "angle"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "aquasoft-toric-monthly-6-pack": {
+   "default": {
+    "views": [
+     "front",
+     "angle"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "arden-101": {
+   "black": {
+    "views": [
+     "front",
+     "angle",
+     "side"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   },
+   "tortoise": {
+    "views": [
+     "front",
+     "angle",
+     "side"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "arden-204": {
+   "black": {
+    "views": [
+     "front",
+     "angle",
+     "side"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   },
+   "crystal": {
+    "views": [
+     "front",
+     "angle",
+     "side"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   },
+   "tortoise": {
+    "views": [
+     "front",
+     "angle",
+     "side"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "arden-round-33": {
+   "black": {
+    "views": [
+     "front",
+     "angle",
+     "side"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   },
+   "tortoise": {
+    "views": [
+     "front",
+     "angle",
+     "side"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "clearday-bi-weekly-6-pack": {
+   "default": {
+    "views": [
+     "front",
+     "angle"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "clearday-silicone-daily-30-pack": {
+   "default": {
+    "views": [
+     "front",
+     "angle"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "halden-wire": {
+   "gold": {
+    "views": [
+     "front",
+     "angle",
+     "side"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "lens-cleaning-spray-60-ml": {
+   "default": {
+    "views": [
+     "front",
+     "angle"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "multipurpose-solution-120-ml": {
+   "default": {
+    "views": [
+     "front",
+     "angle"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  },
+  "multipurpose-solution-360-ml": {
+   "default": {
+    "views": [
+     "front",
+     "angle"
+    ],
+    "widths": [
+     800,
+     1600
+    ],
+    "ratio": [
+     1600,
+     1200
+    ]
+   }
+  }
+ },
+ "editorial": {
+  "about-bench": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1780
+   ]
+  },
+  "collection-glasses": {
+   "widths": [
+    1000,
+    2000
+   ],
+   "ratio": [
+    1000,
+    550
+   ]
+  },
+  "collection-sunglasses": {
+   "widths": [
+    1000,
+    2000
+   ],
+   "ratio": [
+    1000,
+    550
+   ]
+  },
+  "detail-hinge": {
+   "widths": [
+    1000,
+    2000
+   ],
+   "ratio": [
+    1000,
+    500
+   ]
+  },
+  "duo-contacts": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1600
+   ]
+  },
+  "duo-sunglasses": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1600
+   ]
+  },
+  "eye-exam": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1780
+   ]
+  },
+  "hero-glasses": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1780
+   ]
+  },
+  "hero-sunglasses": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1780
+   ]
+  },
+  "store-wall": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1780
+   ]
+  }
+ },
+ "stock": {
+  "black-cateye": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "black-halfrim": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "black-orange": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "brown-round": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "clear-pink": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "gold-newspaper": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "gold-round": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "grey-square": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "metal-teal": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "silver-hands": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  },
+  "store-wall": {
+   "widths": [
+    800,
+    1600
+   ],
+   "ratio": [
+    1600,
+    1200
+   ]
+  }
+ }
+}

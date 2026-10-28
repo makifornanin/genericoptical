@@ -7,9 +7,11 @@ import { INQUIRY_KINDS, INTERESTS, type InquiryPayload } from "./api-types";
  * POST /api/public/v1/inquiries (docs/PUBLIC_API.md). Empty strings become null.
  */
 
+// `nullish()` (not a union with z.undefined()) so zod 4 treats a missing key as optional.
 const optionalText = (max: number, message: string) =>
   z
-    .union([z.string(), z.null(), z.undefined()])
+    .string()
+    .nullish()
     .transform((v) => (typeof v === "string" && v.trim() !== "" ? v.trim() : null))
     .pipe(z.string().max(max, message).nullable());
 

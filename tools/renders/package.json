@@ -1,0 +1,15 @@
+{
+  "name": "optical-product-renders",
+  "private": true,
+  "description": "Path-traced product and editorial renders for the customer website (run locally; output is committed under public/media).",
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.1",
+    "three-mesh-bvh": "0.9.15",
+    "three-gpu-pathtracer": "0.0.26",
+    "polygon-clipping": "0.15.7"
+  }
+}

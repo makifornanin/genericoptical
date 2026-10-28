@@ -1,13 +1,12 @@
 import type { CSSProperties } from "react";
 
 /*
- * Business theme colours (ported from applyTheme/inkFor in the GHL-builder oc-site.js).
- * The colours come from the API (business.brandColor / accentColor) and are written server-side as
- * --oc-theme-* custom properties on the root .oc wrapper; the tokens in oc-base.css fall back to the
- * defaults when a colour is missing. Text on brand/accent is picked for contrast.
+ * Business colours from the dashboard (brandColor for dark surfaces, accentColor for the eye-exam
+ * call to action) become --theme-* custom properties; text on each is ink or white, whichever
+ * contrasts more. Invalid or missing colours fall back to the defaults in styles/tokens.css.
  */
 
-const INK = "#18191b";
+const INK = "#121212";
 
 export function luminance(hex: string): number | null {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
@@ -19,13 +18,17 @@ export function luminance(hex: string): number | null {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-/** The text colour (ink or white) with the better contrast on `hex`, or null for an invalid colour. */
+export function contrast(a: string, b: string): number | null {
+  const la = luminance(a);
+  const lb = luminance(b);
+  if (la === null || lb === null) return null;
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
 export function inkFor(hex: string): string | null {
-  const L = luminance(hex);
-  const inkL = luminance(INK);
-  if (L === null || inkL === null) return null;
-  const onWhite = 1.05 / (L + 0.05);
-  const onInk = (L + 0.05) / (inkL + 0.05);
+  const onInk = contrast(hex, INK);
+  const onWhite = contrast(hex, "#ffffff");
+  if (onInk === null || onWhite === null) return null;
   return onInk >= onWhite ? INK : "#ffffff";
 }
 
@@ -37,9 +40,9 @@ export function themeStyle(brand: string | null | undefined, accent: string | nu
   ] as const) {
     if (!value) continue;
     const ink = inkFor(value);
-    if (!ink) continue;
-    style[`--oc-theme-${name}`] = value;
-    style[`--oc-theme-${name}-ink`] = ink;
+    if (!ink || (contrast(value, ink) ?? 0) < 4.5) continue;
+    style[`--theme-${name}`] = value;
+    style[`--theme-${name}-ink`] = ink;
   }
   return style as CSSProperties;
 }

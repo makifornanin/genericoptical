@@ -1,45 +1,43 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
-import { blockGhl, PAGES, VIEWPORTS } from "./helpers";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./helpers";
+import { addFrameWithLenses, blockGhl, PAGES, VIEWPORTS } from "./helpers";
 
-// axe-core WCAG 2.2 A/AA checks on every page, phone and desktop. Serious/critical issues fail.
+/* axe-core, WCAG 2.2 A/AA: serious and critical violations fail the test. */
+
+async function audit(page: Page, label: string) {
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+  const bad = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+  expect(
+    bad.map((v) => `${label}: ${v.id} (${v.impact}) — ${v.nodes.map((n) => n.target.join(" ")).slice(0, 3).join(", ")}`),
+    `${label} accessibility`,
+  ).toEqual([]);
+}
+
 for (const vp of ["mobile", "desktop"] as const) {
-  test.describe(`accessibility (${vp})`, () => {
+  test.describe(vp, () => {
     test.use({ viewport: VIEWPORTS[vp] });
-    for (const spec of PAGES) {
-      test(spec.name, async ({ page }) => {
+    for (const p of PAGES) {
+      test(p.id, async ({ page }) => {
         await blockGhl(page);
-        await page.goto(spec.path, { waitUntil: "networkidle" });
-        const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
-        const bad = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
-        expect(bad.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).slice(0, 3).join(", ")}`)).toEqual([]);
+        await page.goto(p.path, { waitUntil: "networkidle" });
+        await audit(page, `${p.id} @${vp}`);
       });
     }
   });
 }
 
-test.describe("accessibility of interactive states", () => {
-  test.use({ viewport: VIEWPORTS.mobile });
-
-  test("open mobile menu", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
-    await page.getByRole("button", { name: "Open menu" }).click();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id)).toEqual([]);
-  });
-
-  test("product inquiry form open with validation errors", async ({ page }) => {
-    await page.goto("/eyewear/arden-101", { waitUntil: "networkidle" });
-    await page.getByRole("button", { name: "Ask about this" }).click();
-    await page.getByRole("button", { name: "Send message" }).click();
-    await expect(page.getByText("Please enter your name.")).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id)).toEqual([]);
-  });
-
-  test("booking request form (branch without online calendar)", async ({ page }) => {
-    await page.goto("/book?branch=qc&service=eye_exam", { waitUntil: "networkidle" });
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id)).toEqual([]);
-  });
+test("open states: lens drawer, bag with items, checkout with errors, order page", async ({ page }) => {
+  await page.goto("/products/arden-101");
+  await page.getByRole("button", { name: "Select lenses" }).click();
+  await audit(page, "lens drawer");
+  await page.keyboard.press("Escape");
+  await addFrameWithLenses(page);
+  await page.goto("/bag");
+  await expect(page.locator(".summary .total")).toContainText("₱");
+  await audit(page, "bag");
+  await page.goto("/checkout");
+  await page.getByRole("button", { name: /Place order/ }).click();
+  await expect(page.locator("#err-fullName")).toBeVisible();
+  await audit(page, "checkout errors");
 });

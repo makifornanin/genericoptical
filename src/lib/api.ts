@@ -10,6 +10,9 @@ import {
   type Category,
   type CategoryRef,
   type DayHours,
+  type Lens,
+  type LensType,
+  type OrderingConfig,
   type ProductDetail,
   type ProductSummary,
   type ProductVariant,
@@ -86,6 +89,10 @@ const cachedProducts = unstable_cache((query: string) => requestJson(`/products$
   revalidate: REVALIDATE_SECONDS,
   tags: ["catalog"],
 });
+const cachedLenses = unstable_cache(() => requestJson("/lenses", "catalog"), ["public-api-v1", "lenses"], {
+  revalidate: REVALIDATE_SECONDS,
+  tags: ["catalog"],
+});
 const cachedProduct = unstable_cache((slug: string) => requestJson(`/products/${encodeURIComponent(slug)}`, "catalog"), ["public-api-v1", "product"], {
   revalidate: REVALIDATE_SECONDS,
   tags: ["catalog"],
@@ -134,6 +141,14 @@ export const getProduct = cache((slug: string) => {
   if (!/^[a-z0-9][a-z0-9._-]{0,159}$/i.test(slug)) return Promise.resolve<ApiResult<ProductDetail>>({ ok: false, reason: "not_found" });
   return settle(`product ${slug}`, () => cachedProduct(slug), (body) => parseProductDetail(obj(body)?.product));
 });
+
+/** Prescription lenses the website can fit to a frame (made to order at the lab). */
+export const getLenses = cache(() =>
+  settle("lenses", () => cachedLenses(), (body) => {
+    const items = obj(body)?.lenses;
+    return Array.isArray(items) ? items.map(parseLens).filter((l): l is Lens => l !== null) : null;
+  }),
+);
 
 /* ── Normalisers: tolerate missing optional fields, reject what would break rendering ─────── */
 
@@ -232,6 +247,34 @@ function parseService(v: unknown): Service | null {
   };
 }
 
+const LENS_TYPES: LensType[] = ["single_vision", "progressive", "bifocal"];
+function parseLens(v: unknown): Lens | null {
+  const l = obj(v);
+  const variantId = l && str(l.variantId);
+  const name = l && str(l.name);
+  const priceCents = l && num(l.priceCents);
+  if (!l || !variantId || !name || priceCents === null) return null;
+  return {
+    variantId,
+    name,
+    description: str(l.description),
+    priceCents,
+    type: LENS_TYPES.includes(l.type as LensType) ? (l.type as LensType) : "single_vision",
+    features: list(l.features).filter((f): f is string => typeof f === "string"),
+  };
+}
+
+function parseOrdering(v: unknown): OrderingConfig {
+  const o = obj(v);
+  // Older dashboards don't send this block: no online ordering then.
+  if (!o) return { enabled: false, demoPayments: true, paymentOptions: [] };
+  return {
+    enabled: o.enabled === true,
+    demoPayments: o.demoPayments !== false,
+    paymentOptions: list(o.paymentOptions).filter((x): x is "demo_card" | "pay_at_pickup" => x === "demo_card" || x === "pay_at_pickup"),
+  };
+}
+
 function parseCategoryRef(v: unknown): CategoryRef {
   const c = obj(v) ?? {};
   const slug = str(c.slug) ?? "other";
@@ -302,6 +345,7 @@ export function parseSite(body: unknown): SiteData | null {
       widgetBase: widgetBase && widgetBase.startsWith("https:") ? (widgetBase.endsWith("/") ? widgetBase : `${widgetBase}/`) : null,
       ghlConnected: booking.ghlConnected === true,
     },
+    ordering: parseOrdering(root.ordering),
     generatedAt: str(root.generatedAt),
   };
 }
@@ -323,6 +367,8 @@ function parseProductSummary(v: unknown): ProductSummary | null {
     priceFromCents: num(p.priceFromCents),
     priceToCents: num(p.priceToCents),
     variantCount: num(p.variantCount) ?? 0,
+    colours: list(p.colours).filter((c): c is string => typeof c === "string" && c.trim() !== ""),
+    filters: stringMap(p.filters),
     availability: availability(p.availability),
     updatedAt: str(p.updatedAt),
   };

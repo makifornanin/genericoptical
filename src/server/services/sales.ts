@@ -75,7 +75,7 @@ class Replay<T> extends Error {
  * - `run` may call `recheck()` after taking its locks; a duplicate that waited on the lock then
  *   returns the first request's result instead of failing a business check.
  */
-async function idempotent<T extends object>(
+export async function idempotent<T extends object>(
   lookup: () => Promise<(T & { requestHash?: string | null }) | null>,
   run: (tx: Tx, recheck: () => Promise<void>) => Promise<T>,
   constraint: string,
@@ -108,7 +108,7 @@ async function idempotent<T extends object>(
   }
 }
 
-async function businessTax(tx: Tx, ctx: Ctx) {
+export async function businessTax(tx: Tx, ctx: Ctx) {
   const [b] = await tx
     .select({
       taxRateBps: businesses.taxRateBps,
@@ -123,7 +123,7 @@ async function businessTax(tx: Tx, ctx: Ctx) {
   return b;
 }
 
-async function activeBranch(tx: Tx, ctx: Ctx, branchId: string) {
+export async function activeBranch(tx: Tx, ctx: Ctx, branchId: string) {
   const [b] = await tx
     .select()
     .from(branches)
@@ -143,7 +143,7 @@ async function activeCustomer(tx: Tx, ctx: Ctx, customerId: string) {
   return c;
 }
 
-type LineMeta = {
+export type LineMeta = {
   id: string;
   variantId: string;
   productName: string;
@@ -157,7 +157,7 @@ type LineMeta = {
 };
 
 /** Loads variants from the DB and builds pricing input. Prices come from the catalogue, not the client. */
-async function buildLines(
+export async function buildLines(
   tx: Tx,
   ctx: Ctx,
   items: { variantId: string; quantity: number; lineDiscountCents: number; unitCostCents?: number | null; unitPriceCents?: number | null; prescriptionId: string | null; notes?: string | null }[],
@@ -227,7 +227,7 @@ async function buildLines(
 /** Largest sale total accepted (₱/$ 1 billion in minor units) — keeps all tax/allocation maths exact. */
 const MAX_TOTAL_CENTS = 100_000_000_000;
 
-function price(pricing: PricingLineInput[], tax: { taxRateBps: number; pricesIncludeTax: boolean }, discount: Parameters<typeof priceSale>[2]) {
+export function price(pricing: PricingLineInput[], tax: { taxRateBps: number; pricesIncludeTax: boolean }, discount: Parameters<typeof priceSale>[2]) {
   const gross = pricing.reduce((s, l) => s + l.unitPriceCents * l.quantity, 0);
   if (!Number.isSafeInteger(gross) || gross > MAX_TOTAL_CENTS) throw invalid("That total is too large to process. Split it into smaller sales.");
   try {
@@ -251,7 +251,7 @@ function toDiscount(d: { type: "percent"; valueBps: number } | { type: "amount";
   return d;
 }
 
-async function insertItems(tx: Tx, ctx: Ctx, saleId: string, meta: LineMeta[], priced: ReturnType<typeof priceSale>) {
+export async function insertItems(tx: Tx, ctx: Ctx, saleId: string, meta: LineMeta[], priced: ReturnType<typeof priceSale>) {
   await tx.insert(saleItems).values(
     meta.map((m, i) => {
       const p = priced.lines[i];
@@ -321,7 +321,7 @@ async function lockSale(tx: Tx, ctx: Ctx, saleId: string): Promise<SaleRow> {
 }
 
 /** Recomputes balance + payment status after any money movement and persists them. */
-async function settle(tx: Tx, ctx: Ctx, s: Pick<SaleRow, "id" | "totalCents" | "paidCents" | "refundedCents" | "refundedCashCents" | "status">) {
+export async function settle(tx: Tx, ctx: Ctx, s: Pick<SaleRow, "id" | "totalCents" | "paidCents" | "refundedCents" | "refundedCashCents" | "status">) {
   const balance = s.status === "cancelled" ? 0 : computeBalance(s);
   if (balance < 0) throw conflict("This would leave the sale overpaid.");
   const paymentStatus = derivePaymentStatus({ totalCents: s.totalCents, paidCents: s.paidCents - s.refundedCashCents, balanceDueCents: balance });
@@ -651,7 +651,7 @@ export async function transitionOrder(ctx: Ctx, saleId: string, to: FulfillmentS
   }
 }
 
-async function transitionInTx(tx: Tx, ctx: Ctx, saleId: string, to: FulfillmentStage, reason: string | null) {
+export async function transitionInTx(tx: Tx, ctx: Ctx, saleId: string, to: FulfillmentStage, reason: string | null) {
   const sale = await lockSale(tx, ctx, saleId);
   if (sale.kind !== "order") throw invalid("Only customer orders have fulfilment stages.");
   const from = sale.fulfillmentStatus as FulfillmentStage;
@@ -1191,6 +1191,7 @@ export async function listSales(ctx: Ctx, f: SalesFilter) {
       id: sales.id,
       number: sales.number,
       kind: sales.kind,
+      channel: sales.channel,
       status: sales.status,
       fulfillmentStatus: sales.fulfillmentStatus,
       paymentStatus: sales.paymentStatus,

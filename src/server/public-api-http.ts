@@ -3,7 +3,7 @@ import { ZodError } from "zod";
 import type { ApiKeyScope } from "@/server/db/schema";
 import { errorFields, log } from "@/server/log";
 import { AppError } from "@/server/services/core";
-import { clientIp } from "@/server/http";
+import { clientIp, readBodyCapped } from "@/server/http";
 import { authenticateSiteKey, feedBusiness, PublicApiError, rateLimit, type SiteKeyAuth } from "@/server/services/public-api";
 
 /** Shared request handling for /api/public/v1 (docs/PUBLIC_API.md). Server-to-server only: no CORS. */
@@ -40,6 +40,38 @@ export async function publicRead(request: Request, scope: ApiKeyScope, load: (au
     await rateLimit(`read:key:${auth.keyId}`, 600, 60);
     const body = await load(auth);
     return Response.json(body, { headers: { "Cache-Control": READ_CACHE, Vary: "Authorization" } });
+  } catch (error) {
+    return publicError(error);
+  }
+}
+
+/**
+ * Authenticated, uncached JSON write (website orders, cart quotes). The body is capped; `limits`
+ * apply per key and, when the website forwarded it, per visitor IP.
+ */
+export async function publicWrite(
+  request: Request,
+  scope: ApiKeyScope,
+  opts: { maxBytes: number; perKey: [number, number]; perIp?: [number, number]; bucket: string; status?: number },
+  handle: (auth: SiteKeyAuth, body: unknown, ip: string | null) => Promise<unknown>,
+): Promise<Response> {
+  try {
+    const auth = await authenticateSiteKey(request.headers.get("authorization"), scope);
+    const raw = await readBodyCapped(request, opts.maxBytes);
+    if (raw === null) throw new PublicApiError(413, "Payload too large");
+    let body: unknown = {};
+    if (raw.trim()) {
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        throw new PublicApiError(400, "Send a JSON body.");
+      }
+    }
+    const ip = forwardedClientIp(request);
+    if (ip && opts.perIp) await rateLimit(`${opts.bucket}:ip:${auth.businessId}:${ip}`, opts.perIp[0], opts.perIp[1]);
+    await rateLimit(`${opts.bucket}:key:${auth.keyId}`, opts.perKey[0], opts.perKey[1]);
+    const result = await handle(auth, body, ip);
+    return Response.json(result, { status: opts.status ?? 200, headers: NO_STORE });
   } catch (error) {
     return publicError(error);
   }

@@ -2,8 +2,10 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { CardsSkeleton, Forbidden } from "@/components/app/page";
 import { requireSession } from "@/server/auth/session";
+import { ghlRecordStatus } from "@/server/integrations/ghl/record-status";
 import { AppError, can } from "@/server/services/core";
 import { getSale } from "@/server/services/sales";
+import { websiteOrderDetails } from "@/server/services/website-orders";
 import { SaleDocument } from "../../sales/sale-document";
 
 async function Content({ params }: { params: Promise<{ id: string }> }) {
@@ -18,7 +20,8 @@ async function Content({ params }: { params: Promise<{ id: string }> }) {
     throw error;
   }
   if (data.sale.kind !== "order") redirect(`/app/sales/${id}`);
-  return <SaleDocument data={data} session={session} />;
+  const [ghl, website] = await Promise.all([ghlRecordStatus(session.ctx, "sale", id), data.sale.channel === "website" ? websiteOrderDetails(session.ctx, id) : null]);
+  return <SaleDocument data={data} session={session} ghl={ghl} website={website} />;
 }
 
 export default function OrderPage(props: PageProps<"/app/orders/[id]">) {

@@ -229,3 +229,7 @@ export async function ensureGhlPipelinesAction() {
 export async function saveCatalogueFeedAction(input: unknown) {
   return run((ctx) => settings.updateCatalogueFeed(ctx, input), "Catalogue feed saved");
 }
+
+export async function saveWebsiteOrdersAction(input: unknown) {
+  return run((ctx) => settings.updateWebsiteOrders(ctx, input), "Website orders setting saved", ["site"]);
+}

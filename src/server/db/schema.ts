@@ -70,7 +70,8 @@ export const fulfillmentStatus = pgEnum("fulfillment_status", [
   "cancelled",
 ]);
 export const paymentStatus = pgEnum("payment_status", ["unpaid", "partially_paid", "paid"]);
-export const paymentMethod = pgEnum("payment_method", ["cash", "card", "bank_transfer", "gcash", "maya", "other", "ghl_online"]);
+/** online_demo: the website's simulated card payment (demo store) — no money moves; never offered to staff. */
+export const paymentMethod = pgEnum("payment_method", ["cash", "card", "bank_transfer", "gcash", "maya", "other", "ghl_online", "online_demo"]);
 export const refundMethod = pgEnum("refund_method", [
   "cash",
   "card",
@@ -862,8 +863,8 @@ export const sales = pgTable(
     idempotencyKey: text("idempotency_key"),
     /** Fingerprint of the request that created the row; a replay with the same key must match it. */
     requestHash: text("request_hash"),
-    /** in_store = POS/orders rung up in the dashboard; ghl_online = imported from a GoHighLevel checkout. */
-    channel: text("channel").$type<"in_store" | "ghl_online">().notNull().default("in_store"),
+    /** in_store = POS/orders rung up in the dashboard; ghl_online = imported from a GoHighLevel checkout; website = placed on the customer website. */
+    channel: text("channel").$type<"in_store" | "ghl_online" | "website">().notNull().default("in_store"),
     externalGhlOrderId: text("external_ghl_order_id"),
     externalGhlStatus: text("external_ghl_status"),
     createdAt: createdAt(),
@@ -879,7 +880,7 @@ export const sales = pgTable(
     unique("sales_business_id_id_key").on(t.businessId, t.id),
     uniqueIndex("sales_idempotency_key").on(t.businessId, t.idempotencyKey).where(sql`${t.idempotencyKey} is not null`),
     uniqueIndex("sales_ghl_order_key").on(t.businessId, t.externalGhlOrderId).where(sql`${t.externalGhlOrderId} is not null`),
-    check("sales_channel_check", sql`${t.channel} in ('in_store', 'ghl_online')`),
+    check("sales_channel_check", sql`${t.channel} in ('in_store', 'ghl_online', 'website')`),
     index().on(t.businessId, t.completedAt),
     index().on(t.businessId, t.createdAt),
     index().on(t.businessId, t.customerId),
@@ -1418,7 +1419,7 @@ export const integrationMismatches = pgTable(
 
 // ─── Public website API ──────────────────────────────────────────────────────
 
-export const API_KEY_SCOPES = ["site:read", "catalog:read", "inquiries:write"] as const;
+export const API_KEY_SCOPES = ["site:read", "catalog:read", "inquiries:write", "orders:read", "orders:write"] as const;
 export type ApiKeyScope = (typeof API_KEY_SCOPES)[number];
 
 /**
@@ -1452,6 +1453,56 @@ export const apiRateLimits = pgTable(
     count: integer("count").notNull().default(0),
   },
   (t) => [primaryKey({ columns: [t.bucket, t.windowStart] }), index().on(t.windowStart)],
+);
+
+/**
+ * How the customer will supply the prescription for one pair of prescription glasses. Values typed on
+ * the website are the customer's own transcription: kept here, flagged unverified, and never written
+ * into the clinical `prescriptions` table automatically.
+ */
+export type WebsitePrescription = {
+  /** Frame line the lenses belong to, as shown on the order (product · variant). */
+  frame: string;
+  lens: string;
+  mode: "enter" | "send_later" | "on_file" | "book_exam";
+  values?: {
+    od: { sph: string; cyl: string | null; axis: string | null; add: string | null };
+    os: { sph: string; cyl: string | null; axis: string | null; add: string | null };
+    pd: string | null;
+    issuedOn: string | null;
+  };
+};
+
+/**
+ * Orders placed on the customer website (one per `sales` row with channel 'website'): the customer's
+ * order-status token (hash only), the details as they entered them, and the demo payment choice.
+ */
+export const websiteOrders = pgTable(
+  "website_orders",
+  {
+    id: id(),
+    businessId: businessId(),
+    saleId: uuid("sale_id").notNull(),
+    accessTokenHash: text("access_token_hash").notNull(),
+    contactName: text("contact_name").notNull(),
+    contactEmail: text("contact_email"),
+    contactPhone: text("contact_phone"),
+    paymentOption: text("payment_option", { enum: ["pay_at_pickup", "demo_card"] }).notNull(),
+    prescriptions: jsonb("prescriptions").$type<WebsitePrescription[]>().notNull().default([]),
+    /** The customer confirmed they hold a current contact lens prescription (contact lens lines only). */
+    contactLensRxConfirmed: boolean("contact_lens_rx_confirmed").notNull().default(false),
+    marketingConsent: boolean("marketing_consent").notNull().default(false),
+    smsConsent: boolean("sms_consent").notNull().default(false),
+    customerNote: text("customer_note"),
+    clientIp: text("client_ip"),
+    createdAt: createdAt(),
+    cancelledByCustomerAt: ts("cancelled_by_customer_at"),
+  },
+  (t) => [
+    unique("website_orders_sale_key").on(t.businessId, t.saleId),
+    index().on(t.businessId, t.createdAt),
+    foreignKey({ columns: [t.businessId, t.saleId], foreignColumns: [sales.businessId, sales.id] }),
+  ],
 );
 
 // ─── POS held carts ──────────────────────────────────────────────────────────

@@ -253,6 +253,13 @@ export async function publicSite(businessId: string) {
       widgetBase: (process.env.GHL_WIDGET_BASE || "https://api.leadconnectorhq.com/widget/booking/").replace(/\/?$/, "/"),
       ghlConnected: conn[0]?.status === "connected",
     },
+    // Website orders (Settings → Website): pickup only; online card payments are simulated (demo store).
+    ordering: {
+      enabled: biz.settings?.websiteOrders?.enabled ?? biz.isDemo,
+      fulfilment: ["pickup"],
+      paymentOptions: ["demo_card", "pay_at_pickup"],
+      demoPayments: true,
+    },
     generatedAt: new Date().toISOString(),
   };
 }

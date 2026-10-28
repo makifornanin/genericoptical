@@ -19,6 +19,7 @@ import { env } from "@/server/env";
 import { Pagination } from "@/components/ui/table";
 import { AppointmentTypeDialog, BranchDialog, DemoPanel, HoursForm, ProfileForm, TaxForm, WebsiteForm } from "./forms";
 import { CatalogueFeedCard } from "./catalogue-feed";
+import { WebsiteOrdersCard } from "./website-orders";
 import { SiteKeysCard } from "./site-keys";
 import { EventTable, GhlAccessCheck, GhlCalendarMapping, GhlConnectionCard, GhlEndpoints, GhlMismatches, GhlOpticalPipelines, GhlProblems, GhlSettingsForm, GhlSyncStatus, GhlUserMapping } from "./ghl-panel";
 
@@ -177,6 +178,7 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
             faqs: w.faqs ?? [],
           }}
         />
+        {can(ctx, "settings.manage") ? <WebsiteOrdersCard initial={{ enabled: b.settings.websiteOrders?.enabled ?? b.isDemo }} isDemo={b.isDemo} /> : null}
         {keys ? (
           <CatalogueFeedCard
             initial={{ enabled: b.settings.catalogueFeed?.enabled ?? false, origins: b.settings.catalogueFeed?.origins ?? [] }}

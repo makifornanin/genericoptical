@@ -14,14 +14,16 @@ import type { GhlRecordStatus } from "@/server/integrations/ghl/record-status";
 import type { SessionInfo } from "@/server/services/auth";
 import { can } from "@/server/services/core";
 import type { getSale } from "@/server/services/sales";
+import type { websiteOrderDetails } from "@/server/services/website-orders";
 import { CancelSaleButton, OrderStageControl, RecordPaymentDialog, RefundDialog, VoidPaymentButton } from "./money-dialogs";
 import { OrderDetailsForm } from "./order-details-form";
 
 type Sale = Awaited<ReturnType<typeof getSale>>;
+type WebsiteOrder = NonNullable<Awaited<ReturnType<typeof websiteOrderDetails>>> | null;
 
 const FLOW: FulfillmentStage[] = FULFILLMENT_STAGES.filter((s) => s !== "cancelled");
 
-export function SaleDocument({ data, session, ghl = null }: { data: Sale; session: SessionInfo; ghl?: GhlRecordStatus | null }) {
+export function SaleDocument({ data, session, ghl = null, website = null }: { data: Sale; session: SessionInfo; ghl?: GhlRecordStatus | null; website?: WebsiteOrder }) {
   const ctx = session.ctx;
   const f = formatter(session.business);
   const s = data.sale;
@@ -44,7 +46,7 @@ export function SaleDocument({ data, session, ghl = null }: { data: Sale; sessio
             {s.status !== "cancelled" ? <PaymentPill status={s.paymentStatus} refunded={s.refundedCents} total={s.totalCents} /> : null}
           </div>
           <p className="mt-1 text-[13px] text-text-2">
-            {isOrder ? "Customer order" : "Point-of-sale transaction"} · {data.branchName} · {f.dateTime(s.createdAt)}
+            {s.channel === "website" ? "Website order · pickup" : isOrder ? "Customer order" : "Point-of-sale transaction"} · {data.branchName} · {f.dateTime(s.createdAt)}
             {data.soldByName ? ` · by ${data.soldByName}` : ""}
           </p>
         </div>
@@ -245,6 +247,7 @@ export function SaleDocument({ data, session, ghl = null }: { data: Sale; sessio
           </div>
 
           <div className="flex flex-col gap-4">
+            {website ? <WebsiteOrderCard web={website} dateTime={f.dateTime} /> : null}
             <Card>
               <CardHeader title="Customer" />
               <CardBody>
@@ -306,5 +309,74 @@ export function SaleDocument({ data, session, ghl = null }: { data: Sale; sessio
         </div>
       </PageBody>
     </>
+  );
+}
+
+const RX_MODES: Record<string, string> = {
+  enter: "Entered online by the customer",
+  send_later: "Customer will send it",
+  on_file: "Use the latest one on file",
+  book_exam: "Customer will book an eye exam",
+};
+
+/** What the customer entered on the website. Their typed prescription is shown as-is and flagged unverified. */
+function WebsiteOrderCard({ web, dateTime }: { web: NonNullable<WebsiteOrder>; dateTime: (d: Date) => string }) {
+  return (
+    <Card>
+      <CardHeader title="Website order" subtitle={`Placed ${dateTime(web.createdAt)}`} />
+      <CardBody className="flex flex-col gap-3 text-[13px]">
+        <DetailList
+          items={[
+            { label: "Name given", value: web.contactName },
+            { label: "Email", value: web.contactEmail ?? "—" },
+            { label: "Mobile", value: web.contactPhone ?? "—" },
+            { label: "Payment", value: web.paymentOption === "demo_card" ? "Online card (demo — not charged)" : "Pay at pickup" },
+            { label: "Consent", value: [web.smsConsent ? "SMS" : null, web.marketingConsent ? "Marketing" : null].filter(Boolean).join(", ") || "None given" },
+          ]}
+        />
+        {web.prescriptions.map((rx, i) => (
+          <div key={i} className="rounded-[10px] border border-line p-3">
+            <p className="font-medium">{rx.frame}</p>
+            <p className="text-[12px] text-text-2">
+              {rx.lens} · {RX_MODES[rx.mode] ?? rx.mode}
+            </p>
+            {rx.values ? (
+              <>
+                <table className="mt-2 w-full text-[12px] tabular">
+                  <thead className="text-text-3">
+                    <tr>
+                      <th className="text-left font-normal">Eye</th>
+                      <th className="text-right font-normal">SPH</th>
+                      <th className="text-right font-normal">CYL</th>
+                      <th className="text-right font-normal">AXIS</th>
+                      <th className="text-right font-normal">ADD</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(["od", "os"] as const).map((eye) => (
+                      <tr key={eye}>
+                        <td>{eye === "od" ? "OD (right)" : "OS (left)"}</td>
+                        <td className="text-right">{rx.values![eye].sph}</td>
+                        <td className="text-right">{rx.values![eye].cyl ?? "—"}</td>
+                        <td className="text-right">{rx.values![eye].axis ?? "—"}</td>
+                        <td className="text-right">{rx.values![eye].add ?? "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="mt-1 text-[12px] text-text-2">
+                  PD {rx.values.pd ?? "not given"}
+                  {rx.values.issuedOn ? ` · issued ${rx.values.issuedOn}` : ""}
+                </p>
+                <p className="mt-2 rounded-[8px] bg-warn-soft px-2 py-1.5 text-[12px] text-warn">Typed by the customer, not verified. Check it against the original prescription before ordering lenses.</p>
+              </>
+            ) : null}
+          </div>
+        ))}
+        {web.contactLensRxConfirmed ? <p className="text-[12px] text-text-2">The customer confirmed they have a current contact lens prescription.</p> : null}
+        {web.customerNote ? <p className="text-[12.5px] text-text-2">&ldquo;{web.customerNote}&rdquo;</p> : null}
+        {web.cancelledByCustomerAt ? <Pill tone="negative">Cancelled by the customer online · {dateTime(web.cancelledByCustomerAt)}</Pill> : null}
+      </CardBody>
+    </Card>
   );
 }

@@ -116,9 +116,10 @@ POS sales and customer orders share one financial document, `sales`, with `kind 
 - One practitioner can't be double-booked. This is enforced by a Postgres **exclusion constraint** on `(practitioner_membership_id, tstzrange(starts_at, ends_at))` for active statuses, so it holds even under concurrent requests. Appointment types that don't need a practitioner can run concurrently.
 - Times are stored as `timestamptz` (UTC) and validated against branch business hours in the **business time zone** (default `Asia/Manila`).
 
-## Public website (moved to GoHighLevel)
+## Public website (separate Vercel project since Phase 6)
 
-- The customer website now runs on GoHighLevel. The Phase 1 pages are archived, unchanged, in `customer-website-reference/`, which also holds standalone HTML/CSS/JS, screenshots, a per-section classification and `ghl-migration-guide.md`. The archive is excluded from the TypeScript, lint and Tailwind builds.
+- **Phase 6:** the customer website is a standalone Next.js site in its own repository (`optical-customer-website`) and Vercel project. It reads this dashboard's public API with a site key and places website orders through it (see PUBLIC_API.md → Website orders). The GoHighLevel website approach below was cancelled; the notes are kept for history.
+- *Phase 2–5 (superseded):* the customer website ran on GoHighLevel. The Phase 1 pages are archived, unchanged, in `customer-website-reference/`, which also holds standalone HTML/CSS/JS, screenshots, a per-section classification and `ghl-migration-guide.md`. The archive is excluded from the TypeScript, lint and Tailwind builds.
 - This deployment serves only the dashboard and integration endpoints:
   - `/` redirects to `/app`;
   - `robots.txt` disallows everything;

@@ -277,7 +277,7 @@ export function WebsiteForm({ initial }: { initial: WebsiteValues }) {
   const set = <K extends keyof WebsiteValues>(k: K, val: WebsiteValues[K]) => setV((p) => ({ ...p, [k]: val }));
   return (
     <Card>
-      <CardHeader title="Website content" subtitle="The public website now runs on GoHighLevel. This copy is kept as the source for rebuilding those pages (see customer-website-reference/ghl-migration-guide.md); saving it here doesn't publish anything." />
+      <CardHeader title="Website content" subtitle="Shown on the customer website: the home page headline, the About page and the FAQs on Help and Eye exam. Changes appear there within a minute." />
       <CardBody className="grid gap-4 sm:grid-cols-2">
         <TextField label="Hero eyebrow" value={v.heroEyebrow} onChange={(e) => set("heroEyebrow", e.target.value)} />
         <TextField label="Hero headline" value={v.heroTitle} onChange={(e) => set("heroTitle", e.target.value)} />

@@ -83,7 +83,7 @@ export const inboundOpportunity: Handler = async (event, env) => {
 /** What a dashboard sale should look like in the CRM pipeline. */
 function desiredFor(sale: typeof sales.$inferSelect, settings: GhlSettings, currency: string, locale: string) {
   const net = Math.max(0, sale.totalCents - sale.refundedCents);
-  const label = sale.kind === "order" ? "Order" : "Sale";
+  const label = sale.channel === "website" ? "Website order" : sale.kind === "order" ? "Order" : "Sale";
   const name = `${label} ${sale.number} · ${formatMoney(sale.totalCents, currency, locale)}`;
   let status: "open" | "won" | "lost" = "open";
   let stageId: string | null = null;
@@ -130,14 +130,17 @@ export const saleSync: Handler = async (event, env) => {
       status: desired.status,
       contactId: contact.contactId,
       monetaryValue: toMajor(desired.valueCents),
-      source: "Optical dashboard POS",
+      source: sale.channel === "website" ? "Website (demo store)" : "Optical dashboard POS",
     });
     await upsertMirror(env.businessId, opportunity, { saleId: sale.id, customerId: cust.id, lastPushed: { ...desired } });
     const paid = formatMoney(sale.paidCents, biz.currency, biz.locale);
     const total = formatMoney(sale.totalCents, biz.currency, biz.locale);
-    await api
-      .addNote(contact.contactId, `${desired.name}\nTotal ${total}; payments recorded at the shop: ${paid}${sale.balanceDueCents > 0 ? `; balance due ${formatMoney(sale.balanceDueCents, biz.currency, biz.locale)}` : ""}.\nRecorded in the dashboard POS — not processed by GoHighLevel Payments.`)
-      .catch(() => undefined);
+    const due = sale.balanceDueCents > 0 ? `; balance due ${formatMoney(sale.balanceDueCents, biz.currency, biz.locale)}` : "";
+    const note =
+      sale.channel === "website"
+        ? `${desired.name}\nPlaced on the website for pickup. Total ${total}; ${sale.paidCents > 0 ? `paid online with the demo card (simulated — nothing was charged): ${paid}` : "to pay at pickup"}${due}.\nNot processed by GoHighLevel Payments.`
+        : `${desired.name}\nTotal ${total}; payments recorded at the shop: ${paid}${due}.\nRecorded in the dashboard POS — not processed by GoHighLevel Payments.`;
+    await api.addNote(contact.contactId, note).catch(() => undefined);
     return { status: "synced", externalId: opportunity.id, result: { created: true, ...desired } };
   }
 

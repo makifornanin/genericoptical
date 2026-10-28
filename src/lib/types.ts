@@ -31,6 +31,11 @@ export type BusinessSettings = {
    * products, branches and services only, readable from browsers on the listed origins.
    */
   catalogueFeed?: { enabled: boolean; origins: string[] };
+  /**
+   * Orders from the customer website (Settings → Website). Unset means on for demo businesses and off
+   * otherwise. Online payment is always the simulated demo card: no payment provider is connected.
+   */
+  websiteOrders?: { enabled: boolean };
 };
 
 export type PermissionOverrides = { grant?: string[]; revoke?: string[] };

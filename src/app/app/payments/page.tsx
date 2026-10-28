@@ -53,7 +53,7 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
           <>
             <DateRangeFilter label={range.label} />
             <SearchInput placeholder="Sale number, reference or customer" />
-            <ParamSelect param="method" label="Method" options={[{ value: "", label: "All methods" }, ...PAYMENT_METHODS.map((m) => ({ value: m, label: PAYMENT_METHOD_LABELS[m] }))]} />
+            <ParamSelect param="method" label="Method" options={[{ value: "", label: "All methods" }, ...[...PAYMENT_METHODS, "online_demo"].map((m) => ({ value: m, label: PAYMENT_METHOD_LABELS[m] }))]} />
           </>
         ) : null}
       </Toolbar>

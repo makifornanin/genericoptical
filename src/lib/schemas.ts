@@ -58,6 +58,8 @@ export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   maya: "Maya",
   other: "Other (manual)",
   balance_adjustment: "Credit to balance",
+  ghl_online: "GoHighLevel online",
+  online_demo: "Online card (demo — not charged)",
 };
 
 export const listQuery = z.object({
@@ -199,6 +201,82 @@ export const publicLeadInput = z
   })
   .refine((v) => v.email || v.phone, { message: "Add an email address or phone number so we can reply.", path: ["email"] });
 
+// ─── Website orders (public API) ─────────────────────────────────────────────
+
+/** A lens power in dioptres, on the optical 0.25 step, normalised to "+1.25" / "-2.00". */
+const rxPower = (label: string, min: number, max: number) =>
+  z.coerce
+    .number({ error: `${label}: enter a number.` })
+    .refine((v) => v >= min && v <= max, `${label} must be between ${min} and +${max}.`)
+    .refine((v) => Math.abs(v * 4 - Math.round(v * 4)) < 1e-9, `${label} goes in steps of 0.25.`)
+    .transform((v) => (v > 0 ? "+" : v < 0 ? "-" : "") + Math.abs(v).toFixed(2));
+
+const blankToNull = (v: unknown) => (v === "" || v === undefined ? null : v);
+
+const rxEye = z
+  .object({
+    sph: rxPower("Sphere (SPH)", -20, 20),
+    cyl: z.preprocess(blankToNull, rxPower("Cylinder (CYL)", -8, 8).nullable()),
+    axis: z.preprocess(blankToNull, z.coerce.number().int("Axis is a whole number.").min(0, "Axis is 0–180.").max(180, "Axis is 0–180.").nullable()),
+    add: z.preprocess(blankToNull, rxPower("Addition (ADD)", 0.5, 4).nullable()),
+  })
+  .refine((e) => !e.cyl || Number(e.cyl) === 0 || e.axis !== null, { message: "Add the axis that goes with the cylinder.", path: ["axis"] })
+  .transform((e) => ({ sph: e.sph, cyl: e.cyl, axis: e.axis === null ? null : String(e.axis), add: e.add }));
+
+/** How the customer supplies a prescription for one pair of prescription glasses. */
+export const websiteRxInput = z.discriminatedUnion("mode", [
+  z.object({
+    mode: z.literal("enter"),
+    od: rxEye,
+    os: rxEye,
+    pd: z.preprocess(blankToNull, z.coerce.number().min(40, "PD is usually 50–75 mm.").max(85, "PD is usually 50–75 mm.").nullable()).transform((v) => (v === null ? null : v.toFixed(1))),
+    issuedOn: optDay,
+  }),
+  z.object({ mode: z.literal("send_later") }),
+  z.object({ mode: z.literal("on_file") }),
+  z.object({ mode: z.literal("book_exam") }),
+]);
+export type WebsiteRxInput = z.infer<typeof websiteRxInput>;
+
+export const websiteCartLine = z.object({
+  variantId: uuid,
+  quantity: z.number().int().min(1, "Quantity must be at least 1.").max(10, "Order up to 10 of an item online."),
+  /** A prescription lens product (made to order) fitted to this frame. */
+  lensVariantId: optUuid,
+});
+
+export const websiteQuoteInput = z.object({ items: z.array(websiteCartLine).min(1, "Your bag is empty.").max(20) });
+
+export const websiteOrderInput = z.object({
+  idempotencyKey,
+  branchId: uuid,
+  customer: z.object({
+    fullName: reqText("Your name", 120),
+    email: z.string().trim().toLowerCase().max(200).refine((v) => z.email().safeParse(v).success, "Enter a valid email address."),
+    phone: optPhone.refine((v) => Boolean(v), "Enter a mobile number so the branch can reach you."),
+  }),
+  items: z.array(websiteCartLine.extend({ prescription: websiteRxInput.nullish() })).min(1, "Your bag is empty.").max(20),
+  payment: z.discriminatedUnion("option", [
+    z.object({ option: z.literal("pay_at_pickup") }),
+    z.object({
+      option: z.literal("demo_card"),
+      /** Issued by the website's simulated card step; no card number ever reaches the dashboard. */
+      reference: z.string().regex(/^DEMO-[A-Z0-9]{8,24}$/, "Invalid demo payment reference."),
+      cardLast4: z.string().regex(/^\d{4}$/),
+      cardBrand: z.string().trim().max(20),
+    }),
+  ]),
+  /** The total the customer saw; the order is refused (409) if catalogue prices changed since. */
+  expectedTotalCents: z.number().int().min(0),
+  contactLensRxConfirmed: z.boolean().default(false),
+  note: optText(500),
+  marketingConsent: z.boolean().default(false),
+  smsConsent: z.boolean().default(false),
+  /** Honeypot: real customers never fill this. */
+  website: z.string().max(500).optional().default(""),
+});
+export type WebsiteOrderInput = z.input<typeof websiteOrderInput>;
+
 // ─── Catalogue ───────────────────────────────────────────────────────────────
 
 export const CATEGORY_KINDS = ["frames", "rx_lenses", "contact_lenses", "sunglasses", "accessories", "cleaning", "cases", "services"] as const;
@@ -338,6 +416,8 @@ export const checkoutInput = z.object({
   idempotencyKey,
 });
 export type CheckoutInput = z.input<typeof checkoutInput>;
+/** Settings → Website: orders from the customer website. */
+export const websiteOrdersInput = z.object({ enabled: z.boolean() });
 /** Settings → Website: the public catalogue feed for an externally hosted website. */
 export const catalogueFeedInput = z.object({
   enabled: z.boolean(),

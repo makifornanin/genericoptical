@@ -1,6 +1,6 @@
 import { and, asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { catalogueFeedInput, optEmail, optPhone, optText, reqText } from "@/lib/schemas";
+import { catalogueFeedInput, optEmail, optPhone, optText, reqText, websiteOrdersInput } from "@/lib/schemas";
 import { WEEKDAYS, type WeekHours } from "@/lib/types";
 import { getDb, type Executor } from "@/server/db";
 import { appointmentTypes, branches, businesses, inventoryLocations } from "@/server/db/schema";
@@ -169,6 +169,17 @@ export async function updateCatalogueFeed(ctx: Ctx, raw: unknown) {
     .set({ settings: sql`coalesce(${businesses.settings}, '{}'::jsonb) || ${JSON.stringify({ catalogueFeed: { enabled: input.enabled, origins } })}::jsonb`, updatedAt: now(ctx) })
     .where(eq(businesses.id, ctx.businessId));
   await audit(db(), ctx, { action: "settings.catalogue_feed", entityType: "business", entityId: ctx.businessId, summary: `${input.enabled ? "Enabled" : "Disabled"} the public catalogue feed${origins.length ? ` for ${origins.join(", ")}` : ""}` });
+}
+
+/** Switches orders from the customer website on or off (pickup only; online payment is the simulated demo card). */
+export async function updateWebsiteOrders(ctx: Ctx, raw: unknown) {
+  requirePermission(ctx, "settings.manage");
+  const input = websiteOrdersInput.parse(raw);
+  await db()
+    .update(businesses)
+    .set({ settings: sql`coalesce(${businesses.settings}, '{}'::jsonb) || ${JSON.stringify({ websiteOrders: { enabled: input.enabled } })}::jsonb`, updatedAt: now(ctx) })
+    .where(eq(businesses.id, ctx.businessId));
+  await audit(db(), ctx, { action: "settings.website_orders", entityType: "business", entityId: ctx.businessId, summary: `${input.enabled ? "Enabled" : "Disabled"} orders from the customer website` });
 }
 
 /** Saving a branch also guarantees it has a stock location. */

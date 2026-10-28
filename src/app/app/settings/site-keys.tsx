@@ -56,7 +56,7 @@ function CreateKeyDialog({ apiUrl }: { apiUrl: string }) {
         description={
           created
             ? "This is the only time the key is shown. Only a hash is stored, so a lost key can't be recovered; revoke it and create another."
-            : "Lets the customer website read published products, branches and services, and send inquiries. It can't see costs, exact stock, customers or staff."
+            : "Lets the customer website read published products, branches and services, send inquiries, and place and look up website orders. It can't see costs, exact stock, staff, or any customer record."
         }
         footer={
           created ? (

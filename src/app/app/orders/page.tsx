@@ -7,6 +7,7 @@ import { FulfillmentPill, PaymentPill, SaleStatusPill } from "@/components/app/s
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState, Segmented } from "@/components/ui/misc";
+import { Pill } from "@/components/ui/pill";
 import { Pagination, SortTH, Table, TableWrap, TD, TH, THead, TR, type SearchParams } from "@/components/ui/table";
 import { formatter } from "@/lib/format";
 import { getBranchContext, requireSession } from "@/server/auth/session";
@@ -99,7 +100,10 @@ async function Content({ searchParams }: { searchParams: Promise<SearchParams> }
                           <Link href={`/app/orders/${o.id}`} className="hover:underline">
                             {o.number}
                           </Link>
-                          <div className="text-[11.5px] font-normal text-text-3">{o.branchName}</div>
+                          <div className="text-[11.5px] font-normal text-text-3">
+                            {o.branchName}
+                            {o.channel === "website" ? <Pill tone="info" className="ml-1.5 align-middle">Website</Pill> : null}
+                          </div>
                         </TD>
                         <TD>{o.customerName}</TD>
                         <TD>{o.status === "open" ? <FulfillmentPill stage={o.fulfillmentStatus} /> : <SaleStatusPill status={o.status} />}</TD>

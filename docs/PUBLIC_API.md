@@ -1,6 +1,6 @@
 # Public website API (v1)
 
-Read-only business data and inquiry intake for the **customer website**, a separate Vercel project. The website calls this API **from its server only**: Next.js server components and route handlers. Browsers never call it, and it sends no permissive CORS headers.
+Business data, inquiry intake and **website orders** (a demo store: pickup only, online payments simulated) for the **customer website**, a separate Vercel project. The website calls this API **from its server only**: Next.js server components and route handlers. Browsers never call it, and it sends no permissive CORS headers.
 
 - **Base path:** `/api/public/v1`.
 - **Implementation:** `src/app/api/public/v1/**`, `src/server/services/public-api.ts`.
@@ -10,7 +10,7 @@ Read-only business data and inquiry intake for the **customer website**, a separ
 - **Header:** every request sends `Authorization: Bearer <site key>`.
 - **What a key is:**
   - Site keys are per business and stored only as a SHA-256 hash (table `api_keys`).
-  - Each key carries scopes: `site:read`, `catalog:read`, `inquiries:write`.
+  - Each key carries scopes: `site:read`, `catalog:read`, `inquiries:write`, `orders:read`, `orders:write`. New keys get all five. A key created before Phase 6 has only the first three and can't place orders until it is replaced.
   - A revoked key stops working immediately.
 - **Creating a key:** in the dashboard, **Settings → Website → Website API keys → New key** (owners and managers with *Manage integrations*). The key is shown once; paste it into the website's `DASHBOARD_SITE_KEY`. CLI alternative: `npm run site-key -- create --business <slug> --name "Customer website"`.
 - **Revoking a key:** the same Settings card, or `npm run site-key -- revoke <prefix>`. `npm run site-key -- list --business <slug>` shows keys and when they were last used.
@@ -31,6 +31,10 @@ Durable, in PostgreSQL, so they hold across serverless instances.
 | Reads per key | 600 per minute |
 | Inquiries per key | 120 per hour |
 | Inquiries per visitor IP | 8 per 10 minutes. The website server forwards the visitor's IP in `X-Client-IP`; it is trusted only on authenticated requests. |
+| Cart quotes per key | 600 per minute |
+| Orders per key / per visitor IP | 300 per hour / 10 per 10 minutes |
+| Order lookups per key / per visitor IP | 600 per hour / 12 per 10 minutes |
+| Order reads / cancels per key | 600 per minute / 120 per hour |
 
 Exceeding a limit returns **429** with `Retry-After`.
 
@@ -78,6 +82,9 @@ Exceeding a limit returns **429** with `Retry-After`.
   }],
   "categories": [{ "slug": "frames", "name": "Frames", "kind": "frames", "productCount": 20 }],
   "booking": { "widgetBase": "https://api.leadconnectorhq.com/widget/booking/", "ghlConnected": false },
+  "ordering": {                                   // Settings → Website → Website orders; on by default for a demo business
+    "enabled": true, "fulfilment": ["pickup"], "paymentOptions": ["demo_card", "pay_at_pickup"], "demoPayments": true
+  },
   "generatedAt": "ISO"
 }
 ```
@@ -158,6 +165,113 @@ Response: `201 { "ok": true }`, or `400 { "error", "fieldErrors" }`, `401`, `429
 2. Consent is never escalated by an anonymous form.
 3. The GHL integration queues `lead.upsert`. GHL searches for an existing contact (email, then phone) before creating one, so contacts aren't duplicated, and tags the stage.
 4. The lead is shown in GHL with source "Website".
+
+## Website orders (demo store)
+
+The customer website sells for **pickup at a branch**. There's no delivery and no real payment: the "card" option is a simulated payment, recorded as *Online card (demo — not charged)*. Implementation: `src/server/services/website-orders.ts`, table `website_orders` (migration `0013`).
+
+The owner can switch ordering on or off in **Settings → Website → Website orders**. It is on by default for a demo business and off for a real one. When it is off, `GET /site` returns `ordering.enabled: false`, and `POST /orders` returns `403`.
+
+### `GET /lenses` (scope `catalog:read`)
+
+Published prescription lenses: products in an `rx_lenses` category, made to order, shown online.
+
+```jsonc
+{ "lenses": [{ "variantId": "uuid", "productId": "uuid", "name": "Progressive · blue-light filter", "description": "…|null",
+               "priceCents": 650000, "type": "single_vision|progressive|bifocal", "features": ["blue_light", "thin", "photochromic"] }],
+  "generatedAt": "ISO" }
+```
+
+`type` and `features` are read from the product's name and its `lensType` attribute.
+
+### `POST /cart/quote` (scope `catalog:read`)
+
+Prices a bag from the live catalogue and says which branches can fulfil it.
+
+```jsonc
+// request
+{ "items": [{ "variantId": "uuid", "quantity": 1, "lensVariantId": "uuid|null" }] }
+// response
+{ "currency": "PHP", "pricesIncludeTax": true, "subtotalCents": 0, "taxCents": 0, "totalCents": 0,
+  "lines": [{ "variantId": "uuid", "name": "…", "variantLabel": "…", "productType": "stock|made_to_order", "quantity": 1, "unitPriceCents": 0, "lineTotalCents": 0 }],
+  "branches": [{ "branchId": "uuid", "name": "Makati", "code": "MKT", "canFulfil": true, "unavailableVariantIds": [] }],
+  "generatedAt": "ISO" }
+```
+
+- **What can be sold:** only published, active variants. Lenses go only with a frame, never on their own. Services can't be ordered.
+- **Stock:** `canFulfil` compares available stock (on hand minus reservations) at each branch with the quantities in the bag. Counts are never returned.
+
+### `POST /orders` (scope `orders:write`) → `201`
+
+```jsonc
+{
+  "idempotencyKey": "8–100 chars [A-Za-z0-9-]",   // one per checkout attempt
+  "branchId": "uuid",                              // pickup branch
+  "customer": { "fullName": "…", "email": "…", "phone": "…" },   // all required
+  "items": [{
+    "variantId": "uuid", "quantity": 1, "lensVariantId": "uuid|null",
+    "prescription": {                              // required when lensVariantId is set
+      "mode": "enter|send_later|on_file|book_exam",
+      "od": { "sph": "-1.25", "cyl": "-0.50|null", "axis": "90|null", "add": "+1.50|null" }, "os": { … },
+      "pd": "63|null", "issuedOn": "YYYY-MM-DD|null"   // od/os required for "enter"
+    }
+  }],
+  "payment": { "option": "pay_at_pickup" }
+          | { "option": "demo_card", "reference": "DEMO-…", "cardLast4": "4242", "cardBrand": "Visa" },
+  "expectedTotalCents": 0,                         // the total the customer saw
+  "contactLensRxConfirmed": false,                 // required true when the bag has contact lenses
+  "note": "…|null", "marketingConsent": false, "smsConsent": false,
+  "website": ""                                    // honeypot
+}
+```
+
+What it does, in one transaction:
+
+1. **Checks the bag and the prices.** It re-prices the bag and refuses with `409` ("Prices changed…") if the total differs from `expectedTotalCents`.
+2. **Finds or creates the customer.** It matches an existing customer by email, then phone. A matched record is **never modified** by this anonymous input. A new one is created with source *website* and the consent given.
+3. **Creates the order.** It creates a `sales` row (`kind=order`, `channel=website`), with a ready-by date of +7 days when the order has lenses and +2 days otherwise.
+4. **Records the payment.** For `demo_card` it records an `online_demo` payment for the full amount, with the reference and the last four digits. The dashboard never receives a card number.
+5. **Stores the website details.** It writes a `website_orders` row with the contact as entered, the payment option, consents, the note, the IP, and the prescriptions **as typed by the customer** (unverified; they are not written to the clinical prescriptions table).
+6. **Reserves the stock.** It moves the order to *confirmed*, which reserves every stocked unit at the branch and queues the GoHighLevel sync. If the branch no longer has enough, the whole order is rolled back with `409` ("Some items just sold out at this branch…").
+
+**Response:** `{ "order": OrderView, "token": "…", "replayed": false }`.
+
+**Idempotency:** the same `idempotencyKey` with the same body returns the same order (`replayed: true`). With a different body it returns `409`.
+
+**Order token:** an HMAC-SHA256 of the order id with `APP_SECRET`. Only its SHA-256 is stored, and it is compared in constant time.
+
+### `GET /orders/<number>` (scope `orders:read`, header `X-Order-Token`)
+
+`{ "order": OrderView }`, where `OrderView` contains:
+
+- `number`, `placedAt`, `status`, `stage`, `paymentStatus`, `paymentOption`
+- `currency`, `subtotalCents`, `taxCents`, `totalCents`, `paidCents`, `balanceDueCents`
+- `readyBy`, `readyAt`, `completedAt`, `cancelledAt`, `cancelledByCustomer`, `canCancel`
+- `contact`, `branch` (with address, phone, map link and hours), `items`, `prescriptions`
+- `timeline`: stage changes from the order's audit trail, with no staff names
+
+A wrong number and a wrong token both give `404`. Responses are `no-store`.
+
+### `POST /orders/<number>/cancel` (scope `orders:write`, header `X-Order-Token`)
+
+The customer can cancel an order while it is still *new* or *confirmed* and **nothing has been paid**. Cancelling releases the reservation and returns `{ "order": OrderView }`. Cancelling twice is harmless. A paid order (the demo card), or one where work has started, gets `409` with a message to contact the branch.
+
+### `POST /orders/lookup` (scope `orders:read`)
+
+"Find my order": `{ "number": "ORD-000123", "email": "…" }` returns `{ "number", "token" }`. If either part is wrong the response is `404`, so it doesn't reveal which.
+
+### In the dashboard and GoHighLevel
+
+- **Orders list:** website orders show a *Website* badge.
+- **Order page:** a *Website order* card shows:
+  - the contact details as entered
+  - the payment option (demo card marked "not charged")
+  - consents and the customer's note
+  - each typed prescription, with the warning that it isn't verified
+  - the contact-lens confirmation
+  - whether the customer cancelled
+- **Payments:** the Payments page can filter by *Online card (demo — not charged)*. Staff can't choose that method themselves.
+- **GoHighLevel:** the order syncs as an opportunity like any other order. The label is *Website order* and the source *Website (demo store)*. The note says the order was placed on the website for pickup and, for the demo card, that nothing was charged and the payment was not processed by GoHighLevel Payments.
 
 ## Public catalogue feed (anonymous, opt-in)
 
